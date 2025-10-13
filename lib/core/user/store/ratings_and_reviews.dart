@@ -275,7 +275,9 @@ class _RatingScreenState extends State<RatingScreen> {
                 shrinkWrap: true,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
-                  return GestureDetector(onTap: () {}, child: ReviewCard());
+                  return GestureDetector(onTap: () {
+                    print('review');
+                  }, child: ReviewCard());
                 },
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   mainAxisExtent: 145.h,
