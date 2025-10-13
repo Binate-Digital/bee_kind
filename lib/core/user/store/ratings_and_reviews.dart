@@ -153,6 +153,7 @@ class _RatingScreenState extends State<RatingScreen> {
                               children: [
                                 GestureDetector(
                                   onTap: () {
+                                    Navigator.pop(context);
                                     showModalBottomSheet(
                                       isDismissible: true,
                                       context: context,
@@ -275,9 +276,7 @@ class _RatingScreenState extends State<RatingScreen> {
                 shrinkWrap: true,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
-                  return GestureDetector(onTap: () {
-                    print('review');
-                  }, child: ReviewCard());
+                  return GestureDetector(onTap: () {}, child: ReviewCard());
                 },
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   mainAxisExtent: 145.h,

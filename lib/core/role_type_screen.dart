@@ -42,7 +42,9 @@ class RoleTypeScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(bottom: 30.h),
               child: CustomButton(
-                onTap: () {},
+                onTap: () => Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => SignInScreen())),
                 borderColor: AppColors.blackColor,
                 text: "Login as Store Owner",
                 verticalPadding: 18.h,
