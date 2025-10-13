@@ -30,7 +30,7 @@ class AppBarBaseView extends StatelessWidget {
     return Scaffold(
       backgroundColor: color ?? AppColors.whiteColor,
       floatingActionButton: button ?? Offstage(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       appBar: PreferredSize(
         preferredSize: Size(double.infinity, isExtended ? 170.h : 70.h),
         child: AppBar(

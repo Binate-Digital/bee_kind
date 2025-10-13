@@ -332,7 +332,13 @@ class _SelectedProductState extends State<SelectedProduct> {
                 ],
               ),
               SizedBox(height: 30.h),
-              CustomButton(onTap: () {}, text: "Add To Cart"),
+              CustomButton(
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                text: "Add To Cart",
+              ),
               SizedBox(height: 30.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -1,5 +1,7 @@
 import 'package:bee_kind/common/notifications.dart';
+import 'package:bee_kind/common/profile_screen.dart';
 import 'package:bee_kind/core/user/home_screen.dart';
+import 'package:bee_kind/core/user/store/cart_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_drawer.dart';
@@ -44,9 +46,9 @@ class _UserBaseViewState extends State<UserBaseView> {
   Widget _buildCurrentScreen() {
     final screens = [
       UserHomeScreen(),
+      CartScreen(),
       Placeholder(),
-      Placeholder(),
-      Placeholder(),
+      ProfileViewScreen(),
     ];
     return screens[_currentIndex];
   }
@@ -81,11 +83,20 @@ class _UserBaseViewState extends State<UserBaseView> {
         ],
         backgroundColor: AppColors.whiteColor,
         elevation: 0.0,
-        title: CustomText(
-          text: widget.appBarTitle ?? "Home",
-          fontSize: 22.sp,
-          weight: FontWeight.bold,
-          fontColor: AppColors.blackColor,
+        title: StatefulBuilder(
+          builder: (context, setModalState) {
+            // ignore: unused_local_variable
+            int index = 0;
+            setModalState(() {
+              index = _currentIndex;
+            });
+            return CustomText(
+              text: _tabs[_currentIndex].label,
+              fontSize: 22.sp,
+              weight: FontWeight.bold,
+              fontColor: AppColors.blackColor,
+            );
+          },
         ),
         centerTitle: true,
       ),

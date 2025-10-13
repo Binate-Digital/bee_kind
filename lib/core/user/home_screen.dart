@@ -1,6 +1,7 @@
 import 'package:bee_kind/core/user/store/selected_store.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
+import 'package:bee_kind/widgets/address_bar.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_drop_down.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
@@ -224,46 +225,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             ),
           ),
         ),
-        GestureDetector(
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 15.w),
-            margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-            decoration: BoxDecoration(
-              color: AppColors.whiteColor,
-              border: Border.all(color: AppColors.yellow2, width: 1.w),
-              borderRadius: BorderRadius.circular(30.r),
-            ),
-            child: Row(
-              children: [
-                Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(right: 10.w),
-                      child: Icon(Icons.location_on, color: AppColors.yellow2),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 10.w),
-                      decoration: BoxDecoration(
-                        color: AppColors.yellow2,
-                        borderRadius: BorderRadius.circular(30.r),
-                      ),
-                      width: 1.5.w,
-                      height: 30.h,
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: CustomText(
-                    text: "USA New York, Lorem ipsum road",
-                    textAlign: TextAlign.start,
-                    fontColor: AppColors.blackColor.withValues(alpha: 0.3),
-                    fontSize: 18.sp,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        AddressBar(onTap: () {}),
         GestureDetector(
           onTap: () {
             Navigator.push(

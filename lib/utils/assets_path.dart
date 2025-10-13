@@ -28,6 +28,12 @@ class AssetsPath {
   static const String star = "assets/images/icons/star.png";
   static const String edit = "assets/images/icons/edit.png";
   static const String delete = "assets/images/icons/delete.png";
+  static const String success = "assets/images/icons/confirm.png";
+  static const String dummy = "assets/images/icons/person.jpg";
+  static const String card = "assets/images/icons/card.png";
+  static const String help = "assets/images/icons/help.png";
+  static const String faq = "assets/images/icons/faq.png";
+  static const String camera = "assets/images/icons/camera.png";
 
   ///placeholder image
   static const String placeholder = "assets/images/placeholder.png";

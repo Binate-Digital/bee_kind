@@ -182,7 +182,17 @@ class StoreScreen extends StatelessWidget {
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: EdgeInsets.symmetric(horizontal: 5.w),
-                          child: Product(),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => SelectedProduct(),
+                                ),
+                              );
+                            },
+                            child: Product(),
+                          ),
                         );
                       },
                     ),

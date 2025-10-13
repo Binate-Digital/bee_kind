@@ -60,7 +60,8 @@ class CustomTextField extends StatelessWidget {
     this.readOnly = false,
     this.inputFormatters,
     this.onFieldSubmitted,
-    this.onEditingComplete, this.radius = 30,
+    this.onEditingComplete,
+    this.radius = 30,
   });
   @override
   Widget build(BuildContext context) {
@@ -100,17 +101,12 @@ class CustomTextField extends StatelessWidget {
         horizontal: 14.sp,
       ),
       hintText: hint,
-      // labelText: hint,
-      // labelStyle: TextStyle(
-      //     color: hintColor ?? AppColors.blackColor,
-      //     fontSize: 15.sp,
-      //     fontFamily: AppFonts.Jones_Medium),
-      // floatingLabelAlignment: FloatingLabelAlignment.center,
       hintStyle: TextStyle(
         color: hintColor ?? AppColors.yellow2,
         fontSize: 16.sp,
         fontFamily: AppFonts.ralewayMedium,
       ),
+      alignLabelWithHint: true, // Add this single line
       border: _outlineInputBorder(),
       enabledBorder: _outlineInputBorder(),
       focusedBorder: _outlineInputBorder(),
@@ -129,11 +125,7 @@ class CustomTextField extends StatelessWidget {
                 height: 20.h,
                 margin: EdgeInsets.only(left: 15.w, right: 5.w),
                 padding: EdgeInsets.only(right: 5.w),
-                child: Image.asset(
-                  prefxicon!,
-                  // color: hintColor ?? AppColors.blackColor,
-                  // scale: 3.sp,
-                ),
+                child: Image.asset(prefxicon!),
               ),
             )
           : null,
@@ -146,9 +138,65 @@ class CustomTextField extends StatelessWidget {
               child: suffixIcon,
             )
           : null,
-      // _suffixIconWidget() : null,
     );
   }
+
+  // InputDecoration colorInputDecoration() {
+  //   return InputDecoration(
+  //     contentPadding: EdgeInsets.symmetric(
+  //       vertical: verticalPadding ?? 18.sp,
+  //       horizontal: 14.sp,
+  //     ),
+  //     hintText: hint,
+  //     // labelText: hint,
+  //     // labelStyle: TextStyle(
+  //     //     color: hintColor ?? AppColors.blackColor,
+  //     //     fontSize: 15.sp,
+  //     //     fontFamily: AppFonts.Jones_Medium),
+  //     // floatingLabelAlignment: FloatingLabelAlignment.center,
+  //     hintStyle: TextStyle(
+  //       color: hintColor ?? AppColors.yellow2,
+  //       fontSize: 16.sp,
+  //       fontFamily: AppFonts.ralewayMedium,
+  //     ),
+  //     border: _outlineInputBorder(),
+  //     enabledBorder: _outlineInputBorder(),
+  //     focusedBorder: _outlineInputBorder(),
+  //     errorBorder: _outlineInputBorder(),
+  //     focusedErrorBorder: _outlineInputBorder(),
+  //     focusColor: AppColors.transparentColor,
+  //     errorMaxLines: 2,
+  //     isDense: false,
+  //     fillColor: bgColor ?? AppColors.yellow1.withValues(alpha: 0.2),
+  //     filled: true,
+  //     errorStyle: const TextStyle(overflow: TextOverflow.visible),
+  //     prefixIcon: prefxicon != null
+  //         ? GestureDetector(
+  //             onTap: onPrefixTap,
+  //             child: Container(
+  //               height: 20.h,
+  //               margin: EdgeInsets.only(left: 15.w, right: 5.w),
+  //               padding: EdgeInsets.only(right: 5.w),
+  //               child: Image.asset(
+  //                 prefxicon!,
+  //                 // color: hintColor ?? AppColors.blackColor,
+  //                 // scale: 3.sp,
+  //               ),
+  //             ),
+  //           )
+  //         : null,
+  //     prefixIconConstraints: BoxConstraints(),
+  //     suffixIconConstraints: BoxConstraints(),
+  //     suffixIcon: isSuffixIcon == true
+  //         ? Container(
+  //             height: 25.h,
+  //             padding: EdgeInsets.only(right: 23.w),
+  //             child: suffixIcon,
+  //           )
+  //         : null,
+  //     // _suffixIconWidget() : null,
+  //   );
+  // }
 
   // Image _suffixIconWidget() {
   //   return Image.asset(suffixIcon!, scale: 5.sp);
