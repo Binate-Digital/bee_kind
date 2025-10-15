@@ -1,4 +1,4 @@
-import 'package:bee_kind/core/user/user_base_view.dart';
+import 'package:bee_kind/auth/introduction_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
@@ -69,7 +69,7 @@ Future<void> showSuccessDialog(BuildContext context) async {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => UserBaseView()),
+                    MaterialPageRoute(builder: (_) => IntroductionScreen()),
                   );
                 },
                 text: "Continue",

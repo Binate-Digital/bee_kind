@@ -89,7 +89,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Form(
           key: formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // Static Profile Picture
               Container(
@@ -97,13 +97,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 height: 150.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.yellow1.withValues(alpha: 0.2),
+                  color: AppColors.yellow1.withValues(alpha: 0.05),
                   border: Border.all(color: AppColors.yellow2, width: 2),
                 ),
                 margin: EdgeInsets.symmetric(vertical: 15.h),
-                child: SizedBox(
-                  width: 20.w,
-                  height: 20.h,
+                child: Transform.scale(
+                  scale: 0.4,
                   child: Image.asset(AssetsPath.camera),
                 ),
               ),

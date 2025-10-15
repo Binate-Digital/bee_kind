@@ -1,8 +1,15 @@
+import 'package:bee_kind/common/payment_accounts.dart';
+import 'package:bee_kind/common/profile/address_screen.dart';
+import 'package:bee_kind/common/profile/faq.dart';
+import 'package:bee_kind/common/profile/help_and_support_screen.dart';
 import 'package:bee_kind/core/user/edit_profile_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
+import 'package:bee_kind/widgets/delete_account_confirmation_dialog.dart';
+import 'package:bee_kind/widgets/logout_confirmation_dialog.dart';
+import 'package:bee_kind/widgets/profile_options_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -63,7 +70,10 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
             ),
             SizedBox(height: 20.w),
             ProfileOption(
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AddressScreen()),
+              ),
               image: AssetsPath.location,
               text: "Address",
             ),
@@ -76,126 +86,43 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
             ),
             SizedBox(height: 20.w),
             ProfileOption(
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => PaymentAccountsScreen()),
+              ),
               image: AssetsPath.card,
               text: "Payment Accounts",
             ),
             SizedBox(height: 20.w),
             ProfileOption(
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => HelpAndSupportScreen()),
+              ),
               image: AssetsPath.help,
               text: "Help & Support",
             ),
             SizedBox(height: 20.w),
-            ProfileOption(onTap: () {}, image: AssetsPath.faq, text: "FAQs"),
+            ProfileOption(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => FAQScreen()),
+              ),
+              image: AssetsPath.faq,
+              text: "FAQs",
+            ),
             SizedBox(height: 30.w),
             CustomButton(
-              onTap: () {},
+              onTap: () => deleteAccountConfirmationDialog(context),
               text: "Delete Account",
               gradientColors: [AppColors.whiteColor, AppColors.whiteColor],
             ),
             SizedBox(height: 20.w),
-            CustomButton(onTap: () {}, text: "Logout"),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ProfileOption extends StatefulWidget {
-  const ProfileOption({
-    super.key,
-    required this.onTap,
-    required this.image,
-    required this.text,
-    this.isNotification = false,
-  });
-  final VoidCallback onTap;
-  final String image;
-  final String text;
-  final bool isNotification;
-
-  @override
-  State<ProfileOption> createState() => _ProfileOptionState();
-}
-
-class _ProfileOptionState extends State<ProfileOption> {
-  bool isToggled = false;
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: SizedBox(
-        height: 40.h,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Image.asset(widget.image, height: 30.h, width: 30.h),
-                    SizedBox(width: 10.w),
-                    CustomText(text: widget.text, fontSize: 18.sp),
-                  ],
-                ),
-                widget.isNotification
-                    ? slidingToggleButton(
-                        value: isToggled,
-                        onChanged: (newValue) {
-                          setState(() {
-                            isToggled = newValue;
-                          });
-                        },
-                      )
-                    : Icon(Icons.arrow_forward_rounded),
-              ],
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.blackColor.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(30.r),
-              ),
-              height: 2.w,
+            CustomButton(
+              onTap: () => logoutConfirmationDialog(context),
+              text: "Logout",
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget slidingToggleButton({
-    required bool value,
-    ValueChanged<bool>? onChanged,
-    double width = 40,
-    double height = 25,
-    Duration animationDuration = const Duration(milliseconds: 200),
-    Key? key,
-  }) {
-    return GestureDetector(
-      key: key,
-      onTap: () => onChanged?.call(!value),
-      child: Container(
-        width: width,
-        height: height,
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(height / 2),
-          color: value ? AppColors.yellow2 : Colors.grey,
-        ),
-        child: AnimatedAlign(
-          duration: animationDuration,
-          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            width: height - 4,
-            height: height - 4,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-            ),
-          ),
         ),
       ),
     );

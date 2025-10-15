@@ -389,6 +389,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: CustomTextField(
                   hint: "Phone",
                   controller: phoneController,
+                  keyboardType: TextInputType.phone,
                   validator: (value) => Validation.validatePhoneNumber(value),
                   inputFormatters: [
                     USPhoneNumberFormatter(),

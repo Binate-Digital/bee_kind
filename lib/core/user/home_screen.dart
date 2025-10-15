@@ -74,70 +74,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 ],
                                 hintText: "Product Category",
                               ),
+                              SizedBox(height: 30.h),
                               Padding(
-                                padding: EdgeInsets.symmetric(vertical: 20.h),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      width: 190.w,
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 15.h,
-                                        horizontal: 15.w,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.yellow1.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                        border: Border.all(
-                                          color: AppColors.yellow2,
-                                          width: 1.w,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          30.r,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                CustomText(
-                                                  text: "Location",
-                                                  textAlign: TextAlign.start,
-                                                  fontColor: AppColors.yellow2,
-                                                  fontSize: 18.sp,
-                                                ),
-                                                Icon(
-                                                  Icons.location_on,
-                                                  color: AppColors.yellow2,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 190.w,
-                                      child: CustomDropdown(
-                                        items: [
-                                          "New York",
-                                          "Chicago",
-                                          "Boston",
-                                        ],
-                                        hintText: "City",
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(bottom: 18.h),
+                                padding: EdgeInsets.only(bottom: 10.h),
                                 child: CustomText(
                                   text: "Price Range",
                                   fontFamily: "Raleway",

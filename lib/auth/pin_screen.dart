@@ -30,6 +30,30 @@ class _PinScreenState extends State<PinScreen> {
 
   final otpPinFieldController = GlobalKey<OtpPinFieldState>();
 
+  void showOTPSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "An OTP has been sent to you!",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color:
+                AppColors.blackColor, // Assuming you want black text on yellow
+          ),
+          textAlign: TextAlign.center,
+        ),
+        backgroundColor: AppColors.yellow1,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        margin: EdgeInsets.all(20),
+        duration: Duration(milliseconds: 1500),
+      ),
+    );
+  }
+
   void validateAndContinue() {
     final currentOtp = otpPinFieldController.currentState?.controller.text;
 
@@ -228,7 +252,7 @@ class _PinScreenState extends State<PinScreen> {
                           fontSize: 18.sp,
                         ),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () => showOTPSnackBar(context),
                           child: CustomText(
                             text: "Resend",
                             underlined: true,

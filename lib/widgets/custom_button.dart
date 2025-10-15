@@ -58,21 +58,12 @@ class CustomButton extends StatelessWidget {
             vertical: verticalPadding ?? 20.h,
             horizontal: horizontalPadding ?? 30.w,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CustomText(
-                text: text,
-                weight: FontWeight.bold,
-                fontColor: textColor ?? AppColors.blackColor,
-                fontSize: fontSize ?? 16.sp,
-                fontFamily: fontFamily ?? AppFonts.ralewayBold,
-              ),
-              if (showIcon) ...[
-                SizedBox(width: 8.w),
-                Icon(Icons.arrow_forward),
-              ],
-            ],
+          child: CustomText(
+            text: text,
+            weight: FontWeight.bold,
+            fontColor: textColor ?? AppColors.blackColor,
+            fontSize: fontSize ?? 16.sp,
+            fontFamily: fontFamily ?? AppFonts.ralewayBold,
           ),
         ),
       ),

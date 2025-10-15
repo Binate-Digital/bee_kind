@@ -1,3 +1,4 @@
+import 'package:bee_kind/common/new_address_screen.dart';
 import 'package:bee_kind/core/user/store/choose_payment_method.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/widgets/address_bar.dart';
@@ -92,14 +93,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             SizedBox(height: 20.h),
-                            AddressType(
-                              isChecked: isHomeChecked,
-                              type: "Home",
-                              onChanged: (value) {
-                                setModalState(() {
-                                  isHomeChecked = value!;
-                                });
-                              },
+                            GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      AddNewAddressScreen(isEdit: true),
+                                ),
+                              ),
+                              child: AddressType(
+                                isChecked: isHomeChecked,
+                                type: "Home",
+                                onChanged: (value) {
+                                  setModalState(() {
+                                    isHomeChecked = value!;
+                                  });
+                                },
+                              ),
                             ),
                             AddressType(
                               isChecked: isOfficeChecked,
@@ -121,7 +131,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ),
                             Padding(
                               padding: EdgeInsets.symmetric(
-                                vertical: 30.h,
+                                horizontal: 20.w,
+                                vertical: 10.h,
+                              ),
+                              child: GestureDetector(
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        AddNewAddressScreen(isEdit: false),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Icon(
+                                      Icons.add_circle,
+                                      color: AppColors.yellow2,
+                                    ),
+                                    SizedBox(width: 10.w),
+                                    CustomText(
+                                      text: "Add Another Address",
+                                      fontSize: 18.sp,
+                                      weight: FontWeight.bold,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 10.h,
                                 horizontal: 20.h,
                               ),
                               child: Row(
@@ -170,7 +210,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 hint: "Additional Notes",
                 maxlines: 6,
                 radius: 20.r,
-                verticalPadding: 70.h,
               ),
             ),
             ListView.builder(

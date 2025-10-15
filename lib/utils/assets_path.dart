@@ -34,6 +34,15 @@ class AssetsPath {
   static const String help = "assets/images/icons/help.png";
   static const String faq = "assets/images/icons/faq.png";
   static const String camera = "assets/images/icons/camera.png";
+  static const String support = "assets/images/icons/support.png";
+  static const String image = "assets/images/icons/image.png";
+  static const String send = "assets/images/icons/send.png";
+  static const String supportPerson = "assets/images/icons/support-person.png";
+  static const String box = "assets/images/icons/box.png";
+  static const String truck = "assets/images/icons/truck.png";
+  static const String carry = "assets/images/icons/carry.png";
+  static const String openBox = "assets/images/icons/openbox.png";
+  static const String introImage = "assets/images/icons/intro-image.png";
 
   ///placeholder image
   static const String placeholder = "assets/images/placeholder.png";

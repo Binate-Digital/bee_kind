@@ -24,82 +24,6 @@ class _RatingScreenState extends State<RatingScreen> {
     return AppBarBaseView(
       title: "Ratings & Reviews",
       isExtended: true,
-      button: widget.addReview
-          ? Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-              child: CustomButton(
-                onTap: () {
-                  showModalBottomSheet(
-                    isDismissible: true,
-                    context: context,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30.r),
-                        topRight: Radius.circular(30.r),
-                      ),
-                    ),
-                    builder: (BuildContext context) {
-                      return StatefulBuilder(
-                        builder: (context, setModalState) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 50.h,
-                              horizontal: 20.h,
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                CustomText(
-                                  text: "How is your order?",
-                                  weight: FontWeight.bold,
-                                  fontSize: 18.sp,
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                    top: 20.h,
-                                    bottom: 10.h,
-                                  ),
-                                  child: StarRating(
-                                    size: 40.r,
-                                    rating: rating,
-                                    color: AppColors.yellow2,
-                                    borderColor: Colors.grey,
-                                    allowHalfRating: true,
-                                    starCount: 5,
-                                    onRatingChanged: (rate) =>
-                                        setModalState(() {
-                                          rating = rate;
-                                        }),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 10.h),
-                                  child: CustomTextField(
-                                    hint: "Write a Review",
-                                    radius: 10.r,
-                                    verticalPadding: 70.h,
-                                    maxlines: 6,
-                                  ),
-                                ),
-                                SizedBox(height: 20.h),
-                                CustomButton(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                  text: "Save",
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-                text: "Add Review",
-              ),
-            )
-          : Offstage(),
       extendedWidget: Padding(
         padding: EdgeInsets.only(top: 100.h),
         child: Column(
@@ -226,8 +150,6 @@ class _RatingScreenState extends State<RatingScreen> {
                                                             hint:
                                                                 "Write a Review",
                                                             radius: 10.r,
-                                                            verticalPadding:
-                                                                70.h,
                                                             maxlines: 6,
                                                           ),
                                                         ),

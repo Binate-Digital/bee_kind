@@ -1,5 +1,6 @@
 import 'package:bee_kind/common/payment_accounts.dart';
 import 'package:bee_kind/common/terms_and_conditions_screen.dart';
+import 'package:bee_kind/core/user/store/orders_history.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:bee_kind/utils/app_colors.dart';
@@ -108,8 +109,12 @@ class CustomDrawer extends StatelessWidget {
                   icon: AssetsPath.orders,
                   title: "Order History",
                   onTap: () {
-                    Navigator.pop(context);
-                    // Navigate to order history page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => OrdersHistoryScreen(),
+                      ),
+                    );
                   },
                 ),
                 _buildMenuItem(

@@ -1,4 +1,5 @@
 import 'package:bee_kind/core/user/store/ratings_and_reviews.dart';
+import 'package:bee_kind/core/user/user_base_view.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
@@ -334,8 +335,13 @@ class _SelectedProductState extends State<SelectedProduct> {
               SizedBox(height: 30.h),
               CustomButton(
                 onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UserBaseView(currIndex: 1),
+                    ),
+                    (route) => false,
+                  );
                 },
                 text: "Add To Cart",
               ),

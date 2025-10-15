@@ -54,7 +54,7 @@ class _PaymentAccountsScreenState extends State<PaymentAccountsScreen> {
     return AppBarBaseView(
       title: "Payment Accounts",
       button: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
         child: CustomButton(
           borderColor: AppColors.blackColor,
           onTap: () {

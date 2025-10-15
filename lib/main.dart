@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       designSize: const Size(430, 932),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
+        title: 'Bee Kind',
         theme: ThemeData(
           useMaterial3: false,
             primaryColor: AppColors.whiteColor,
