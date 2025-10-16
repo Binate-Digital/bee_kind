@@ -22,15 +22,19 @@ class _CartScreenState extends State<CartScreen> {
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Column(
           children: [
-            ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: 4,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                return CartItem();
-              },
+            MediaQuery.removePadding(
+              context: context,
+              removeBottom: true,
+              child: ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: 4,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return CartItem();
+                },
+              ),
             ),
-            Padding(
+            Container(
               padding: EdgeInsets.symmetric(vertical: 10.h),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -49,42 +53,39 @@ class _CartScreenState extends State<CartScreen> {
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 10.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    children: [
-                      Row(
-                        children: [
-                          CustomText(
-                            text: "Total",
-                            fontSize: 16.sp,
-                            weight: FontWeight.bold,
-                          ),
-                          SizedBox(width: 20.w, height: 30.h),
-                        ],
-                      ),
-                      CustomText(
-                        text: "\$20.00",
-                        fontSize: 18.sp,
-                        fontColor: AppColors.yellow2,
-                        weight: FontWeight.bold,
-                      ),
-                    ],
-                  ),
-
-                  CustomButton(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => CheckoutScreen()),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        CustomText(
+                          text: "Total",
+                          fontSize: 16.sp,
+                          weight: FontWeight.bold,
+                        ),
+                        SizedBox(width: 20.w, height: 30.h),
+                      ],
                     ),
-                    text: "Checkout",
-                    width: 300.w,
+                    CustomText(
+                      text: "\$20.00",
+                      fontSize: 18.sp,
+                      fontColor: AppColors.yellow2,
+                      weight: FontWeight.bold,
+                    ),
+                  ],
+                ),
+
+                CustomButton(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CheckoutScreen()),
                   ),
-                ],
-              ),
+                  text: "Checkout",
+                  width: 300.w,
+                ),
+              ],
             ),
           ],
         ),

@@ -263,6 +263,34 @@ class _SelectedProductState extends State<SelectedProduct> {
               Row(
                 children: [
                   CustomText(
+                    text: "Dosage",
+                    fontSize: 22.sp,
+                    fontColor: AppColors.blackColor,
+                    weight: FontWeight.bold,
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.h),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 390.w,
+                    child: CustomText(
+                      text:
+                          "Lorem ipsum dolor sit amet consectetur adipiscing elit porta, leo erat parturient arcu.",
+                      fontSize: 16.sp,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.start,
+                      maxLines: 2,
+                      fontColor: AppColors.blackColor,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 30.h),
+              Row(
+                children: [
+                  CustomText(
                     text: "Quantity",
                     fontSize: 18.sp,
                     fontColor: AppColors.blackColor,

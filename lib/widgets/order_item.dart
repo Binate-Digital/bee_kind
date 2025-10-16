@@ -5,16 +5,21 @@ import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class OrderItem extends StatefulWidget {
-  const OrderItem({super.key, this.hideButton = false, required this.onTap});
+class OrderItem extends StatelessWidget {
+  const OrderItem({
+    super.key,
+    this.hideButton = false,
+    required this.onTap,
+    this.verticalPadding,
+    this.horizontalPadding,
+    this.fontSize,
+  });
   final bool hideButton;
   final VoidCallback onTap;
+  final double? verticalPadding;
+  final double? horizontalPadding;
+  final double? fontSize;
 
-  @override
-  State<OrderItem> createState() => _OrderItemState();
-}
-
-class _OrderItemState extends State<OrderItem> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -36,7 +41,7 @@ class _OrderItemState extends State<OrderItem> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: EdgeInsets.symmetric(vertical: 55.h, horizontal: 55.w),
+            padding: EdgeInsets.symmetric(vertical: verticalPadding ?? 55.h, horizontal: horizontalPadding ?? 55.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(color: AppColors.yellow2, width: 1.w),
@@ -52,7 +57,7 @@ class _OrderItemState extends State<OrderItem> {
             children: [
               CustomText(
                 text: "Lorem Ipsum",
-                fontSize: 20.sp,
+                fontSize: fontSize ?? 20.sp,
                 weight: FontWeight.bold,
               ),
               SizedBox(height: 10.h),
@@ -81,14 +86,16 @@ class _OrderItemState extends State<OrderItem> {
                 weight: FontWeight.bold,
               ),
               SizedBox(height: 10.h),
-              widget.hideButton ? SizedBox(width: 100.w) : CustomButton(
-                onTap: widget.onTap,
-                text: "Track Order",
-                width: 100.w,
-                fontSize: 13.sp,
-                horizontalPadding: 10.w,
-                verticalPadding: 15.h,
-              ),
+              hideButton
+                  ? SizedBox(width: 100.w)
+                  : CustomButton(
+                      onTap: onTap,
+                      text: "Track Order",
+                      width: 100.w,
+                      fontSize: 13.sp,
+                      horizontalPadding: 10.w,
+                      verticalPadding: 15.h,
+                    ),
             ],
           ),
         ],

@@ -68,7 +68,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
               image: AssetsPath.person,
               text: "Edit Profile",
             ),
-            SizedBox(height: 20.w),
+            SizedBox(height: 20.h),
             ProfileOption(
               onTap: () => Navigator.push(
                 context,
@@ -77,14 +77,14 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
               image: AssetsPath.location,
               text: "Address",
             ),
-            SizedBox(height: 20.w),
+            SizedBox(height: 20.h),
             ProfileOption(
               onTap: () {},
               isNotification: true,
               image: AssetsPath.notifications,
               text: "Notifications",
             ),
-            SizedBox(height: 20.w),
+            SizedBox(height: 20.h),
             ProfileOption(
               onTap: () => Navigator.push(
                 context,
@@ -93,7 +93,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
               image: AssetsPath.card,
               text: "Payment Accounts",
             ),
-            SizedBox(height: 20.w),
+            SizedBox(height: 20.h),
             ProfileOption(
               onTap: () => Navigator.push(
                 context,
@@ -102,7 +102,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
               image: AssetsPath.help,
               text: "Help & Support",
             ),
-            SizedBox(height: 20.w),
+            SizedBox(height: 20.h),
             ProfileOption(
               onTap: () => Navigator.push(
                 context,
@@ -111,17 +111,18 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
               image: AssetsPath.faq,
               text: "FAQs",
             ),
-            SizedBox(height: 30.w),
+            SizedBox(height: 30.h),
             CustomButton(
               onTap: () => deleteAccountConfirmationDialog(context),
               text: "Delete Account",
               gradientColors: [AppColors.whiteColor, AppColors.whiteColor],
             ),
-            SizedBox(height: 20.w),
+            SizedBox(height: 20.h),
             CustomButton(
               onTap: () => logoutConfirmationDialog(context),
               text: "Logout",
             ),
+            SizedBox(height: 130.h),
           ],
         ),
       ),

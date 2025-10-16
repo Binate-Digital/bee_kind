@@ -19,7 +19,7 @@ class _AddressBarState extends State<AddressBar> {
       onTap: widget.onTap,
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 15.w),
-        margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+        margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: AppColors.whiteColor,
           border: Border.all(color: AppColors.yellow2, width: 1.w),

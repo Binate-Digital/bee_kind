@@ -1,9 +1,11 @@
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
+import 'package:bee_kind/widgets/custom_google_maps.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class AddNewAddressScreen extends StatefulWidget {
   const AddNewAddressScreen({super.key, this.isEdit = false});
@@ -14,6 +16,8 @@ class AddNewAddressScreen extends StatefulWidget {
 }
 
 class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
+  GoogleMapController? mapController;
+
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((value) {
@@ -25,6 +29,7 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
   void showAddAddressBottomSheet() {
     showModalBottomSheet(
       context: context,
+      isDismissible: false,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(30.r),
@@ -52,10 +57,12 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                 ),
                 SizedBox(height: 20.h),
                 CustomText(
-                  text: widget.isEdit ? "Edit Address Details" : "Address Details",
-                    fontSize: 20.sp,
-                    weight: FontWeight.bold,
-                    fontColor: Colors.black87,
+                  text: widget.isEdit
+                      ? "Edit Address Details"
+                      : "Address Details",
+                  fontSize: 20.sp,
+                  weight: FontWeight.bold,
+                  fontColor: Colors.black87,
                 ),
                 SizedBox(height: 20.h),
 
@@ -138,6 +145,13 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(color: AppColors.whiteColor);
+    return CustomGoogleMap(
+      onMapCreated: (controller) => mapController = controller,
+      initialCameraPosition: const CameraPosition(
+        target: LatLng(24.861714457432807, 67.07000228675905),
+        zoom: 15,
+      ),
+      widget: Container(),
+    );
   }
 }

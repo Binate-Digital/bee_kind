@@ -22,7 +22,7 @@ class SelectedCompletedOrderScreen extends StatefulWidget {
 
 class _SelectedCompletedOrderScreenState
     extends State<SelectedCompletedOrderScreen> {
-  int _currentStep = 0;
+  int _currentStep = 3;
   double rating = 3.5;
 
   final List<String> _steps = [

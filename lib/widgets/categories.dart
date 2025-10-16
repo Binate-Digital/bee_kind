@@ -15,8 +15,8 @@ class Categories extends StatelessWidget {
         children: [
           Container(
             padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
-            width: 130.w,
-            height: 130.h,
+            width: 110.w,
+            height: 110.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.yellow2, width: 1.w),

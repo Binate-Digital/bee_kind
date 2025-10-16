@@ -1,12 +1,25 @@
 import 'package:bee_kind/auth/sign_in_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
+import 'package:bee_kind/utils/user_location_permission.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class RoleTypeScreen extends StatelessWidget {
+class RoleTypeScreen extends StatefulWidget {
   const RoleTypeScreen({super.key});
+
+  @override
+  State<RoleTypeScreen> createState() => _RoleTypeScreenState();
+}
+
+class _RoleTypeScreenState extends State<RoleTypeScreen> {
+
+@override
+  void initState() {
+    super.initState();
+    UserLocation.handleLocationPermission();
+  }
 
   @override
   Widget build(BuildContext context) {

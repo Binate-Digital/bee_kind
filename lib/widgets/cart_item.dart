@@ -155,13 +155,13 @@ class _CartItemState extends State<CartItem> {
                             padding: EdgeInsets.symmetric(vertical: 20.w),
                             child: CustomText(
                               text: "Remove from Cart?",
-                              fontSize: 18.sp,
+                              fontSize: 22.sp,
                               weight: FontWeight.bold,
                             ),
                           ),
                           Padding(
                             padding: EdgeInsets.symmetric(
-                              vertical: 30.h,
+                              vertical: 20.h,
                               horizontal: 20.h,
                             ),
                             child: Row(

@@ -5,9 +5,9 @@ import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-Future<void> showSuccessDialog(BuildContext context) async {
+Future<void> showSuccessDialog(BuildContext ctx) async {
   showDialog(
-    context: context,
+    context: ctx,
     barrierDismissible: false, // Prevent accidental dismissal
     builder: (context) {
       return AlertDialog(
@@ -42,12 +42,10 @@ Future<void> showSuccessDialog(BuildContext context) async {
 
             SizedBox(height: 25.h),
 
-            // White checkmark inside green circle
             Icon(Icons.check_circle, color: Colors.green, size: 140.w),
 
             SizedBox(height: 20.h),
 
-            // Success message
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10.w),
               child: CustomText(
@@ -61,14 +59,16 @@ Future<void> showSuccessDialog(BuildContext context) async {
 
             SizedBox(height: 30.h),
 
-            // Continue button
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 20.h),
               child: CustomButton(
                 onTap: () {
+                  // Close dialog
                   Navigator.pop(context);
-                  Navigator.push(
-                    context,
+
+                  // Use ctx (the root screen context) for navigation
+                  Navigator.pushReplacement(
+                    ctx,
                     MaterialPageRoute(builder: (_) => IntroductionScreen()),
                   );
                 },

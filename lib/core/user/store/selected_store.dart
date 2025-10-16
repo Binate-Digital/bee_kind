@@ -1,3 +1,4 @@
+import 'package:bee_kind/core/user/store/product_categories_list.dart';
 import 'package:bee_kind/core/user/store/selected_product.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
@@ -218,7 +219,18 @@ class StoreScreen extends StatelessWidget {
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: EdgeInsets.symmetric(horizontal: 5.w),
-                          child: Categories(),
+                          child: GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CategoryWiseProductsList(
+                                  showDistance: false,
+                                  homeCategory: false,
+                                ),
+                              ),
+                            ),
+                            child: Categories(),
+                          ),
                         );
                       },
                     ),

@@ -130,10 +130,10 @@ class CustomTextField extends StatelessWidget {
       prefixIconConstraints: BoxConstraints(),
       suffixIconConstraints: BoxConstraints(),
       suffixIcon: isSuffixIcon == true
-          ? Container(
+          ? SizedBox(
               height: 25.h,
               width: 100.w,
-              padding: EdgeInsets.only(right: 23.w),
+              // padding: EdgeInsets.only(right: 23.w),
               child: suffixIcon,
             )
           : null,

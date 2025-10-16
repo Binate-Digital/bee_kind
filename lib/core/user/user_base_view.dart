@@ -83,7 +83,7 @@ class _UserBaseViewState extends State<UserBaseView> {
       canPop: false,
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: AppColors.whiteColor,
+        extendBody: true,
         drawer: CustomDrawer(scaffoldKey: scaffoldKey),
         appBar: AppBar(
           leading: Padding(

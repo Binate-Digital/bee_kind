@@ -88,7 +88,7 @@ class _HorizontalStepperState extends State<HorizontalStepper> {
       decoration: BoxDecoration(
         color: isCompleted
             ? widget.activeColor
-            : (isActive ? widget.activeColor : Colors.transparent),
+            : (isActive ? widget.activeColor : widget.inactiveColor),
         border: Border.all(
           color: isActive ? widget.activeColor : widget.inactiveColor,
           width: 2.w,

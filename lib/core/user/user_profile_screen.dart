@@ -1,21 +1,20 @@
-import 'dart:developer';
+// import 'dart:developer';
 import 'dart:io';
 import 'package:bee_kind/utils/app_colors.dart';
-import 'package:bee_kind/utils/app_constants.dart';
+// import 'package:bee_kind/utils/app_constants.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/validation.dart';
+import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_drop_down.dart';
-import 'package:bee_kind/widgets/custom_scaffold.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:bee_kind/widgets/success_dialog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:map_location_picker/map_location_picker.dart';
+// import 'package:map_location_picker/map_location_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 String globalEmail = "";
@@ -41,10 +40,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String stateError = "";
   String addressError = "";
 
+  bool isChecked = false;
+  bool isDeliveryChecked = false;
+
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
+  TextEditingController addressNameController = TextEditingController();
+  TextEditingController zipCodeController = TextEditingController();
+  TextEditingController streetAddress1Controller = TextEditingController();
+  TextEditingController streetAddress2Controller = TextEditingController();
+
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   File? profileImage;
@@ -194,6 +201,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void errorSnackBar(BuildContext context, String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          text,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color:
+                AppColors.blackColor, // Assuming you want black text on yellow
+          ),
+          textAlign: TextAlign.center,
+        ),
+        backgroundColor: AppColors.yellow1,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        margin: EdgeInsets.all(20),
+        duration: Duration(milliseconds: 1500),
+      ),
+    );
+  }
+
   bool _validateForm() {
     bool isValid = true;
 
@@ -208,6 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     // Validate date of birth
     if (selectedDate == null) {
+      debugPrint("error date");
       setState(() {
         dateError = "Date of birth is required";
       });
@@ -216,6 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     // Validate gender
     if (selectedGender == null || selectedGender!.isEmpty) {
+      debugPrint("error gender");
       setState(() {
         genderError = "Gender is required";
       });
@@ -224,6 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     // Validate city
     if (selectedCity == null || selectedCity!.isEmpty) {
+      debugPrint("error city");
       setState(() {
         cityError = "City is required";
       });
@@ -232,22 +266,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     // Validate state
     if (selectedState == null || selectedState!.isEmpty) {
+      debugPrint("error state");
       setState(() {
         stateError = "State is required";
       });
       isValid = false;
     }
 
-    // Validate address
-    if (location.isEmpty) {
-      setState(() {
-        addressError = "Address is required";
-      });
+    // // Validate address (if you later re-enable map picker)
+    // if (location.isEmpty) {
+    //   debugPrint("error location");
+    //   setState(() {
+    //     addressError = "Address is required";
+    //   });
+    //   isValid = false;
+    // }
+
+    // Validate all text form fields
+    if (!formKey.currentState!.validate()) {
+      debugPrint("error validation!");
       isValid = false;
     }
 
-    // Validate form fields (first name, last name, phone)
-    if (formKey.currentState?.validate() != true) {
+    // ✅ Check if consent checkboxes are checked
+    if (!isChecked) {
+      debugPrint("error checked");
+      errorSnackBar(
+        context,
+        "You must consent to upload your government ID and confirm you are 21 years or older.",
+      );
+      isValid = false;
+    }
+
+    if (!isDeliveryChecked) {
+      debugPrint("error isDeliveryChecked");
+      errorSnackBar(
+        context,
+        "You must confirm that your delivery address matches your ID address.",
+      );
       isValid = false;
     }
 
@@ -299,394 +355,548 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScaffold(
-      isProfile: true,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 70.h),
-        child: Form(
-          key: formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CustomText(
-                text: "Create Profile",
-                fontSize: 22.sp,
-                weight: FontWeight.bold,
-              ),
-              GestureDetector(
-                onTap: showImageSourceBottomSheet,
-                child: Container(
-                  width: 150.w,
-                  height: 150.h,
-                  decoration: BoxDecoration(shape: BoxShape.circle),
-                  margin: EdgeInsets.symmetric(vertical: 15.h),
-                  child: ClipOval(
-                    child: profileImage != null
-                        ? Image.file(
-                            profileImage!,
-                            width: 150.w,
-                            height: 150.h,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.yellow1.withValues(alpha: 0.2),
-                              border: Border.all(
+    return AppBarBaseView(
+      title: "Create Profile",
+
+      isLeading: false,
+      button: Container(
+        color: AppColors.whiteColor,
+        padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
+        child: CustomButton(
+          onTap: () {
+            if (_validateForm()) {
+              debugPrint("validated!");
+              showSuccessDialog(context);
+            }
+          },
+          text: "Continue",
+          borderColor: AppColors.blackColor,
+          verticalPadding: 20.h,
+          horizontalPadding: 10.w,
+          fontSize: 18.sp,
+        ),
+      ),
+      body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: showImageSourceBottomSheet,
+                  child: Container(
+                    width: 150.w,
+                    height: 150.h,
+                    decoration: BoxDecoration(shape: BoxShape.circle),
+                    margin: EdgeInsets.symmetric(vertical: 15.h),
+                    child: ClipOval(
+                      child: profileImage != null
+                          ? Image.file(
+                              profileImage!,
+                              width: 150.w,
+                              height: 150.h,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.yellow1.withValues(alpha: 0.2),
+                                border: Border.all(
+                                  color: AppColors.yellow2,
+                                  width: 2,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.camera_alt_rounded,
+                                size: 30,
                                 color: AppColors.yellow2,
-                                width: 2,
                               ),
-                              shape: BoxShape.circle,
                             ),
-                            child: Icon(
-                              Icons.camera_alt_rounded,
-                              size: 30,
-                              color: AppColors.yellow2,
-                            ),
-                          ),
+                    ),
                   ),
                 ),
-              ),
-              CustomText(text: "Upload Image", fontSize: 22.sp),
-              Padding(
-                padding: EdgeInsets.only(top: 30.h, bottom: 15.h),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                CustomText(text: "Upload Image", fontSize: 22.sp),
+                Padding(
+                  padding: EdgeInsets.only(top: 30.h, bottom: 10.h),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 180.w,
+                        child: CustomTextField(
+                          hint: "First Name",
+                          controller: firstNameController,
+                          validator: (value) =>
+                              Validation.validateName(value, "First Name"),
+                          prefxicon: AssetsPath.person,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 180.w,
+                        child: CustomTextField(
+                          hint: "Last Name",
+                          controller: lastNameController,
+                          validator: (value) =>
+                              Validation.validateName(value, "Last Name"),
+                          prefxicon: AssetsPath.person,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10.h),
+                  child: CustomTextField(
+                    hint: "Email",
+                    isEditable: false,
+                    controller: emailController,
+                    prefxicon: AssetsPath.email,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10.h),
+                  child: CustomTextField(
+                    hint: "Phone",
+                    controller: phoneController,
+                    keyboardType: TextInputType.phone,
+                    validator: (value) => Validation.validatePhoneNumber(value),
+                    inputFormatters: [
+                      USPhoneNumberFormatter(),
+                      LengthLimitingTextInputFormatter(16),
+                    ],
+                    prefxicon: AssetsPath.phone,
+                  ),
+                ),
+
+                // Date of Birth with error
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 180.w,
-                      child: CustomTextField(
-                        hint: "First Name",
-                        controller: firstNameController,
-                        validator: (value) =>
-                            Validation.validateName(value, "First Name"),
-                        prefxicon: AssetsPath.person,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 180.w,
-                      child: CustomTextField(
-                        hint: "Last Name",
-                        controller: lastNameController,
-                        validator: (value) =>
-                            Validation.validateName(value, "Last Name"),
-                        prefxicon: AssetsPath.person,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 15.h),
-                child: CustomTextField(
-                  hint: "Email",
-                  isEditable: false,
-                  controller: emailController,
-                  prefxicon: AssetsPath.email,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 15.h),
-                child: CustomTextField(
-                  hint: "Phone",
-                  controller: phoneController,
-                  keyboardType: TextInputType.phone,
-                  validator: (value) => Validation.validatePhoneNumber(value),
-                  inputFormatters: [
-                    USPhoneNumberFormatter(),
-                    LengthLimitingTextInputFormatter(16),
-                  ],
-                  prefxicon: AssetsPath.phone,
-                ),
-              ),
-
-              // Date of Birth with error
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () => selectDate(context),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 20.h,
-                        horizontal: 15.w,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.yellow1.withValues(alpha: 0.2),
-                        border: Border.all(color: AppColors.yellow2, width: 1),
-                        borderRadius: BorderRadius.circular(30.r),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          CustomText(
-                            text: formatDate(selectedDate),
-                            fontColor: AppColors.yellow2,
-                            fontSize: 18.sp,
+                    GestureDetector(
+                      onTap: () => selectDate(context),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 20.h,
+                          horizontal: 15.w,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.yellow1.withValues(alpha: 0.2),
+                          border: Border.all(
+                            color: AppColors.yellow2,
+                            width: 1,
                           ),
-                          Image.asset(AssetsPath.calendar, width: 18.w),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Visibility(
-                    visible: dateError.isNotEmpty,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 4.h, left: 15.w),
-                      child: CustomText(
-                        text: dateError,
-                        fontColor: AppColors.errorColor,
-                        fontSize: 14.sp,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              // Gender with error
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: 15.h),
-                    child: CustomDropdown(
-                      items: ["Male", "Female"],
-                      initialValue: selectedGender,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedGender = value;
-                          genderError =
-                              ""; // Clear error when selection changes
-                        });
-                        debugPrint("Selected $selectedGender");
-                      },
-                      hintText: "Gender",
-                    ),
-                  ),
-                  Visibility(
-                    visible: genderError.isNotEmpty,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: 10.h,
-                        left: 15.w,
-                        top: 4.h,
-                      ),
-                      child: CustomText(
-                        text: genderError,
-                        fontColor: AppColors.errorColor,
-                        fontSize: 14.sp,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              // City and State with errors
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 15.h, top: 15.h),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
+                          borderRadius: BorderRadius.circular(30.r),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            SizedBox(
-                              width: 180.w,
-                              child: CustomDropdown(
-                                items: ["New York City", "Chicago", "Houston"],
-                                initialValue: selectedCity,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedCity = value;
-                                    cityError =
-                                        ""; // Clear error when selection changes
-                                  });
-                                  debugPrint("Selected $selectedCity");
-                                },
-                                hintText: "City",
-                              ),
-                            ),
-                            Visibility(
-                              visible: cityError.isNotEmpty,
-                              child: Container(
-                                width: 180.w,
-                                padding: EdgeInsets.only(
-                                  bottom: 10.h,
-                                  top: 4.h,
-                                  right: 80.w,
-                                ),
-                                child: CustomText(
-                                  text: cityError,
-                                  fontColor: AppColors.errorColor,
-                                  fontSize: 14.sp,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            SizedBox(
-                              width: 180.w,
-                              child: CustomDropdown(
-                                items: ["New York", "California", "Texas"],
-                                initialValue: selectedState,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedState = value;
-                                    stateError =
-                                        ""; // Clear error when selection changes
-                                  });
-                                  debugPrint("Selected $selectedState");
-                                },
-                                hintText: "State",
-                              ),
-                            ),
-                            Visibility(
-                              visible: stateError.isNotEmpty,
-                              child: Container(
-                                width: 180.w,
-                                padding: EdgeInsets.only(
-                                  bottom: 10.h,
-                                  top: 4.h,
-                                  right: 80.w,
-                                ),
-                                child: CustomText(
-                                  text: stateError,
-                                  fontColor: AppColors.errorColor,
-                                  fontSize: 14.sp,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              // Address with error
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      debugPrint("Location tapped");
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Theme(
-                            data: ThemeData.light(),
-                            child: MapLocationPicker(
-                              config: MapLocationPickerConfig(
-                                floatingControlsColor: AppColors.whiteColor,
-                                floatingControlsIconColor: AppColors.yellow1,
-                                apiKey: AppConstants.googleApiKey,
-                                initialPosition: const LatLng(
-                                  38.7945952,
-                                  -106.5348379,
-                                ),
-                                bottomCardBuilder:
-                                    (
-                                      context,
-                                      place,
-                                      places,
-                                      formattedAddress,
-                                      isLoading,
-                                      onPlaceSelected,
-                                      searchBar,
-                                    ) {
-                                      return CupertinoActionSheet(
-                                        title: const Text("Selected Location"),
-                                        actions: [
-                                          CupertinoActionSheetAction(
-                                            onPressed: onPlaceSelected,
-                                            child: Text(
-                                              formattedAddress,
-                                              style: TextStyle(
-                                                fontSize: 18.sp,
-                                                color: AppColors.blackColor,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                onNext: (loc) async {
-                                  setState(() {
-                                    location = loc?.formattedAddress ?? '';
-                                    addressError =
-                                        ""; // Clear error when address is selected
-                                  });
-                                  log('address ${loc?.formattedAddress}');
-                                  log('lat ${loc?.geometry?.location.lat}');
-                                  log('long ${loc?.geometry?.location.lng}');
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 15.h,
-                        horizontal: 15.w,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.yellow1.withValues(alpha: 0.2),
-                        border: Border.all(color: AppColors.yellow2, width: 1),
-                        borderRadius: BorderRadius.circular(30.r),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Icon(Icons.location_on, color: AppColors.yellow2),
-                          Expanded(
-                            child: CustomText(
-                              text: location.isEmpty ? "Address" : location,
-                              textAlign: TextAlign.start,
+                            CustomText(
+                              text: formatDate(selectedDate),
                               fontColor: AppColors.yellow2,
                               fontSize: 18.sp,
                             ),
+                            Image.asset(AssetsPath.calendar, width: 18.w),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Visibility(
+                      visible: dateError.isNotEmpty,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 4.h, left: 15.w),
+                        child: CustomText(
+                          text: dateError,
+                          fontColor: AppColors.errorColor,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Gender with error
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 15.h),
+                      child: CustomDropdown(
+                        items: ["Male", "Female"],
+                        initialValue: selectedGender,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedGender = value;
+                            genderError =
+                                ""; // Clear error when selection changes
+                          });
+                          debugPrint("Selected $selectedGender");
+                        },
+                        hintText: "Gender",
+                      ),
+                    ),
+                    Visibility(
+                      visible: genderError.isNotEmpty,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom: 10.h,
+                          left: 15.w,
+                          top: 4.h,
+                        ),
+                        child: CustomText(
+                          text: genderError,
+                          fontColor: AppColors.errorColor,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 20.h),
+
+                CustomText(
+                  text: "Address Details",
+                  fontSize: 20.sp,
+                  weight: FontWeight.bold,
+                ),
+
+                SizedBox(height: 20.h),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        hint: "Address Name",
+                        controller: addressNameController,
+                        validator: (value) =>
+                            Validation.validateAddressName(value),
+                      ),
+                    ),
+                    SizedBox(width: 20.w),
+                    Expanded(
+                      child: CustomTextField(
+                        hint: "Zip Code",
+                        controller: zipCodeController,
+                        keyboardType: TextInputType.number,
+                        validator: (value) => Validation.validateZipCode(value),
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 10.h),
+
+                CustomTextField(
+                  hint: "Street Address (Line 1)",
+                  controller: streetAddress1Controller,
+                  validator: (value) => Validation.validateStreetAddress(
+                    value,
+                    "Street Address (Line 1)",
+                  ),
+                ),
+                SizedBox(height: 10.h),
+                CustomTextField(
+                  hint: "Street Address (Line 2)",
+                  controller: streetAddress2Controller,
+                  validator: (value) => Validation.validateStreetAddress(
+                    value,
+                    "Street Address (Line 2)",
+                  ),
+                ),
+
+                SizedBox(height: 10.h),
+
+                // City and State with errors
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 20.h),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                              SizedBox(
+                                width: 180.w,
+                                child: CustomDropdown(
+                                  items: [
+                                    "New York City",
+                                    "Chicago",
+                                    "Houston",
+                                  ],
+                                  initialValue: selectedCity,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedCity = value;
+                                      cityError =
+                                          ""; // Clear error when selection changes
+                                    });
+                                    debugPrint("Selected $selectedCity");
+                                  },
+                                  hintText: "City",
+                                ),
+                              ),
+                              Visibility(
+                                visible: cityError.isNotEmpty,
+                                child: Container(
+                                  width: 180.w,
+                                  padding: EdgeInsets.only(
+                                    bottom: 10.h,
+                                    top: 4.h,
+                                    right: 80.w,
+                                  ),
+                                  child: CustomText(
+                                    text: cityError,
+                                    fontColor: AppColors.errorColor,
+                                    fontSize: 14.sp,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              SizedBox(
+                                width: 180.w,
+                                child: CustomDropdown(
+                                  items: ["New York", "California", "Texas"],
+                                  initialValue: selectedState,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedState = value;
+                                      stateError =
+                                          ""; // Clear error when selection changes
+                                    });
+                                    debugPrint("Selected $selectedState");
+                                  },
+                                  hintText: "State",
+                                ),
+                              ),
+                              Visibility(
+                                visible: stateError.isNotEmpty,
+                                child: Container(
+                                  width: 180.w,
+                                  padding: EdgeInsets.only(
+                                    bottom: 10.h,
+                                    top: 4.h,
+                                    right: 80.w,
+                                  ),
+                                  child: CustomText(
+                                    text: stateError,
+                                    fontColor: AppColors.errorColor,
+                                    fontSize: 14.sp,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  Visibility(
-                    visible: addressError.isNotEmpty,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 4.h, left: 15.w),
-                      child: CustomText(
-                        text: addressError,
-                        fontColor: AppColors.errorColor,
-                        fontSize: 14.sp,
+                  ],
+                ),
+
+                CustomText(
+                  text: "Identity & Age Verification",
+                  fontSize: 20.sp,
+                  weight: FontWeight.bold,
+                ),
+
+                SizedBox(height: 10.h),
+
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 40.w,
+                      child: Checkbox(
+                        value: isChecked,
+                        checkColor: AppColors.yellow2,
+                        onChanged: (value) {
+                          setState(() {
+                            isChecked = value!;
+                          });
+                        },
+                        fillColor: WidgetStateProperty.all(
+                          AppColors.yellow1.withValues(alpha: 0.2),
+                        ),
+                        side: BorderSide(color: AppColors.yellow2, width: 1),
                       ),
                     ),
-                  ),
-                ],
-              ),
-
-              Padding(
-                padding: EdgeInsets.only(top: 15.h),
-                child: CustomButton(
-                  onTap: () {
-                    if (_validateForm()) {
-                      showSuccessDialog(context);
-                    }
-                  },
-                  text: "Continue",
-                  borderColor: AppColors.blackColor,
-                  verticalPadding: 20.h,
-                  horizontalPadding: 10.w,
-                  fontSize: 18.sp,
+                    SizedBox(
+                      width: 350.w,
+                      child: CustomText(
+                        text:
+                            "I consent to upload my government ID and a live selfie for identity and age verification. I confirm that I am 21 years or older",
+                        fontSize: 15.sp,
+                        textAlign: TextAlign.start,
+                        maxLines: 3,
+                        weight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10.h),
+                  child: CustomButton(
+                    onTap: () {
+                      if (_validateForm()) {
+                        showSuccessDialog(context);
+                      }
+                    },
+                    text: "Verify Age & Id",
+                    borderColor: AppColors.blackColor,
+                    verticalPadding: 20.h,
+                    horizontalPadding: 10.w,
+                    fontSize: 18.sp,
+                  ),
+                ),
+
+                Padding(
+                  padding: EdgeInsets.only(bottom: 80.h),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 40.w,
+                        child: Checkbox(
+                          value: isDeliveryChecked,
+                          checkColor: AppColors.yellow2,
+                          onChanged: (value) {
+                            setState(() {
+                              isDeliveryChecked = value!;
+                            });
+                          },
+                          fillColor: WidgetStateProperty.all(
+                            AppColors.yellow1.withValues(alpha: 0.2),
+                          ),
+                          side: BorderSide(color: AppColors.yellow2, width: 1),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 350.w,
+                        child: CustomText(
+                          text:
+                              "My delivery address matches the address on my ID.",
+                          fontSize: 15.sp,
+                          textAlign: TextAlign.start,
+                          maxLines: 3,
+                          weight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Address with error
+                // Column(
+                //   crossAxisAlignment: CrossAxisAlignment.start,
+                //   children: [
+                //     GestureDetector(
+                //       onTap: () async {
+                //         debugPrint("Location tapped");
+                //         Navigator.push(
+                //           context,
+                //           MaterialPageRoute(
+                //             builder: (context) => Theme(
+                //               data: ThemeData.light(),
+                //               child: MapLocationPicker(
+                //                 config: MapLocationPickerConfig(
+                //                   floatingControlsColor: AppColors.whiteColor,
+                //                   floatingControlsIconColor: AppColors.yellow1,
+                //                   apiKey: AppConstants.googleApiKey,
+                //                   initialPosition: const LatLng(
+                //                     38.7945952,
+                //                     -106.5348379,
+                //                   ),
+                //                   bottomCardBuilder:
+                //                       (
+                //                         context,
+                //                         place,
+                //                         places,
+                //                         formattedAddress,
+                //                         isLoading,
+                //                         onPlaceSelected,
+                //                         searchBar,
+                //                       ) {
+                //                         return CupertinoActionSheet(
+                //                           title: const Text("Selected Location"),
+                //                           actions: [
+                //                             CupertinoActionSheetAction(
+                //                               onPressed: onPlaceSelected,
+                //                               child: Text(
+                //                                 formattedAddress,
+                //                                 style: TextStyle(
+                //                                   fontSize: 18.sp,
+                //                                   color: AppColors.blackColor,
+                //                                 ),
+                //                               ),
+                //                             ),
+                //                           ],
+                //                         );
+                //                       },
+                //                   onNext: (loc) async {
+                //                     setState(() {
+                //                       location = loc?.formattedAddress ?? '';
+                //                       addressError =
+                //                           ""; // Clear error when address is selected
+                //                     });
+                //                     log('address ${loc?.formattedAddress}');
+                //                     log('lat ${loc?.geometry?.location.lat}');
+                //                     log('long ${loc?.geometry?.location.lng}');
+                //                     Navigator.pop(context);
+                //                   },
+                //                 ),
+                //               ),
+                //             ),
+                //           ),
+                //         );
+                //       },
+                //       child: Container(
+                //         padding: EdgeInsets.symmetric(
+                //           vertical: 15.h,
+                //           horizontal: 15.w,
+                //         ),
+                //         decoration: BoxDecoration(
+                //           color: AppColors.yellow1.withValues(alpha: 0.2),
+                //           border: Border.all(color: AppColors.yellow2, width: 1),
+                //           borderRadius: BorderRadius.circular(30.r),
+                //         ),
+                //         child: Row(
+                //           mainAxisAlignment: MainAxisAlignment.start,
+                //           children: [
+                //             Icon(Icons.location_on, color: AppColors.yellow2),
+                //             Expanded(
+                //               child: CustomText(
+                //                 text: location.isEmpty ? "Address" : location,
+                //                 textAlign: TextAlign.start,
+                //                 fontColor: AppColors.yellow2,
+                //                 fontSize: 18.sp,
+                //               ),
+                //             ),
+                //           ],
+                //         ),
+                //       ),
+                //     ),
+                //     Visibility(
+                //       visible: addressError.isNotEmpty,
+                //       child: Padding(
+                //         padding: EdgeInsets.only(top: 4.h, left: 15.w),
+                //         child: CustomText(
+                //           text: addressError,
+                //           fontColor: AppColors.errorColor,
+                //           fontSize: 14.sp,
+                //         ),
+                //       ),
+                //     ),
+                //   ],
+                // ),
+              ],
+            ),
           ),
         ),
       ),

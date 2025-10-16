@@ -43,6 +43,7 @@ class AssetsPath {
   static const String carry = "assets/images/icons/carry.png";
   static const String openBox = "assets/images/icons/openbox.png";
   static const String introImage = "assets/images/icons/intro-image.png";
+  static const String marker = "assets/images/icons/marker.png";
 
   ///placeholder image
   static const String placeholder = "assets/images/placeholder.png";

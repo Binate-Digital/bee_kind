@@ -14,6 +14,7 @@ class AppBarBaseView extends StatelessWidget {
     this.button,
     this.extendedWidget,
     this.isExtended = false,
+    this.isLeading = true,
   });
 
   final String title;
@@ -24,6 +25,7 @@ class AppBarBaseView extends StatelessWidget {
   final Color? appBarColor;
   final Widget? extendedWidget;
   final bool isExtended;
+  final bool isLeading;
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +38,16 @@ class AppBarBaseView extends StatelessWidget {
         child: AppBar(
           backgroundColor: appBarColor,
           elevation: 0,
-          leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Icon(
-              Icons.arrow_back_rounded,
-              color: AppColors.blackColor,
-              size: 30,
-            ),
-          ),
+          leading: isLeading
+              ? GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(
+                    Icons.arrow_back_rounded,
+                    color: AppColors.blackColor,
+                    size: 30,
+                  ),
+                )
+              : Offstage(),
           actions: actions,
           flexibleSpace: extendedWidget ?? Offstage(),
           title: CustomText(

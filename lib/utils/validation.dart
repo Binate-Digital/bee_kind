@@ -122,6 +122,43 @@ class Validation {
     }
     return null;
   }
+
+  // Add this inside Validation class
+
+  /// Validates Address Name
+  static String? validateAddressName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Address Name field can't be empty.";
+    }
+    if (value.length < 3) {
+      return "Address Name must be at least 3 characters long.";
+    }
+    return null;
+  }
+
+  /// Validates Street Address
+  static String? validateStreetAddress(String? value, String lineName) {
+    if (value == null || value.trim().isEmpty) {
+      return "$lineName field can't be empty.";
+    }
+    if (value.length < 5) {
+      return "$lineName must be at least 5 characters long.";
+    }
+    return null;
+  }
+
+  /// Validates ZIP Code
+  static String? validateZipCode(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "ZIP Code field can't be empty.";
+    }
+    // Basic US ZIP pattern: 12345 or 12345-6789
+    final zipRegex = RegExp(r'^\d{5}(-\d{4})?$');
+    if (!zipRegex.hasMatch(value.trim())) {
+      return "Please enter a valid ZIP Code.";
+    }
+    return null;
+  }
 }
 
 class USPhoneNumberFormatter extends TextInputFormatter {
