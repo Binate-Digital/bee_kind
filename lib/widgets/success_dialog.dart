@@ -1,11 +1,15 @@
 import 'package:bee_kind/auth/introduction_screen.dart';
+import 'package:bee_kind/core/vendor/packages_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-Future<void> showSuccessDialog(BuildContext ctx) async {
+Future<void> showSuccessDialog(
+  BuildContext ctx, {
+  bool isVendor = false,
+}) async {
   showDialog(
     context: ctx,
     barrierDismissible: false, // Prevent accidental dismissal
@@ -69,7 +73,10 @@ Future<void> showSuccessDialog(BuildContext ctx) async {
                   // Use ctx (the root screen context) for navigation
                   Navigator.pushReplacement(
                     ctx,
-                    MaterialPageRoute(builder: (_) => IntroductionScreen()),
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          isVendor ? PackagesScreen() : IntroductionScreen(),
+                    ),
                   );
                 },
                 text: "Continue",

@@ -15,6 +15,7 @@ class AppBarBaseView extends StatelessWidget {
     this.extendedWidget,
     this.isExtended = false,
     this.isLeading = true,
+    this.location,
   });
 
   final String title;
@@ -26,13 +27,15 @@ class AppBarBaseView extends StatelessWidget {
   final Widget? extendedWidget;
   final bool isExtended;
   final bool isLeading;
+  final FloatingActionButtonLocation? location;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: color ?? AppColors.whiteColor,
       floatingActionButton: button ?? Offstage(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation:
+          location ?? FloatingActionButtonLocation.centerDocked,
       appBar: PreferredSize(
         preferredSize: Size(double.infinity, isExtended ? 170.h : 70.h),
         child: AppBar(

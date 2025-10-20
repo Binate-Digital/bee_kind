@@ -10,8 +10,13 @@ import 'package:flutter_rating/flutter_rating.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RatingScreen extends StatefulWidget {
-  const RatingScreen({super.key, this.addReview = false});
+  const RatingScreen({
+    super.key,
+    this.addReview = false,
+    this.isVendor = false,
+  });
   final bool addReview;
+  final bool isVendor;
 
   @override
   State<RatingScreen> createState() => _RatingScreenState();
@@ -227,7 +232,10 @@ class _RatingScreenState extends State<RatingScreen> {
                 shrinkWrap: true,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
-                  return GestureDetector(onTap: () {}, child: ReviewCard());
+                  return GestureDetector(
+                    onTap: () {},
+                    child: ReviewCard(isVendor: widget.isVendor),
+                  );
                 },
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   mainAxisExtent: 145.h,

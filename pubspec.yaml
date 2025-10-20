@@ -47,6 +47,7 @@ dependencies:
   dotted_border: ^3.1.0
   google_maps_flutter: ^2.13.1
   geolocator: ^14.0.2
+  syncfusion_flutter_charts: ^31.2.2
   
 
 dev_dependencies:

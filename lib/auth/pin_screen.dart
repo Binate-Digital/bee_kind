@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bee_kind/auth/reset_password_screen.dart';
-import 'package:bee_kind/core/user/user_profile_screen.dart';
+import 'package:bee_kind/common/create_profile_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/validation.dart';
 import 'package:bee_kind/widgets/circular_timer.dart';

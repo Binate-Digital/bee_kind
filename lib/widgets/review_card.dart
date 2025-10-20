@@ -1,13 +1,15 @@
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
+import 'package:bee_kind/widgets/response_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ReviewCard extends StatefulWidget {
-  const ReviewCard({super.key, this.enabled = false});
+  const ReviewCard({super.key, this.enabled = false, this.isVendor = false});
   final bool enabled;
+  final bool isVendor;
 
   @override
   State<ReviewCard> createState() => _ReviewCardState();
@@ -44,11 +46,36 @@ class _ReviewCardState extends State<ReviewCard> {
                   ),
                 ),
                 SizedBox(width: 10.w),
-                CustomText(
-                  text: "John Smith",
-                  fontSize: 18.sp,
-                  fontColor: AppColors.blackColor,
-                  weight: FontWeight.bold,
+                Column(
+                  children: [
+                    CustomText(
+                      text: "John Smith",
+                      fontSize: 18.sp,
+                      fontColor: AppColors.blackColor,
+                      weight: FontWeight.bold,
+                    ),
+                    widget.isVendor
+                        ? GestureDetector(
+                            onTap: () => showRespondDialog(context),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 8.h,
+                              ),
+                              margin: EdgeInsets.only(top: 10.h),
+                              decoration: BoxDecoration(
+                                color: AppColors.yellow2,
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: CustomText(
+                                text: "Respond",
+                                fontColor: Colors.black,
+                                fontSize: 16.sp,
+                              ),
+                            ),
+                          )
+                        : Offstage(),
+                  ],
                 ),
               ],
             ),

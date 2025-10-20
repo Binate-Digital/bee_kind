@@ -43,7 +43,7 @@ class _AddressScreenState extends State<AddressScreen> {
             ),
             child: AddressType(
               isChecked: isHomeChecked,
-              type: "Home",
+              type: "Office",
               onChanged: (value) {
                 setState(() {
                   isHomeChecked = value!;
@@ -51,24 +51,24 @@ class _AddressScreenState extends State<AddressScreen> {
               },
             ),
           ),
-          AddressType(
-            isChecked: isOfficeChecked,
-            type: "Office",
-            onChanged: (value) {
-              setState(() {
-                isOfficeChecked = value!;
-              });
-            },
-          ),
-          AddressType(
-            isChecked: isApartmentChecked,
-            type: "Apartment",
-            onChanged: (value) {
-              setState(() {
-                isApartmentChecked = value!;
-              });
-            },
-          ),
+          // AddressType(
+          //   isChecked: isOfficeChecked,
+          //   type: "Office",
+          //   onChanged: (value) {
+          //     setState(() {
+          //       isOfficeChecked = value!;
+          //     });
+          //   },
+          // ),
+          // AddressType(
+          //   isChecked: isApartmentChecked,
+          //   type: "Apartment",
+          //   onChanged: (value) {
+          //     setState(() {
+          //       isApartmentChecked = value!;
+          //     });
+          //   },
+          // ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
             child: Row(

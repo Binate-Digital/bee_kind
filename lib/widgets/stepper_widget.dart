@@ -46,12 +46,12 @@ class _HorizontalStepperState extends State<HorizontalStepper> {
             children: [
               // Dotted connectors
               Positioned.fill(
-                left: 16.w,
+                left: 5.w,
                 child: Row(
                   children: List.generate(widget.steps.length - 1, (index) {
                     final isCompleted = index < widget.currentStep;
                     return Container(
-                      width: 70.w,
+                      width: 135.w,
                       margin: EdgeInsets.symmetric(horizontal: 18.w),
                       child: HorizontalDottedLine(
                         color: isCompleted

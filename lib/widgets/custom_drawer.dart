@@ -1,6 +1,8 @@
 import 'package:bee_kind/common/payment_accounts.dart';
 import 'package:bee_kind/common/terms_and_conditions_screen.dart';
 import 'package:bee_kind/core/user/store/orders_history.dart';
+import 'package:bee_kind/core/vendor/packages_screen.dart';
+import 'package:bee_kind/core/vendor/store/my_products_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:bee_kind/utils/app_colors.dart';
@@ -8,8 +10,13 @@ import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 
 class CustomDrawer extends StatelessWidget {
-  const CustomDrawer({super.key, required this.scaffoldKey});
+  const CustomDrawer({
+    super.key,
+    required this.scaffoldKey,
+    required this.isVendor,
+  });
   final GlobalKey<ScaffoldState> scaffoldKey;
+  final bool isVendor;
 
   @override
   Widget build(BuildContext context) {
@@ -83,10 +90,21 @@ class CustomDrawer extends StatelessWidget {
                   fontColor: AppColors.blackColor,
                 ),
                 SizedBox(height: 4.h),
-                CustomText(
-                  text: "+1 (555) 123-4567",
-                  fontSize: 18.sp,
-                  fontColor: AppColors.blackColor,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      AssetsPath.phone,
+                      width: 20.w,
+                      color: AppColors.blackColor,
+                    ),
+                    SizedBox(width: 10.w),
+                    CustomText(
+                      text: "+1 (555) 123-4567",
+                      fontSize: 18.sp,
+                      fontColor: AppColors.blackColor,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -95,28 +113,45 @@ class CustomDrawer extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                _buildMenuItem(
-                  context,
-                  icon: AssetsPath.home,
-                  title: "Home",
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Navigate to home page
-                  },
-                ),
-                _buildMenuItem(
-                  context,
-                  icon: AssetsPath.orders,
-                  title: "Order History",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => OrdersHistoryScreen(),
+                isVendor
+                    ? _buildMenuItem(
+                        context,
+                        icon: AssetsPath.myProducts,
+                        title: "My Products",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => MyProductsScreen()),
+                          );
+                        },
+                      )
+                    : _buildMenuItem(
+                        context,
+                        icon: AssetsPath.orders,
+                        title: "Order History",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => OrdersHistoryScreen(),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
+
+                isVendor
+                    ? _buildMenuItem(
+                        context,
+                        icon: AssetsPath.mySubsciptions,
+                        title: "My Subscriptions",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => PackagesScreen()),
+                          );
+                        },
+                      )
+                    : Offstage(),
                 _buildMenuItem(
                   context,
                   icon: AssetsPath.payment,
@@ -164,7 +199,7 @@ class CustomDrawer extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(bottom: 40.h),
+            padding: EdgeInsets.only(bottom: 80.h),
             child: _buildLogoutButton(context),
           ),
         ],

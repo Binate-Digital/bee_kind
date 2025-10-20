@@ -10,7 +10,7 @@ import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../core/user/user_profile_screen.dart';
+import '../common/create_profile_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});

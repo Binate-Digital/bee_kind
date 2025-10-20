@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:bee_kind/auth/sign_in_screen.dart';
+import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/user_location_permission.dart';
@@ -14,6 +17,8 @@ class RoleTypeScreen extends StatefulWidget {
 }
 
 class _RoleTypeScreenState extends State<RoleTypeScreen> {
+
+  final prefs = SharedPrefs();
 
 @override
   void initState() {
@@ -42,9 +47,12 @@ class _RoleTypeScreenState extends State<RoleTypeScreen> {
             Padding(
               padding: EdgeInsets.only(bottom: 15.h),
               child: CustomButton(
-                onTap: () => Navigator.of(
+                onTap: () async {
+                  await prefs.setString('role', 'user');
+                  Navigator.of(
                   context,
-                ).push(MaterialPageRoute(builder: (_) => SignInScreen())),
+                ).push(MaterialPageRoute(builder: (_) => SignInScreen()));
+                },
                 text: "Login As User",
                 borderColor: AppColors.blackColor,
                 verticalPadding: 18.h,
@@ -55,9 +63,12 @@ class _RoleTypeScreenState extends State<RoleTypeScreen> {
             Padding(
               padding: EdgeInsets.only(bottom: 30.h),
               child: CustomButton(
-                onTap: () => Navigator.of(
+                onTap: () async {
+                  await prefs.setString('role', 'vendor');
+                  Navigator.of(
                   context,
-                ).push(MaterialPageRoute(builder: (_) => SignInScreen())),
+                ).push(MaterialPageRoute(builder: (_) => SignInScreen()));
+                },
                 borderColor: AppColors.blackColor,
                 text: "Login as Store Owner",
                 verticalPadding: 18.h,

@@ -14,14 +14,11 @@ class TrackOrderScreen extends StatelessWidget {
   final VoidCallback? onTap;
 
   final int currentStep = 5; // Changed to 2 to show active states
-  final Map steps = {
-    "images": [
+  final List<String> steps = [
       AssetsPath.box,
       AssetsPath.truck,
       AssetsPath.carry,
-      AssetsPath.openBox,
-    ],
-  };
+    ];
 
   final Map differentSteps = {
     "progress": [
@@ -51,7 +48,7 @@ class TrackOrderScreen extends StatelessWidget {
           children: [
             OrderItem(hideButton: true, onTap: () {}),
             SizedBox(height: 20.h),
-            HorizontalStepper(currentStep: currentStep, steps: steps["images"]),
+            HorizontalStepper(currentStep: currentStep, steps: steps),
             SizedBox(height: 20.h),
             GestureDetector(
               onTap: onTap ?? () {},

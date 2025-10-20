@@ -1,5 +1,4 @@
 class AssetsPath {
-
   ///Icons
   static const String splashImage = "assets/images/splash.png";
   static const String icon = "assets/images/bee_kind_logo.png";
@@ -44,6 +43,10 @@ class AssetsPath {
   static const String openBox = "assets/images/icons/openbox.png";
   static const String introImage = "assets/images/icons/intro-image.png";
   static const String marker = "assets/images/icons/marker.png";
+  static const String myOrders = "assets/images/icons/my-orders.png";
+  static const String myProducts = "assets/images/icons/my-products.png";
+  static const String orderRequests = "assets/images/icons/order-requests.png";
+  static const String mySubsciptions = "assets/images/icons/my-subscription.png";
 
   ///placeholder image
   static const String placeholder = "assets/images/placeholder.png";

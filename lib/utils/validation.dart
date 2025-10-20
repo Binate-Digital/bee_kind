@@ -7,9 +7,10 @@ class Validation {
     r'^\+?1?[-.\s]?\(?[1-9]\d{2}\)?[-.\s]?\d{3}[-.\s]?\d{4}$',
   );
 
-  static String? validateName(String? value, String? fieldName) {
+  // ignore: non_constant_identifier_names
+  static String? validateName(String? value, String? Name) {
     if (value == null || value.trim().isEmpty) {
-      return "$fieldName field can't be empty.";
+      return "$Name can't be empty.";
     }
     return null; // ✅ Valid name
   }
@@ -17,7 +18,7 @@ class Validation {
   /// Email Validation
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Email field can't be empty.";
+      return "Email can't be empty.";
     }
 
     // Basic email regex pattern
@@ -37,7 +38,7 @@ class Validation {
   /// Password Validation
   static String? validatePassword(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Password field can't be empty.";
+      return "Password can't be empty.";
     }
 
     if (value.length < 8) {
@@ -63,7 +64,7 @@ class Validation {
   ) {
     debugPrint(originalPassword);
     if (value == null || value.trim().isEmpty) {
-      return "Confirm password field can't be empty.";
+      return "Confirm password can't be empty.";
     }
 
     if (value.length != originalPassword?.length) {
@@ -76,7 +77,7 @@ class Validation {
 
   static String? validateOtp(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "OTP field can't be empty.";
+      return "OTP can't be empty.";
     }
 
     // Remove any spaces from the input
@@ -102,7 +103,7 @@ class Validation {
 
   static String? validatePhoneNumber(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Phone number field can't be empty.";
+      return "Phone number can't be empty.";
     }
 
     if (!phoneRegex.hasMatch(value)) {
@@ -116,9 +117,10 @@ class Validation {
     return formattedPhone.replaceAll(RegExp(r'[^\d]'), '');
   }
 
-  static String? validateRequired(String? value, String fieldName) {
+  // ignore: non_constant_identifier_names
+  static String? validateRequired(String? value, String Name) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your $fieldName';
+      return 'Please enter your $Name';
     }
     return null;
   }
@@ -128,7 +130,7 @@ class Validation {
   /// Validates Address Name
   static String? validateAddressName(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Address Name field can't be empty.";
+      return "Address can't be empty.";
     }
     if (value.length < 3) {
       return "Address Name must be at least 3 characters long.";
@@ -139,7 +141,7 @@ class Validation {
   /// Validates Street Address
   static String? validateStreetAddress(String? value, String lineName) {
     if (value == null || value.trim().isEmpty) {
-      return "$lineName field can't be empty.";
+      return "$lineName can't be empty.";
     }
     if (value.length < 5) {
       return "$lineName must be at least 5 characters long.";
@@ -150,7 +152,7 @@ class Validation {
   /// Validates ZIP Code
   static String? validateZipCode(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "ZIP Code field can't be empty.";
+      return "ZIP Code can't be empty.";
     }
     // Basic US ZIP pattern: 12345 or 12345-6789
     final zipRegex = RegExp(r'^\d{5}(-\d{4})?$');

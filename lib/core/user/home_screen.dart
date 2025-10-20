@@ -214,9 +214,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                   padding: EdgeInsets.only(top: 20.h),
                                   child: CustomSliderWidget(
                                     label: "Delivery Radius",
-                                    min: 0.5,
-                                    max: 50.0,
-                                    initialValue: 10.0,
+                                    min: minRadius,
+                                    max: maxRadius,
+                                    initialValue: currentRadius,
                                     unit: "mi", // ✅
                                     onChanged: (value) {
                                       setState(() => currentRadius = value);

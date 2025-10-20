@@ -3,6 +3,9 @@ import 'package:bee_kind/common/profile/profile_screen.dart';
 import 'package:bee_kind/core/user/home_screen.dart';
 import 'package:bee_kind/core/user/store/cart_screen.dart';
 import 'package:bee_kind/core/user/store/orders_list_screen.dart';
+import 'package:bee_kind/core/vendor/dashboard_screen.dart';
+import 'package:bee_kind/core/vendor/store/my_orders_screen.dart';
+import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_drawer.dart';
@@ -10,44 +13,52 @@ import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class UserBaseView extends StatefulWidget {
-  const UserBaseView({super.key, this.appBarTitle, this.currIndex});
+class BaseView extends StatefulWidget {
+  const BaseView({super.key, this.appBarTitle, this.currIndex});
   final String? appBarTitle;
   final int? currIndex;
 
   @override
-  State<UserBaseView> createState() => _UserBaseViewState();
+  State<BaseView> createState() => _BaseViewState();
 }
 
-class _UserBaseViewState extends State<UserBaseView> {
+class _BaseViewState extends State<BaseView> {
   int _currentIndex = 0;
 
-  final List<BottomTab> _tabs = [
-    BottomTab(
-      label: 'Home',
-      image: AssetsPath.home,
-      selectedImage: AssetsPath.home,
-    ),
-    BottomTab(
-      label: 'My Cart',
-      image: AssetsPath.mycart,
-      selectedImage: AssetsPath.mycart,
-    ),
-    BottomTab(
-      label: 'My Orders',
-      image: AssetsPath.orders,
-      selectedImage: AssetsPath.orders,
-    ),
-    BottomTab(
-      label: 'Profile',
-      image: AssetsPath.profile,
-      selectedImage: AssetsPath.profile,
-    ),
-  ];
+  final prefs = SharedPrefs();
+
+  bool isVendor = false;
+
+  List<BottomTab> _tabs = [];
 
   @override
   void initState() {
     super.initState();
+
+    isVendor = prefs.getString("role") == "vendor";
+
+    _tabs = [
+      BottomTab(
+        label: isVendor ? "Dashboard" : 'Home',
+        image: AssetsPath.home,
+        selectedImage: AssetsPath.home,
+      ),
+      BottomTab(
+        label: isVendor ? "Order Requests" : 'My Cart',
+        image: AssetsPath.orderRequests,
+        selectedImage: AssetsPath.orderRequests,
+      ),
+      BottomTab(
+        label: 'My Orders',
+        image: AssetsPath.orders,
+        selectedImage: AssetsPath.orders,
+      ),
+      BottomTab(
+        label: 'Profile',
+        image: AssetsPath.profile,
+        selectedImage: AssetsPath.profile,
+      ),
+    ];
     // Set initial index from widget parameter if provided
     if (widget.currIndex != null) {
       _currentIndex = widget.currIndex!;
@@ -55,7 +66,7 @@ class _UserBaseViewState extends State<UserBaseView> {
   }
 
   @override
-  void didUpdateWidget(UserBaseView oldWidget) {
+  void didUpdateWidget(BaseView oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Update current index when widget parameter changes
     if (widget.currIndex != null && widget.currIndex != oldWidget.currIndex) {
@@ -67,9 +78,9 @@ class _UserBaseViewState extends State<UserBaseView> {
 
   Widget _buildCurrentScreen() {
     final screens = [
-      UserHomeScreen(),
-      CartScreen(),
-      OrdersListScreen(),
+      isVendor ? DashboardScreen() : UserHomeScreen(),
+      isVendor ? Placeholder() : CartScreen(),
+      isVendor ? MyOrdersScreen() : OrdersListScreen(),
       ProfileViewScreen(),
     ];
     return screens[_currentIndex];
@@ -84,7 +95,7 @@ class _UserBaseViewState extends State<UserBaseView> {
       child: Scaffold(
         key: scaffoldKey,
         extendBody: true,
-        drawer: CustomDrawer(scaffoldKey: scaffoldKey),
+        drawer: CustomDrawer(scaffoldKey: scaffoldKey, isVendor: isVendor),
         appBar: AppBar(
           leading: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -117,7 +128,7 @@ class _UserBaseViewState extends State<UserBaseView> {
         ),
         body: _buildCurrentScreen(),
         bottomNavigationBar: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+          padding: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 50.h),
           child: Container(
             height: 90.h,
             decoration: BoxDecoration(
@@ -171,8 +182,9 @@ class _UserBaseViewState extends State<UserBaseView> {
                           SizedBox(height: 4.h),
                           Text(
                             tab.label,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 14.sp,
+                              fontSize: 12.sp,
                               fontFamily: "Raleway",
                               color: AppColors.blackColor,
                             ),

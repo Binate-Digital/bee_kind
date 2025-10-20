@@ -1,4 +1,4 @@
-import 'package:bee_kind/core/user/user_base_view.dart';
+import 'package:bee_kind/common/base_view.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
@@ -18,7 +18,7 @@ class IntroductionScreen extends StatelessWidget {
         child: CustomButton(
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => UserBaseView()),
+            MaterialPageRoute(builder: (_) => BaseView()),
           ),
           text: "Skip",
         ),

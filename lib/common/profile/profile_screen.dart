@@ -1,8 +1,10 @@
+import 'package:bee_kind/common/create_profile_screen.dart';
 import 'package:bee_kind/common/payment_accounts.dart';
 import 'package:bee_kind/common/profile/address_screen.dart';
 import 'package:bee_kind/common/profile/faq.dart';
 import 'package:bee_kind/common/profile/help_and_support_screen.dart';
 import 'package:bee_kind/core/user/edit_profile_screen.dart';
+import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
@@ -21,6 +23,16 @@ class ProfileViewScreen extends StatefulWidget {
 }
 
 class _ProfileViewScreenState extends State<ProfileViewScreen> {
+  final prefs = SharedPrefs();
+
+  bool isVendor = false;
+
+  @override
+  void initState() {
+    super.initState();
+    isVendor = prefs.getString("role") == "vendor";
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -42,7 +54,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
               ),
             ),
             CustomText(
-              text: "John Smith",
+              text: isVendor ? "Lorem Ipsum Store" : "John Smith",
               fontSize: 18.sp,
               weight: FontWeight.bold,
             ),
@@ -57,12 +69,22 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                 ],
               ),
             ),
+            SizedBox(height: 20.h),
+            ProfileOption(
+              onTap: () {},
+              isNotification: true,
+              image: AssetsPath.notifications,
+              text: "Hide Profile",
+            ),
             SizedBox(height: 30.h),
             ProfileOption(
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        isVendor ? ProfileScreen() : EditProfileScreen(),
+                  ),
                 );
               },
               image: AssetsPath.person,
