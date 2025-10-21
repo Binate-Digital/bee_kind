@@ -1,6 +1,7 @@
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
-import 'package:bee_kind/widgets/cancel_order_dialog.dart';
+import 'package:bee_kind/widgets/custom_button.dart';
+import 'package:bee_kind/widgets/dialogs/cancel_order_dialog.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/custom_google_maps.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
@@ -11,6 +12,7 @@ import 'package:bee_kind/widgets/vertical_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LiveTracking extends StatefulWidget {
   const LiveTracking({super.key});
@@ -24,12 +26,7 @@ class _LiveTrackingState extends State<LiveTracking> {
   GoogleMapController? mapController;
   // Changed to 2 to show active states
   final Map steps = {
-    "images": [
-      AssetsPath.box,
-      AssetsPath.truck,
-      AssetsPath.carry,
-      AssetsPath.openBox,
-    ],
+    "images": [AssetsPath.box, AssetsPath.truck, AssetsPath.carry],
   };
 
   final Map differentSteps = {
@@ -49,6 +46,15 @@ class _LiveTrackingState extends State<LiveTracking> {
     ],
     "time": ["03:20 PM", "02:45 PM", "12:30 PM", "10:15 AM", "09:00 AM"],
   };
+
+  Future<void> launchCaller(String phoneNumber) async {
+    final Uri url = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +83,36 @@ class _LiveTrackingState extends State<LiveTracking> {
                     fontSize: 20.sp,
                     weight: FontWeight.bold,
                   ),
+                ),
+                SizedBox(height: 30.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          text: "Delivery personnel name: Lorem",
+                          fontSize: 18.sp,
+                        ),
+                        CustomText(
+                          text: "Car: White toyota camry ALX 415",
+                          fontSize: 18.sp,
+                        ),
+                        CustomText(
+                          text: "Phone: +1 919-555-8247",
+                          fontSize: 18.sp,
+                        ),
+                      ],
+                    ),
+                    CustomButton(
+                      width: 100.w,
+                      text: "Call",
+                      onTap: () {
+                        launchCaller("+1 919-555-8247");
+                      },
+                    ),
+                  ],
                 ),
                 SizedBox(height: 30.h),
                 Container(color: AppColors.blackColor, height: 0.5.w),
@@ -141,8 +177,8 @@ class _LiveTrackingState extends State<LiveTracking> {
               OrderItem(
                 hideButton: true,
                 onTap: () {},
-                verticalPadding: 40.h,
-                horizontalPadding: 40.w,
+                verticalPadding: 45.h,
+                horizontalPadding: 45.w,
               ),
             ],
           ),

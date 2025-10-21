@@ -3,6 +3,7 @@ import 'package:bee_kind/common/terms_and_conditions_screen.dart';
 import 'package:bee_kind/core/user/store/orders_history.dart';
 import 'package:bee_kind/core/vendor/packages_screen.dart';
 import 'package:bee_kind/core/vendor/store/my_products_screen.dart';
+import 'package:bee_kind/widgets/dialogs/logout_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:bee_kind/utils/app_colors.dart';
@@ -72,11 +73,10 @@ class CustomDrawer extends StatelessWidget {
                           width: 2.5,
                         ),
                         shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.camera_alt_rounded,
-                        size: 30,
-                        color: AppColors.blackColor,
+                        image: DecorationImage(
+                          image: AssetImage(AssetsPath.dummy),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
@@ -121,7 +121,9 @@ class CustomDrawer extends StatelessWidget {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => MyProductsScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => MyProductsScreen(),
+                            ),
                           );
                         },
                       )
@@ -200,7 +202,13 @@ class CustomDrawer extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 80.h),
-            child: _buildLogoutButton(context),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+                logoutConfirmationDialog(context);
+              },
+              child: _buildLogoutButton(context),
+            ),
           ),
         ],
       ),

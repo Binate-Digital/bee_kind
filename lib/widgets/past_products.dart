@@ -74,7 +74,7 @@ class PastProducts extends StatelessWidget {
                 fontColor: AppColors.blackColor,
               ),
               isCurrent
-                  ? Offstage()
+                  ? SizedBox(height: 14.5.h)
                   : CustomText(
                       text:
                           "Status: ${isCancelled ? "Cancelled" : "Completed"}",

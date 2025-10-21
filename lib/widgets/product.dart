@@ -5,63 +5,75 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Product extends StatelessWidget {
-  const Product({super.key});
+  const Product({super.key, this.isOutOfStock = false});
+  final bool isOutOfStock;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 75.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: AppColors.yellow2, width: 1.w),
-              color: AppColors.whiteColor,
-              image: DecorationImage(
-                image: AssetImage(AssetsPath.product),
-                fit: BoxFit.cover,
+          child: Stack(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 75.w),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: AppColors.yellow2, width: 1.w),
+                  color: AppColors.whiteColor,
+                  image: DecorationImage(
+                    image: AssetImage(AssetsPath.product),
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
-            ),
+              isOutOfStock
+                  ? Positioned(
+                      top: 10.h,
+                      left: 55.w,
+                      child: CustomText(text: "Out Of Stock"),
+                    )
+                  : Offstage(),
+            ],
           ),
         ),
         SizedBox(height: 6.h),
         SizedBox(
-          width: 140.w,
+          width: MediaQuery.of(context).size.width * 0.35,
           child: Column(
             children: [
               Row(
-            children: [
-              CustomText(
-                text: "Lorem Ipsum",
-                fontSize: 16.sp,
-                fontColor: AppColors.blackColor,
-                weight: FontWeight.bold,
-              ),
-              Spacer(),
-              Row(
                 children: [
-                  Image.asset(AssetsPath.star, width: 18.w),
                   CustomText(
-                    text: "4.8",
+                    text: "Lorem Ipsum",
                     fontSize: 16.sp,
                     fontColor: AppColors.blackColor,
+                    weight: FontWeight.bold,
+                  ),
+                  SizedBox(width: 20.w),
+                  Row(
+                    children: [
+                      Image.asset(AssetsPath.star, width: 18.w),
+                      CustomText(
+                        text: "4.8",
+                        fontSize: 16.sp,
+                        fontColor: AppColors.blackColor,
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-          SizedBox(height: 6.h),
-          Row(
-            children: [
-              CustomText(
-                text: "\$20.00",
-                fontSize: 16.sp,
-                fontColor: AppColors.yellow2,
-                weight: FontWeight.bold,
+              SizedBox(height: 6.h),
+              Row(
+                children: [
+                  CustomText(
+                    text: "\$20.00",
+                    fontSize: 16.sp,
+                    fontColor: AppColors.yellow2,
+                    weight: FontWeight.bold,
+                  ),
+                ],
               ),
-            ],
-          ),
             ],
           ),
         ),

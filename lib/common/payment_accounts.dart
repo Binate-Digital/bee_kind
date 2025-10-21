@@ -1,5 +1,5 @@
 import 'package:bee_kind/utils/app_colors.dart';
-import 'package:bee_kind/widgets/add_new_account_dialog.dart';
+import 'package:bee_kind/widgets/dialogs/add_new_account_dialog.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';

@@ -8,11 +8,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class CategoryWiseProductsList extends StatelessWidget {
   const CategoryWiseProductsList({
     super.key,
-    this.showDistance = true,
-    this.homeCategory = true,
+    this.fromHome = false,
   });
-  final bool showDistance;
-  final bool homeCategory;
+
+  final bool fromHome;
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +28,10 @@ class CategoryWiseProductsList extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (_) =>
-                    homeCategory ? StoreScreen() : SelectedProduct(),
+                    fromHome ? StoreScreen() : SelectedProduct(),
               ),
             ),
-            child: CategoryWiseProduct(showDistance: showDistance),
+            child: CategoryWiseProduct(fromHome: fromHome),
           );
         },
       ),

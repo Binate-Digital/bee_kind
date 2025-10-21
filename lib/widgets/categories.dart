@@ -10,11 +10,11 @@ class Categories extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 120.w,
+      width: 130.w,
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
+            padding: EdgeInsets.symmetric(vertical: 0.h, horizontal: 20.w),
             width: 110.w,
             height: 110.h,
             decoration: BoxDecoration(
@@ -27,10 +27,10 @@ class Categories extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 5.h),
           CustomText(
-            text: "All",
-            fontSize: 22.sp,
+            text: "Lorem",
+            fontSize: 18.sp,
             fontColor: AppColors.yellow2,
             weight: FontWeight.bold,
           ),

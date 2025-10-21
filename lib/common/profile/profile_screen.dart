@@ -9,8 +9,8 @@ import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
-import 'package:bee_kind/widgets/delete_account_confirmation_dialog.dart';
-import 'package:bee_kind/widgets/logout_confirmation_dialog.dart';
+import 'package:bee_kind/widgets/dialogs/delete_account_confirmation_dialog.dart';
+import 'package:bee_kind/widgets/dialogs/logout_confirmation_dialog.dart';
 import 'package:bee_kind/widgets/profile_options_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -69,13 +69,15 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 20.h),
-            ProfileOption(
-              onTap: () {},
-              isNotification: true,
-              image: AssetsPath.notifications,
-              text: "Hide Profile",
-            ),
+            if (isVendor) ...[
+              SizedBox(height: 20.h),
+              ProfileOption(
+                onTap: () {},
+                isNotification: true,
+                image: AssetsPath.notifications,
+                text: "Hide Profile",
+              ),
+            ],
             SizedBox(height: 30.h),
             ProfileOption(
               onTap: () {

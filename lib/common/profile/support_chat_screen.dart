@@ -235,6 +235,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                       onTap: _sendMessage,
                       child: Image.asset(AssetsPath.send),
                     ),
+                    SizedBox(width: 10.w),
                   ],
                 ),
               ),

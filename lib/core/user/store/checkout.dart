@@ -215,7 +215,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ListView.builder(
               physics: NeverScrollableScrollPhysics(),
               padding: EdgeInsets.symmetric(horizontal: 20.w),
-              itemCount: 4,
+              itemCount: 6,
               shrinkWrap: true,
               itemBuilder: (context, index) {
                 return CartItem();

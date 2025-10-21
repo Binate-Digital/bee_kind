@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HorizontalStepper extends StatefulWidget {
-  final int currentStep;
+  final int currentStep; // 👈 Now 1-based: e.g. 1 = first step
   final List<String> steps;
   final Color activeColor;
   final Color inactiveColor;
@@ -27,7 +27,7 @@ class _HorizontalStepperState extends State<HorizontalStepper> {
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
       child: Column(
         children: [
-          // Step indicators and connectors
+          // === Step icons row ===
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(widget.steps.length, (index) {
@@ -41,15 +41,17 @@ class _HorizontalStepperState extends State<HorizontalStepper> {
             }),
           ),
           SizedBox(height: 12.h),
-          // Ticks and connectors row
+
+          // === Connectors + Circles ===
           Stack(
             children: [
-              // Dotted connectors
+              // Dotted connectors between steps
               Positioned.fill(
                 left: 5.w,
                 child: Row(
                   children: List.generate(widget.steps.length - 1, (index) {
-                    final isCompleted = index < widget.currentStep;
+                    // ✅ Adjust for 1-based indexing
+                    final isCompleted = (index + 1) < widget.currentStep;
                     return Container(
                       width: 135.w,
                       margin: EdgeInsets.symmetric(horizontal: 18.w),
@@ -65,13 +67,17 @@ class _HorizontalStepperState extends State<HorizontalStepper> {
                   }),
                 ),
               ),
-              // Ticks row
+
+              // Step circles row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(widget.steps.length, (index) {
-                  final isActive = index <= widget.currentStep;
-                  final isCompleted = index <= widget.currentStep;
-                  return _buildStepCircle(index, isActive, isCompleted);
+                  // ✅ 1-based index logic
+                  final stepNumber = index + 1;
+                  final isActive = stepNumber <= widget.currentStep;
+                  final isCompleted = stepNumber < widget.currentStep;
+
+                  return _buildStepCircle(stepNumber, isActive, isCompleted);
                 }),
               ),
             ],
@@ -81,14 +87,14 @@ class _HorizontalStepperState extends State<HorizontalStepper> {
     );
   }
 
-  Widget _buildStepCircle(int index, bool isActive, bool isCompleted) {
+  Widget _buildStepCircle(int stepNumber, bool isActive, bool isCompleted) {
     return Container(
       width: 32.w,
       height: 32.h,
       decoration: BoxDecoration(
-        color: isCompleted
+        color: isCompleted || isActive
             ? widget.activeColor
-            : (isActive ? widget.activeColor : widget.inactiveColor),
+            : widget.inactiveColor,
         border: Border.all(
           color: isActive ? widget.activeColor : widget.inactiveColor,
           width: 2.w,
@@ -96,10 +102,13 @@ class _HorizontalStepperState extends State<HorizontalStepper> {
         shape: BoxShape.circle,
       ),
       child: Center(
-        child: 
-        isCompleted
-            ? Icon(Icons.check, size: 18.w, color: AppColors.whiteColor)
-            : Icon(Icons.check, size: 18.w, color: widget.inactiveColor),
+        child: Icon(
+          Icons.check,
+          size: 18.w,
+          color: isCompleted || isActive
+              ? AppColors.whiteColor
+              : widget.inactiveColor,
+        ),
       ),
     );
   }

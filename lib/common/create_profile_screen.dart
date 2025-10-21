@@ -1,27 +1,24 @@
-// import 'dart:developer';
 import 'dart:developer';
 import 'dart:io';
 import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/app_constants.dart';
-// import 'package:bee_kind/utils/app_constants.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/validation.dart';
+import 'package:bee_kind/widgets/bottom_sheets/image_picker_bottom_sheet.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_drop_down.dart';
 import 'package:bee_kind/widgets/custom_slider.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
-import 'package:bee_kind/widgets/success_dialog.dart';
+import 'package:bee_kind/widgets/dialogs/error_dialog.dart';
+import 'package:bee_kind/widgets/dialogs/success_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:map_location_picker/map_location_picker.dart';
-// import 'package:map_location_picker/map_location_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 String globalEmail = "";
 
@@ -79,94 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   File? profileImage;
   File? businessLisence;
-  final ImagePicker imagePicker = ImagePicker();
 
-  void showImagePickerBottomSheet({
-    required String title,
-    required Function(File file) onImagePicked,
-    required String target,
-  }) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20.r),
-            topRight: Radius.circular(20.r),
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 20.h),
-              GestureDetector(
-                onTap: () async {
-                  Navigator.pop(context);
-                  final file = await pickImage(
-                    context: context,
-                    source: ImageSource.camera,
-                    target: target,
-                  );
-                  if (file != null) onImagePicked(file);
-                },
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 12.h,
-                    horizontal: 20.w,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.camera_alt, color: AppColors.yellow2),
-                      SizedBox(width: 15.w),
-                      CustomText(
-                        text: "Take Photo",
-                        fontSize: 18.sp,
-                        fontColor: AppColors.blackColor,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              GestureDetector(
-                onTap: () async {
-                  Navigator.pop(context);
-                  final file = await pickImage(
-                    context: context,
-                    source: ImageSource.gallery,
-                    target: target,
-                  );
-                  if (file != null) onImagePicked(file);
-                },
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 12.h,
-                    horizontal: 20.w,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.photo_library, color: AppColors.yellow2),
-                      SizedBox(width: 15.w),
-                      CustomText(
-                        text: "Choose from Gallery",
-                        fontSize: 18.sp,
-                        fontColor: AppColors.blackColor,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 20.h),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget buildImageContainer({
     required File? image,
@@ -227,90 +137,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<File?> pickImage({
-    required BuildContext context,
-    required ImageSource source,
-    required String target, // e.g., "profile" or "license"
-  }) async {
-    try {
-      // Handle camera permission
-      if (source == ImageSource.camera) {
-        final permissionStatus = await Permission.camera.request();
-        if (!permissionStatus.isGranted) {
-          showPermissionDeniedDialog('Camera');
-          return null;
-        }
-      }
-
-      final XFile? image = await imagePicker.pickImage(
-        source: source,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        return File(image.path);
-      } else {
-        debugPrint("No $target image selected");
-      }
-    } catch (e) {
-      debugPrint("Error picking $target image: $e");
-      errorSnackBar("Failed to upload $target image");
-    }
-    return null;
-  }
-
-  void showPermissionDeniedDialog(String permission) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: CustomText(text: "Permission Required"),
-        content: CustomText(
-          text:
-              "Please grant $permission permission to select a profile picture",
-          fontSize: 14.sp,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: CustomText(text: "Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              openAppSettings();
-            },
-            child: CustomText(text: "Open Settings"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void errorSnackBar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        backgroundColor: AppColors.yellow1,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        margin: const EdgeInsets.all(20),
-        duration: const Duration(milliseconds: 1500),
-      ),
-    );
-  }
-
   bool _validateForm() {
     bool isValid = true;
     setState(() {
@@ -336,12 +162,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!isChecked) {
         errorSnackBar(
           "You must consent to upload your ID and confirm your age.",
+          context,
         );
         isValid = false;
       }
       if (!isDeliveryChecked) {
         errorSnackBar(
           "You must confirm that your delivery address matches your ID address.",
+          context,
         );
         isValid = false;
       }
@@ -501,6 +329,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 GestureDetector(
                   onTap: () {
                     showImagePickerBottomSheet(
+                      context: context,
                       title: "Upload Profile Picture",
                       target: "profile",
                       onImagePicked: (file) =>
@@ -515,7 +344,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
 
-                CustomText(text: "Upload Image", fontSize: 22.sp),
+                CustomText(text: isVendor ? "Upload Business Logo" : "Upload Image", fontSize: 22.sp),
                 SizedBox(height: 30.h),
                 if (!isVendor) ...[
                   Row(
@@ -1084,6 +913,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       GestureDetector(
                         onTap: () {
                           showImagePickerBottomSheet(
+                            context: context,
                             title: "Upload Business License",
                             target: "license",
                             onImagePicked: (file) =>

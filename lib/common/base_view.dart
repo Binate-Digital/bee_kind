@@ -4,7 +4,8 @@ import 'package:bee_kind/core/user/home_screen.dart';
 import 'package:bee_kind/core/user/store/cart_screen.dart';
 import 'package:bee_kind/core/user/store/orders_list_screen.dart';
 import 'package:bee_kind/core/vendor/dashboard_screen.dart';
-import 'package:bee_kind/core/vendor/store/my_orders_screen.dart';
+import 'package:bee_kind/core/vendor/my_orders_screen.dart';
+import 'package:bee_kind/core/vendor/order_requests_screen.dart';
 import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
@@ -44,9 +45,9 @@ class _BaseViewState extends State<BaseView> {
         selectedImage: AssetsPath.home,
       ),
       BottomTab(
-        label: isVendor ? "Order Requests" : 'My Cart',
-        image: AssetsPath.orderRequests,
-        selectedImage: AssetsPath.orderRequests,
+        label: isVendor ? "Order\nRequests" : 'My Cart',
+        image: isVendor ? AssetsPath.orderRequests : AssetsPath.mycart,
+        selectedImage: isVendor ? AssetsPath.orderRequests : AssetsPath.mycart,
       ),
       BottomTab(
         label: 'My Orders',
@@ -54,9 +55,9 @@ class _BaseViewState extends State<BaseView> {
         selectedImage: AssetsPath.orders,
       ),
       BottomTab(
-        label: 'Profile',
-        image: AssetsPath.profile,
-        selectedImage: AssetsPath.profile,
+        label: 'Settings',
+        image: AssetsPath.settings,
+        selectedImage: AssetsPath.settings,
       ),
     ];
     // Set initial index from widget parameter if provided
@@ -79,7 +80,7 @@ class _BaseViewState extends State<BaseView> {
   Widget _buildCurrentScreen() {
     final screens = [
       isVendor ? DashboardScreen() : UserHomeScreen(),
-      isVendor ? Placeholder() : CartScreen(),
+      isVendor ? OrderRequestsScreen() : CartScreen(),
       isVendor ? MyOrdersScreen() : OrdersListScreen(),
       ProfileViewScreen(),
     ];

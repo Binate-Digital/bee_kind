@@ -47,6 +47,8 @@ class AssetsPath {
   static const String myProducts = "assets/images/icons/my-products.png";
   static const String orderRequests = "assets/images/icons/order-requests.png";
   static const String mySubsciptions = "assets/images/icons/my-subscription.png";
+  static const String deliveryPerson = "assets/images/icons/delivery-person.png";
+  static const String settings = "assets/images/icons/settings.png";
 
   ///placeholder image
   static const String placeholder = "assets/images/placeholder.png";

@@ -57,7 +57,7 @@ class OrderItem extends StatelessWidget {
             children: [
               CustomText(
                 text: "Lorem Ipsum",
-                fontSize: fontSize ?? 20.sp,
+                fontSize: fontSize ?? 18.sp,
                 weight: FontWeight.bold,
               ),
               SizedBox(height: 10.h),

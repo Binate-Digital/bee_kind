@@ -88,158 +88,164 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Form(
           key: formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              // Static Profile Picture
-              Container(
-                width: 150.w,
-                height: 150.h,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.yellow1.withValues(alpha: 0.05),
-                  border: Border.all(color: AppColors.yellow2, width: 2),
+          child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // Static Profile Picture
+                Container(
+                  width: 150.w,
+                  height: 150.h,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.yellow1.withValues(alpha: 0.05),
+                    border: Border.all(color: AppColors.yellow2, width: 2),
+                  ),
+                  margin: EdgeInsets.symmetric(vertical: 15.h),
+                  child: Transform.scale(
+                    scale: 0.4,
+                    child: Image.asset(AssetsPath.camera),
+                  ),
                 ),
-                margin: EdgeInsets.symmetric(vertical: 15.h),
-                child: Transform.scale(
-                  scale: 0.4,
-                  child: Image.asset(AssetsPath.camera),
-                ),
-              ),
-              CustomText(text: "Profile Picture", fontSize: 18.sp),
+                CustomText(text: "Profile Picture", fontSize: 18.sp),
 
-              // First Name and Last Name
-              Padding(
-                padding: EdgeInsets.only(top: 30.h, bottom: 15.h),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // First Name and Last Name
+                Padding(
+                  padding: EdgeInsets.only(top: 30.h, bottom: 15.h),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 180.w,
+                        child: CustomTextField(
+                          hint: "First Name",
+                          controller: firstNameController,
+                          validator: (value) =>
+                              Validation.validateName(value, "First Name"),
+                          prefxicon: AssetsPath.person,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 180.w,
+                        child: CustomTextField(
+                          hint: "Last Name",
+                          controller: lastNameController,
+                          validator: (value) =>
+                              Validation.validateName(value, "Last Name"),
+                          prefxicon: AssetsPath.person,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Email
+                Padding(
+                  padding: EdgeInsets.only(bottom: 15.h),
+                  child: CustomTextField(
+                    hint: "Email",
+                    controller: emailController,
+                    validator: (value) => Validation.validateEmail(value),
+                    prefxicon: AssetsPath.email,
+                  ),
+                ),
+
+                // Phone
+                Padding(
+                  padding: EdgeInsets.only(bottom: 15.h),
+                  child: CustomTextField(
+                    hint: "Phone",
+                    controller: phoneController,
+                    validator: (value) => Validation.validatePhoneNumber(value),
+                    prefxicon: AssetsPath.phone,
+                  ),
+                ),
+
+                // Date of Birth with error
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 180.w,
-                      child: CustomTextField(
-                        hint: "First Name",
-                        controller: firstNameController,
-                        validator: (value) =>
-                            Validation.validateName(value, "First Name"),
-                        prefxicon: AssetsPath.person,
+                    GestureDetector(
+                      onTap: () => selectDate(context),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 20.h,
+                          horizontal: 15.w,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.yellow1.withValues(alpha: 0.2),
+                          border: Border.all(
+                            color: AppColors.yellow2,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(30.r),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CustomText(
+                              text: formatDate(selectedDate),
+                              fontColor: AppColors.yellow2,
+                              fontSize: 18.sp,
+                            ),
+                            Image.asset(AssetsPath.calendar, width: 18.w),
+                          ],
+                        ),
                       ),
                     ),
-                    SizedBox(
-                      width: 180.w,
-                      child: CustomTextField(
-                        hint: "Last Name",
-                        controller: lastNameController,
-                        validator: (value) =>
-                            Validation.validateName(value, "Last Name"),
-                        prefxicon: AssetsPath.person,
+                    Visibility(
+                      visible: dateError.isNotEmpty,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 4.h, left: 15.w),
+                        child: CustomText(
+                          text: dateError,
+                          fontColor: AppColors.errorColor,
+                          fontSize: 14.sp,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
 
-              // Email
-              Padding(
-                padding: EdgeInsets.only(bottom: 15.h),
-                child: CustomTextField(
-                  hint: "Email",
-                  controller: emailController,
-                  validator: (value) => Validation.validateEmail(value),
-                  prefxicon: AssetsPath.email,
+                // Gender with error
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 15.h),
+                      child: CustomDropdown(
+                        items: ["Male", "Female", "Other", "Prefer not to say"],
+                        initialValue: selectedGender,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedGender = value;
+                            genderError =
+                                ""; // Clear error when selection changes
+                          });
+                        },
+                        hintText: "Gender",
+                      ),
+                    ),
+                    Visibility(
+                      visible: genderError.isNotEmpty,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom: 10.h,
+                          left: 15.w,
+                          top: 4.h,
+                        ),
+                        child: CustomText(
+                          text: genderError,
+                          fontColor: AppColors.errorColor,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-
-              // Phone
-              Padding(
-                padding: EdgeInsets.only(bottom: 15.h),
-                child: CustomTextField(
-                  hint: "Phone",
-                  controller: phoneController,
-                  validator: (value) => Validation.validatePhoneNumber(value),
-                  prefxicon: AssetsPath.phone,
-                ),
-              ),
-
-              // Date of Birth with error
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () => selectDate(context),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 20.h,
-                        horizontal: 15.w,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.yellow1.withValues(alpha: 0.2),
-                        border: Border.all(color: AppColors.yellow2, width: 1),
-                        borderRadius: BorderRadius.circular(30.r),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          CustomText(
-                            text: formatDate(selectedDate),
-                            fontColor: AppColors.yellow2,
-                            fontSize: 18.sp,
-                          ),
-                          Image.asset(AssetsPath.calendar, width: 18.w),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Visibility(
-                    visible: dateError.isNotEmpty,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 4.h, left: 15.w),
-                      child: CustomText(
-                        text: dateError,
-                        fontColor: AppColors.errorColor,
-                        fontSize: 14.sp,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              // Gender with error
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: 15.h),
-                    child: CustomDropdown(
-                      items: ["Male", "Female", "Other", "Prefer not to say"],
-                      initialValue: selectedGender,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedGender = value;
-                          genderError =
-                              ""; // Clear error when selection changes
-                        });
-                      },
-                      hintText: "Gender",
-                    ),
-                  ),
-                  Visibility(
-                    visible: genderError.isNotEmpty,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: 10.h,
-                        left: 15.w,
-                        top: 4.h,
-                      ),
-                      child: CustomText(
-                        text: genderError,
-                        fontColor: AppColors.errorColor,
-                        fontSize: 14.sp,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

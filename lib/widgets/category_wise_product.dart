@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CategoryWiseProduct extends StatelessWidget {
-  const CategoryWiseProduct({super.key, this.showDistance = true});
-  final bool showDistance;
+  const CategoryWiseProduct({super.key, this.fromHome = false});
+  final bool fromHome;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +40,9 @@ class CategoryWiseProduct extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(bottom: 40.h),
+          Container(
+            width: 160.w,
+            padding: EdgeInsets.only(bottom: 20.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -51,7 +52,12 @@ class CategoryWiseProduct extends StatelessWidget {
                   weight: FontWeight.bold,
                 ),
                 SizedBox(height: 10.h),
-                CustomText(text: "Store: Lorem ipsum store", fontSize: 18.sp),
+                CustomText(
+                  text: fromHome ? "Store: Lorem ipsum store" : "10mg",
+                  fontSize: 18.sp,
+                  maxLines: 3,
+                  textAlign: TextAlign.start,
+                ),
               ],
             ),
           ),
@@ -66,7 +72,7 @@ class CategoryWiseProduct extends StatelessWidget {
                 weight: FontWeight.bold,
               ),
               SizedBox(height: 55.h),
-              showDistance
+              fromHome
                   ? CustomText(
                       text: "14 Miles Away",
                       fontSize: 16.sp,

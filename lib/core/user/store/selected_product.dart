@@ -5,7 +5,7 @@ import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
-import 'package:bee_kind/widgets/delete_product_dialog.dart';
+import 'package:bee_kind/widgets/dialogs/delete_product_dialog.dart';
 import 'package:bee_kind/widgets/review_card.dart';
 import 'package:bee_kind/widgets/sliding_toggle_button.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -331,7 +331,7 @@ class _SelectedProductState extends State<SelectedProduct> {
                   ),
                   CustomText(
                     text: "\$20.00",
-                    fontSize: 16.sp,
+                    fontSize: 20.sp,
                     fontColor: AppColors.yellow2,
                     weight: FontWeight.bold,
                   ),
@@ -355,7 +355,7 @@ class _SelectedProductState extends State<SelectedProduct> {
                   if (!widget.isVendor)
                     CustomText(
                       text: "In Stock",
-                      fontSize: 22.sp,
+                      fontSize: 18.sp,
                       fontColor: AppColors.blackColor,
                       weight: FontWeight.bold,
                     ),
@@ -372,7 +372,7 @@ class _SelectedProductState extends State<SelectedProduct> {
                       verticalPadding: 15.h,
                       onTap: () => showStockBottomSheet(context),
                       text: "Select Inventory Options",
-                      fontSize: 15.sp,
+                      fontSize: 14.sp,
                     ),
                   ],
                 ),

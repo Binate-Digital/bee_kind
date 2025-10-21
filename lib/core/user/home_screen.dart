@@ -265,7 +265,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 )
               : SizedBox(width: 90.w, height: 163.h),
           Container(
-            margin: EdgeInsets.only(top: 235.h),
+            margin: EdgeInsets.only(top: 200.h),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -287,21 +287,19 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   height: 140.h,
                   child: ListView.builder(
                     itemCount: 6,
+                    padding: EdgeInsets.zero,
                     physics: BouncingScrollPhysics(),
                     scrollDirection: Axis.horizontal,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 5.w),
-                        child: GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CategoryWiseProductsList(),
-                            ),
+                      return GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CategoryWiseProductsList(fromHome: true),
                           ),
-                          child: Categories(),
                         ),
+                        child: Categories(),
                       );
                     },
                   ),

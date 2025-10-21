@@ -10,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class StoreScreen extends StatelessWidget {
-  const StoreScreen({super.key});
+  StoreScreen({super.key});
+
+  final List<bool> stock = [true, false, false];
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +112,8 @@ class StoreScreen extends StatelessWidget {
                                     child: CustomText(
                                       text: "Lorem ipsum road street 26",
                                       fontSize: 18.sp,
+                                      maxLines: 2,
+                                      textAlign: TextAlign.start,
                                       overflow: TextOverflow.ellipsis,
                                       fontColor: AppColors.blackColor,
                                     ),
@@ -177,7 +181,7 @@ class StoreScreen extends StatelessWidget {
                   SizedBox(
                     height: 195.h,
                     child: ListView.builder(
-                      itemCount: 3,
+                      itemCount: stock.length,
                       scrollDirection: Axis.horizontal,
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
@@ -192,7 +196,7 @@ class StoreScreen extends StatelessWidget {
                                 ),
                               );
                             },
-                            child: Product(),
+                            child: Product(isOutOfStock: stock[index]),
                           ),
                         );
                       },
@@ -211,26 +215,22 @@ class StoreScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 10.h),
                   SizedBox(
-                    height: 195.h,
+                    height: 150.h,
                     child: ListView.builder(
-                      itemCount: 3,
+                      itemCount: 6,
+                      padding: EdgeInsets.zero,
                       scrollDirection: Axis.horizontal,
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 5.w),
-                          child: GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CategoryWiseProductsList(
-                                  showDistance: false,
-                                  homeCategory: false,
-                                ),
-                              ),
+                        return GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  CategoryWiseProductsList(fromHome: false),
                             ),
-                            child: Categories(),
                           ),
+                          child: Categories(),
                         );
                       },
                     ),

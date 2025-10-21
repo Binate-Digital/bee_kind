@@ -1,7 +1,7 @@
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
-import 'package:bee_kind/widgets/response_dialog.dart';
+import 'package:bee_kind/widgets/dialogs/response_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

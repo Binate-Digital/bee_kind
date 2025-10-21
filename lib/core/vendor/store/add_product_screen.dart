@@ -6,7 +6,7 @@ import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_drop_down.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
-import 'package:bee_kind/widgets/discount_dialog.dart';
+import 'package:bee_kind/widgets/dialogs/discount_dialog.dart';
 import 'package:bee_kind/widgets/image_picking_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

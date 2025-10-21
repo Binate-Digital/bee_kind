@@ -47,7 +47,7 @@ class _CartItemState extends State<CartItem> {
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.symmetric(vertical: 55.h, horizontal: 55.w),
+            padding: EdgeInsets.symmetric(vertical: 40.h, horizontal: 40.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(color: AppColors.yellow2, width: 1.w),
@@ -63,7 +63,7 @@ class _CartItemState extends State<CartItem> {
             children: [
               CustomText(
                 text: "Lorem Ipsum",
-                fontSize: 20.sp,
+                fontSize: 18.sp,
                 weight: FontWeight.bold,
               ),
               SizedBox(height: 20.h),
@@ -126,7 +126,7 @@ class _CartItemState extends State<CartItem> {
               ),
             ],
           ),
-          SizedBox(width: 70.w),
+          SizedBox(width: 110.w),
           Column(
             children: [
               CustomText(
@@ -135,7 +135,7 @@ class _CartItemState extends State<CartItem> {
                 fontColor: AppColors.yellow2,
                 weight: FontWeight.bold,
               ),
-              SizedBox(height: 40.h),
+              SizedBox(height: 20.h),
               GestureDetector(
                 onTap: () {
                   showModalBottomSheet(
@@ -195,7 +195,7 @@ class _CartItemState extends State<CartItem> {
                     },
                   );
                 },
-                child: Image.asset(AssetsPath.delete, width: 20.w),
+                child: Image.asset(AssetsPath.delete, width: 18.w),
               ),
             ],
           ),
