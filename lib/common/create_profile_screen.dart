@@ -23,7 +23,8 @@ import 'package:map_location_picker/map_location_picker.dart';
 String globalEmail = "";
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, this.isEdit = false});
+  final bool isEdit;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -76,7 +77,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   File? profileImage;
   File? businessLisence;
-
 
   Widget buildImageContainer({
     required File? image,
@@ -307,10 +307,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onTap: () {
             if (_validateForm()) {
               debugPrint("validated!");
-              showSuccessDialog(context, isVendor: isVendor);
+              widget.isEdit
+                  ? Navigator.pop(context)
+                  : showSuccessDialog(context, isVendor: isVendor);
             }
           },
-          text: "Continue",
+          text: widget.isEdit ? "Edit Profile" : "Continue",
           borderColor: AppColors.blackColor,
           verticalPadding: 20.h,
           horizontalPadding: 10.w,
@@ -344,7 +346,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
 
-                CustomText(text: isVendor ? "Upload Business Logo" : "Upload Image", fontSize: 22.sp),
+                CustomText(
+                  text: isVendor ? "Upload Business Logo" : "Upload Image",
+                  fontSize: 22.sp,
+                ),
                 SizedBox(height: 30.h),
                 if (!isVendor) ...[
                   Row(

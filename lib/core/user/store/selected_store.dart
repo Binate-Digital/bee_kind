@@ -192,7 +192,7 @@ class StoreScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => SelectedProduct(),
+                                  builder: (_) => SelectedProduct(hasDiscount: true),
                                 ),
                               );
                             },

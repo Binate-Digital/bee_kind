@@ -5,7 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Products extends StatelessWidget {
-  const Products({super.key, this.showDistance = true, this.isPopular = false});
+  const Products({
+    super.key,
+    this.showDistance = true,
+    this.isPopular = false,
+  });
   final bool showDistance;
   final bool isPopular;
 

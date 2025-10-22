@@ -24,14 +24,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
   @override
   Widget build(BuildContext context) {
     return AppBarBaseView(
-      title: "Add Products",
+      title: widget.isEdit! ? "Edit Products" : "Add Products",
       button: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
         child: CustomButton(
           onTap: () {
             Navigator.pop(context);
           },
-          text: "Add Products",
+          text: widget.isEdit! ? "Edit Product" : "Add Product",
         ),
       ),
       body: Form(

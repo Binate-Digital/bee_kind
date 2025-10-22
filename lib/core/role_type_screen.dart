@@ -6,24 +6,35 @@ import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/user_location_permission.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
+import 'package:bee_kind/widgets/dialogs/error_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RoleTypeScreen extends StatefulWidget {
-  const RoleTypeScreen({super.key});
+  const RoleTypeScreen({super.key, this.showLogoutSnack = false});
+  final bool showLogoutSnack;
 
   @override
   State<RoleTypeScreen> createState() => _RoleTypeScreenState();
 }
 
 class _RoleTypeScreenState extends State<RoleTypeScreen> {
-
   final prefs = SharedPrefs();
 
-@override
+  @override
   void initState() {
     super.initState();
     UserLocation.handleLocationPermission();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((value) {
+      if (widget.showLogoutSnack) {
+        errorSnackBar("You've been logged out!", context);
+      }
+    });
   }
 
   @override
@@ -50,8 +61,8 @@ class _RoleTypeScreenState extends State<RoleTypeScreen> {
                 onTap: () async {
                   await prefs.setString('role', 'user');
                   Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => SignInScreen()));
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => SignInScreen()));
                 },
                 text: "Login As User",
                 borderColor: AppColors.blackColor,
@@ -66,8 +77,8 @@ class _RoleTypeScreenState extends State<RoleTypeScreen> {
                 onTap: () async {
                   await prefs.setString('role', 'vendor');
                   Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => SignInScreen()));
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => SignInScreen()));
                 },
                 borderColor: AppColors.blackColor,
                 text: "Login as Store Owner",

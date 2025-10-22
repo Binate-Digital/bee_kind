@@ -41,7 +41,10 @@ class OrderItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: EdgeInsets.symmetric(vertical: verticalPadding ?? 55.h, horizontal: horizontalPadding ?? 55.w),
+            padding: EdgeInsets.symmetric(
+              vertical: verticalPadding ?? 45.h,
+              horizontal: horizontalPadding ?? 45.w,
+            ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(color: AppColors.yellow2, width: 1.w),

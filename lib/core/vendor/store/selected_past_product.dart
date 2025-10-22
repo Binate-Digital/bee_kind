@@ -1,3 +1,4 @@
+import 'package:bee_kind/common/base_view.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
@@ -16,10 +17,12 @@ class SelectedOrder extends StatefulWidget {
     this.isCancelled = false,
     this.isCurrent = false,
     this.isAccepted = false,
+    this.isComplete = false,
   });
   final bool isCancelled;
   final bool isCurrent;
   final bool isAccepted;
+  final bool isComplete;
 
   @override
   State<SelectedOrder> createState() => _SelectedOrderState();
@@ -30,6 +33,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
   int currentStep = 0;
   bool isAccepted = false;
   bool isCurrent = false; // ✅ Local copy to modify dynamically
+  bool isComplete = false;
 
   final List<String> steps = [
     AssetsPath.box,
@@ -45,6 +49,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
     currentStep = widget.isCurrent ? 0 : 2;
     isAccepted = widget.isAccepted;
     isCurrent = widget.isCurrent;
+    isComplete = widget.isComplete;
   }
 
   @override
@@ -257,9 +262,10 @@ class _SelectedOrderState extends State<SelectedOrder> {
               ),
               SizedBox(height: 60.h),
 
-              // === Conditional Rendering ===
+              // === ORDER STATE LOGIC ===
+
+              // 🟥 Cancelled Orders
               if (widget.isCancelled) ...[
-                // 🟥 Cancelled Order
                 CustomText(
                   text: "Order Cancelled",
                   fontSize: 18.sp,
@@ -269,21 +275,22 @@ class _SelectedOrderState extends State<SelectedOrder> {
                 SizedBox(height: 10.h),
                 CustomText(
                   text: "Cancellation Reason",
-                  fontSize: 18.sp,
+                  fontSize: 16.sp,
                   fontColor: AppColors.blackColor,
                 ),
                 SizedBox(height: 10.h),
                 CustomText(
                   text:
-                      "Lorem ipsum dolor sit amet consectetur adipiscing elit nec est, primis sem",
-                  fontSize: 18.sp,
-                  maxLines: 3,
-                  textAlign: TextAlign.start,
+                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Primis sem.",
+                  fontSize: 16.sp,
+                  textAlign: TextAlign.center,
                   fontColor: AppColors.blackColor,
                 ),
-
-                // 🟨 Order Not Accepted Yet
-              ] else if (!isAccepted) ...[
+              ]
+              // 🟨 Order Requests (Not Yet Accepted)
+              else if (!widget.isAccepted &&
+                  !widget.isCurrent &&
+                  !widget.isComplete) ...[
                 Padding(
                   padding: EdgeInsets.only(top: 150.h),
                   child: Row(
@@ -292,15 +299,12 @@ class _SelectedOrderState extends State<SelectedOrder> {
                       CustomButton(
                         width: 160.w,
                         text: "Reject",
-                        onTap: () {
-                          errorSnackBar("Order rejected!", context);
-                        },
+                        onTap: () => errorSnackBar("Order Rejected!", context),
                         verticalPadding: 20.h,
                         gradientColors: [
                           AppColors.whiteColor,
                           AppColors.whiteColor,
                         ],
-
                         borderColor: AppColors.blackColor,
                       ),
                       CustomButton(
@@ -309,22 +313,21 @@ class _SelectedOrderState extends State<SelectedOrder> {
                         onTap: () {
                           setState(() {
                             isAccepted = true;
-                            isCurrent = true; // ✅ Start stepper flow
+                            isCurrent = true; // start flow
                             currentStep = 0;
                             text = "Ready for Pickup";
                           });
                         },
                         verticalPadding: 20.h,
                         gradientColors: [AppColors.yellow1, AppColors.yellow2],
-
                         borderColor: AppColors.blackColor,
                       ),
                     ],
                   ),
                 ),
-
-                // 🟩 Accepted & Current (Normal flow)
-              ] else if (isCurrent) ...[
+              ]
+              // 🟩 Current Orders (Active Step Flow)
+              else if (widget.isCurrent && !widget.isComplete) ...[
                 HorizontalStepper(currentStep: currentStep, steps: steps),
                 SizedBox(height: 20.h),
                 CustomText(
@@ -358,17 +361,32 @@ class _SelectedOrderState extends State<SelectedOrder> {
                       if (confirmResult == true) {
                         setState(() {
                           currentStep = 3;
+                          text = "Go to past orders";
                         });
                       }
                     } else if (currentStep >= 3) {
-                      errorSnackBar("Order already delivered!", context);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BaseView(currIndex: 2),
+                        ),
+                      );
                     }
                   },
                 ),
-
-                // ✅ Completed Order
-              ] else ...[
+              ]
+              // 🟦 Completed Orders (Past Orders)
+              else if (widget.isComplete) ...[
                 HorizontalStepper(currentStep: steps.length, steps: steps),
+                SizedBox(height: 20.h),
+                Center(
+                  child: CustomText(
+                    text: "Order Completed",
+                    fontSize: 18.sp,
+                    fontColor: AppColors.blackColor,
+                    weight: FontWeight.bold,
+                  ),
+                ),
               ],
             ],
           ),

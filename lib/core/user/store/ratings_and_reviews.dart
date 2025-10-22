@@ -228,17 +228,19 @@ class _RatingScreenState extends State<RatingScreen> {
                     )
                   : Offstage(),
               GridView.builder(
-                itemCount: 15,
+                itemCount: 5,
                 shrinkWrap: true,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {},
-                    child: ReviewCard(isVendor: widget.isVendor),
+                  return ReviewCard(
+                    isVendor: widget.isVendor,
+                    vendorResponse: index % 2 == 0
+                        ? "Thank you for your feedback! We’re glad you enjoyed the experience."
+                        : "No response from vendor", // only some reviews have responses
                   );
                 },
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  mainAxisExtent: 145.h,
+                  mainAxisExtent: 200.h,
                   crossAxisSpacing: 10.w,
                   crossAxisCount: 1,
                 ),

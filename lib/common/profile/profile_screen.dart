@@ -85,7 +85,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        isVendor ? ProfileScreen() : EditProfileScreen(),
+                        isVendor ? ProfileScreen(isEdit: true) : EditProfileScreen(),
                   ),
                 );
               },

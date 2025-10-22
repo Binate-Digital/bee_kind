@@ -1,11 +1,11 @@
 import 'package:bee_kind/core/user/store/ratings_and_reviews.dart';
 import 'package:bee_kind/common/base_view.dart';
-import 'package:bee_kind/core/vendor/store/add_product_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
+import 'package:bee_kind/widgets/bottom_sheets/show_options_bottom_sheet.dart';
+import 'package:bee_kind/widgets/bottom_sheets/show_stock_bottom_sheet.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
-import 'package:bee_kind/widgets/dialogs/delete_product_dialog.dart';
 import 'package:bee_kind/widgets/review_card.dart';
 import 'package:bee_kind/widgets/sliding_toggle_button.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -13,8 +13,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SelectedProduct extends StatefulWidget {
-  const SelectedProduct({super.key, this.isVendor = false});
+  const SelectedProduct({
+    super.key,
+    this.isVendor = false,
+    this.hasDiscount = false,
+  });
   final bool isVendor;
+  final bool hasDiscount;
 
   @override
   State<SelectedProduct> createState() => _SelectedProductState();
@@ -29,180 +34,6 @@ class _SelectedProductState extends State<SelectedProduct> {
 
   String selectedOption = "In Stock";
   final List<String> options = ["In Stock", "Low Stock", "Out Of Stock"];
-
-  void showOptionsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.whiteColor,
-      isScrollControlled: false,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20.h),
-                  GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => AddProductScreen(isEdit: true),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Image.asset(AssetsPath.edit, width: 20.w),
-                        SizedBox(width: 10.w),
-                        CustomText(
-                          text: "Edit Product",
-                          weight: FontWeight.bold,
-                          fontSize: 18.sp,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-                  Container(
-                    height: 1.h,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      deleteProductDialog(context);
-                    },
-                    child: Row(
-                      children: [
-                        Image.asset(AssetsPath.delete, width: 20.w),
-                        SizedBox(width: 10.w),
-                        CustomText(
-                          text: "Delete Product",
-                          weight: FontWeight.bold,
-                          fontSize: 18.sp,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void showStockBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.whiteColor,
-      isScrollControlled: false,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (BuildContext context) {
-        String tempSelected = selectedOption; // temp for live selection
-
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 15.w),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 50.w,
-                        height: 5.h,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20.h),
-                    CustomText(
-                      text: "Select Stock Status",
-                      fontSize: 20.sp,
-                      weight: FontWeight.bold,
-                      fontColor: Colors.black,
-                    ),
-                    SizedBox(height: 15.h),
-
-                    // ==== Options List ====
-                    ...options.map((option) {
-                      final isSelected = option == tempSelected;
-
-                      return GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          // Update bottom sheet UI instantly
-                          setModalState(() {
-                            tempSelected = option;
-                          });
-
-                          // Also update parent when closing
-                          setState(() {
-                            selectedOption = option;
-                          });
-                          Navigator.pop(context);
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 10.h,
-                            horizontal: 8.w,
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 25.w,
-                                height: 25.w,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: isSelected
-                                      ? AppColors.yellow2
-                                      : AppColors.whiteColor,
-                                  border: Border.all(
-                                    color: AppColors.yellow2,
-                                    width: 1.5,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 10.w),
-                              CustomText(
-                                text: option,
-                                fontColor: Colors.black,
-                                fontSize: 16.sp,
-                                weight: FontWeight.w500,
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-
-                    SizedBox(height: 25.h),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 
   void increment() {
     setState(() {
@@ -298,14 +129,14 @@ class _SelectedProductState extends State<SelectedProduct> {
                             color: AppColors.whiteColor,
                           ),
                         ),
-                        GestureDetector(
+                       widget.isVendor ? GestureDetector(
                           onTap: () => showOptionsBottomSheet(context),
                           child: Icon(
                             Icons.more_vert,
                             color: AppColors.whiteColor,
                             size: 30.r,
                           ),
-                        ),
+                        ) : Offstage(),
                       ],
                     ),
                   ),
@@ -329,12 +160,31 @@ class _SelectedProductState extends State<SelectedProduct> {
                     fontColor: AppColors.blackColor,
                     weight: FontWeight.bold,
                   ),
-                  CustomText(
-                    text: "\$20.00",
-                    fontSize: 20.sp,
-                    fontColor: AppColors.yellow2,
-                    weight: FontWeight.bold,
-                  ),
+                  widget.hasDiscount
+                      ? Row(
+                          children: [
+                            CustomText(
+                              text: "\$10.00",
+                              fontSize: 20.sp,
+                              fontColor: AppColors.blackColor,
+                              weight: FontWeight.bold,
+                            ),
+                            SizedBox(width: 10.w),
+                            CustomText(
+                              text: "\$20.00",
+                              lineThrough: true,
+                              fontSize: 20.sp,
+                              fontColor: AppColors.yellow2,
+                              weight: FontWeight.bold,
+                            ),
+                          ],
+                        )
+                      : CustomText(
+                          text: "\$20.00",
+                          fontSize: 20.sp,
+                          fontColor: AppColors.yellow2,
+                          weight: FontWeight.bold,
+                        ),
                 ],
               ),
               SizedBox(height: 10.h),
@@ -370,7 +220,14 @@ class _SelectedProductState extends State<SelectedProduct> {
                     CustomButton(
                       width: 230.w,
                       verticalPadding: 15.h,
-                      onTap: () => showStockBottomSheet(context),
+                      onTap: () async {
+                        selectedOption = await showStockBottomSheet(
+                          context,
+                          selectedOption,
+                          options,
+                        );
+                        debugPrint("option: $selectedOption");
+                      },
                       text: "Select Inventory Options",
                       fontSize: 14.sp,
                     ),

@@ -7,9 +7,16 @@ import 'package:flutter_rating/flutter_rating.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ReviewCard extends StatefulWidget {
-  const ReviewCard({super.key, this.enabled = false, this.isVendor = false});
+  const ReviewCard({
+    super.key,
+    this.enabled = false,
+    this.isVendor = false,
+    this.vendorResponse, // ✅ new field
+  });
+
   final bool enabled;
   final bool isVendor;
+  final String? vendorResponse; // ✅ vendor response text
 
   @override
   State<ReviewCard> createState() => _ReviewCardState();
@@ -21,17 +28,20 @@ class _ReviewCardState extends State<ReviewCard> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start, // ✅ keep left-aligned
       children: [
+        // === Reviewer Info Row ===
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
+                // Profile Image
                 Container(
-                  width: 60.w,
-                  height: 60.h,
-                  decoration: BoxDecoration(shape: BoxShape.circle),
+                  width: 40.w,
+                  height: 40.h,
                   margin: EdgeInsets.symmetric(vertical: 15.h),
+                  decoration: BoxDecoration(shape: BoxShape.circle),
                   child: ClipOval(
                     child: Container(
                       decoration: BoxDecoration(
@@ -46,67 +56,101 @@ class _ReviewCardState extends State<ReviewCard> {
                   ),
                 ),
                 SizedBox(width: 10.w),
-                Column(
-                  children: [
-                    CustomText(
-                      text: "John Smith",
-                      fontSize: 18.sp,
-                      fontColor: AppColors.blackColor,
-                      weight: FontWeight.bold,
-                    ),
-                    widget.isVendor
-                        ? GestureDetector(
-                            onTap: () => showRespondDialog(context),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 8.h,
-                              ),
-                              margin: EdgeInsets.only(top: 10.h),
-                              decoration: BoxDecoration(
-                                color: AppColors.yellow2,
-                                borderRadius: BorderRadius.circular(20.r),
-                              ),
-                              child: CustomText(
-                                text: "Respond",
-                                fontColor: Colors.black,
-                                fontSize: 16.sp,
-                              ),
-                            ),
-                          )
-                        : Offstage(),
-                  ],
+
+                // Name + Respond button (if vendor)
+                CustomText(
+                  text: "John Smith",
+                  fontSize: 18.sp,
+                  fontColor: AppColors.blackColor,
+                  weight: FontWeight.bold,
                 ),
+                widget.isVendor && (widget.vendorResponse == null)
+                    ? GestureDetector(
+                        onTap: () => showRespondDialog(context),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 8.h,
+                          ),
+                          margin: EdgeInsets.only(top: 10.h),
+                          decoration: BoxDecoration(
+                            color: AppColors.yellow2,
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: CustomText(
+                            text: "Respond",
+                            fontColor: Colors.black,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                      )
+                    : Offstage(),
               ],
             ),
+
+            // Rating Stars
             StarRating(
-              size: 25.r,
+              size: 20.r,
               rating: rating,
               color: AppColors.yellow2,
               borderColor: Colors.grey,
               allowHalfRating: true,
               starCount: 5,
-              onRatingChanged: (rating) => widget.enabled
-                  ? setState(() {
-                      this.rating = rating;
-                    })
-                  : null,
+              onRatingChanged: (rating) =>
+                  widget.enabled ? setState(() => this.rating = rating) : null,
             ),
           ],
         ),
+
+        // === Review Text ===
         SizedBox(
-          width: 390.w,
+          width: double.infinity,
           child: CustomText(
             text:
                 "Lorem ipsum dolor sit amet consectetur adipiscing elit porta, leo erat parturient arcu.",
             fontSize: 16.sp,
-            overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.start,
             maxLines: 2,
             fontColor: AppColors.blackColor,
           ),
         ),
-        SizedBox(height: 20.w),
+
+        // === Vendor Response Section ===
+        if (widget.vendorResponse != null) ...[
+          SizedBox(height: 10.h),
+          Container(
+            width: double.infinity,
+            // height: 120.h,
+            decoration: BoxDecoration(
+              color: AppColors.yellow1.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(15.r),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    text: "Vendor:",
+                    fontSize: 15.sp,
+                    fontColor: AppColors.blackColor,
+                    weight: FontWeight.bold,
+                  ),
+                  SizedBox(height: 6.h),
+                  CustomText(
+                    text: widget.vendorResponse!,
+                    fontSize: 15.sp,
+                    fontColor: AppColors.blackColor,
+                    maxLines: 3,
+                    textAlign: TextAlign.start,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+
+        SizedBox(height: 20.h),
         Container(
           decoration: BoxDecoration(
             color: AppColors.blackColor.withValues(alpha: 0.3),
@@ -117,4 +161,5 @@ class _ReviewCardState extends State<ReviewCard> {
       ],
     );
   }
+
 }

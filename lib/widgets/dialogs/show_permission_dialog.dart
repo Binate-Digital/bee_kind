@@ -11,6 +11,9 @@ void showPermissionDeniedDialog(String permission, BuildContext context) {
         content: CustomText(
           text:
               "Please grant $permission permission to select a profile picture",
+              maxLines: 3,
+              lineSpacing: 1.5,
+              textAlign: TextAlign.start,
           fontSize: 14.sp,
         ),
         actions: [

@@ -1,4 +1,4 @@
-import 'package:bee_kind/core/user/store/selected_store.dart';
+import 'package:bee_kind/common/base_view.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart'; // Add your assets path
 import 'package:bee_kind/widgets/custom_button.dart';
@@ -89,11 +89,11 @@ Future<void> successfulOrderDialog(BuildContext context) async {
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => StoreScreen()),
+                      MaterialPageRoute(builder: (context) => BaseView(currIndex: 2)),
                     );
                     // Add your navigation logic here
                   },
-                  text: "Back To Store",
+                  text: "Track Your Order",
                   borderColor: AppColors.blackColor,
                   verticalPadding: 18.h,
                   horizontalPadding: 10.w,

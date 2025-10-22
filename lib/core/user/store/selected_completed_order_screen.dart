@@ -28,8 +28,7 @@ class _SelectedCompletedOrderScreenState
   final List<String> _steps = [
     AssetsPath.box,
     AssetsPath.truck,
-    AssetsPath.carry,
-    AssetsPath.openBox,
+    AssetsPath.carry
   ];
 
   void nextStep() {

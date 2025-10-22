@@ -24,7 +24,7 @@ class LiveTracking extends StatefulWidget {
 class _LiveTrackingState extends State<LiveTracking> {
   final int currentStep = 5;
   GoogleMapController? mapController;
-  // Changed to 2 to show active states
+
   final Map steps = {
     "images": [AssetsPath.box, AssetsPath.truck, AssetsPath.carry],
   };
@@ -47,6 +47,58 @@ class _LiveTrackingState extends State<LiveTracking> {
     "time": ["03:20 PM", "02:45 PM", "12:30 PM", "10:15 AM", "09:00 AM"],
   };
 
+  Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
+
+  /// === Example coordinates (pickup & destination) ===
+  final LatLng pickupLatLng = const LatLng(
+    24.861714457432807,
+    67.07000228675905,
+  );
+  final LatLng dropoffLatLng = const LatLng(
+    24.873714457432807,
+    67.08200228675905,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMapMarkersAndPolyline();
+  }
+
+  Future<void> _loadMapMarkersAndPolyline() async {
+    final BitmapDescriptor customIcon = await BitmapDescriptor.asset(
+      const ImageConfiguration(size: Size(50, 55)),
+      AssetsPath.marker,
+    );
+
+    setState(() {
+      _markers = {
+        Marker(
+          markerId: const MarkerId("pickup"),
+          position: pickupLatLng,
+          infoWindow: const InfoWindow(title: "Pickup Location"),
+          icon: customIcon,
+        ),
+        Marker(
+          markerId: const MarkerId("dropoff"),
+          position: dropoffLatLng,
+          infoWindow: const InfoWindow(title: "Dropoff Location"),
+          icon: customIcon,
+        ),
+      };
+
+      _polylines = {
+        Polyline(
+          polylineId: const PolylineId("route"),
+          color: AppColors.yellow2,
+          width: 5,
+          points: [pickupLatLng, dropoffLatLng],
+        ),
+      };
+    });
+  }
+
   Future<void> launchCaller(String phoneNumber) async {
     final Uri url = Uri(scheme: 'tel', path: phoneNumber);
     if (await canLaunchUrl(url)) {
@@ -64,7 +116,7 @@ class _LiveTrackingState extends State<LiveTracking> {
         decoration: BoxDecoration(color: AppColors.whiteColor),
         height: 250.h,
         child: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Column(
@@ -96,7 +148,7 @@ class _LiveTrackingState extends State<LiveTracking> {
                           fontSize: 18.sp,
                         ),
                         CustomText(
-                          text: "Car: White toyota camry ALX 415",
+                          text: "Car: White Toyota Camry ALX 415",
                           fontSize: 18.sp,
                         ),
                         CustomText(
@@ -142,10 +194,16 @@ class _LiveTrackingState extends State<LiveTracking> {
       ),
       body: CustomGoogleMap(
         onMapCreated: (controller) => mapController = controller,
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(24.861714457432807, 67.07000228675905),
-          zoom: 15,
-        ),
+        initialCameraPosition: CameraPosition(target: pickupLatLng, zoom: 14),
+        markers: _markers,
+        circles: const {},
+        polylines: _polylines,
+        myLocationEnabled: false,
+        myLocationButtonEnabled: true,
+        zoomControlsEnabled: false,
+        mapToolbarEnabled: false,
+        compassEnabled: true,
+        buildingsEnabled: true,
         widget: Container(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Column(

@@ -1,9 +1,11 @@
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
+import 'package:bee_kind/utils/validation.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 Future<bool?> showAddDeliveryPersonnelDialog(BuildContext context) async {
@@ -130,6 +132,10 @@ Future<bool?> showAddDeliveryPersonnelDialog(BuildContext context) async {
                         CustomTextField(
                           hint: "Enter phone number",
                           keyboardType: TextInputType.phone,
+                          inputFormatters: [
+                            USPhoneNumberFormatter(),
+                            LengthLimitingTextInputFormatter(16),
+                          ],
                           controller: phoneNumberController,
                         ),
 

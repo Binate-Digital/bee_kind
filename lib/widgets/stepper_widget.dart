@@ -1,9 +1,10 @@
 import 'package:bee_kind/utils/app_colors.dart';
+import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HorizontalStepper extends StatefulWidget {
-  final int currentStep; // 👈 Now 1-based: e.g. 1 = first step
+  final int currentStep; // 👈 1-based index: 1 = first step
   final List<String> steps;
   final Color activeColor;
   final Color inactiveColor;
@@ -21,13 +22,38 @@ class HorizontalStepper extends StatefulWidget {
 }
 
 class _HorizontalStepperState extends State<HorizontalStepper> {
+  final List<String> stepLabels = [
+    "Ready for pick up",
+    "Dispatched",
+    "Delivered",
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
       child: Column(
         children: [
-          // === Step icons row ===
+          // === Step Labels (above icons) ===
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(stepLabels.length, (index) {
+              return SizedBox(
+                width: 100.w,
+                child: CustomText(
+                  text: stepLabels[index],
+                  textAlign: TextAlign.end,
+                  fontColor: AppColors.blackColor,
+                  fontSize: 13.sp,
+                  weight: FontWeight.w500,
+                ),
+              );
+            }),
+          ),
+
+          SizedBox(height: 10.h),
+
+          // === Step Icons Row ===
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(widget.steps.length, (index) {
@@ -40,17 +66,17 @@ class _HorizontalStepperState extends State<HorizontalStepper> {
               );
             }),
           ),
+
           SizedBox(height: 12.h),
 
           // === Connectors + Circles ===
           Stack(
             children: [
-              // Dotted connectors between steps
+              // Dotted connectors
               Positioned.fill(
                 left: 5.w,
                 child: Row(
                   children: List.generate(widget.steps.length - 1, (index) {
-                    // ✅ Adjust for 1-based indexing
                     final isCompleted = (index + 1) < widget.currentStep;
                     return Container(
                       width: 135.w,
@@ -68,11 +94,10 @@ class _HorizontalStepperState extends State<HorizontalStepper> {
                 ),
               ),
 
-              // Step circles row
+              // Step circles
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(widget.steps.length, (index) {
-                  // ✅ 1-based index logic
                   final stepNumber = index + 1;
                   final isActive = stepNumber <= widget.currentStep;
                   final isCompleted = stepNumber < widget.currentStep;

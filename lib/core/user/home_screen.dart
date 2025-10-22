@@ -265,9 +265,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 )
               : SizedBox(width: 90.w, height: 163.h),
           Container(
-            margin: EdgeInsets.only(top: 200.h),
+            margin: EdgeInsets.only(top: 170.h),
+            padding: EdgeInsets.symmetric(vertical: 20.h),
+            color: AppColors.whiteColor,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
                   padding: EdgeInsets.only(left: 30.w, right: 30.w),

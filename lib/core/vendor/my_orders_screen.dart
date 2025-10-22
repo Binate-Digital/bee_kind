@@ -13,7 +13,7 @@ class MyOrdersScreen extends StatefulWidget {
 }
 
 class _MyOrdersScreenState extends State<MyOrdersScreen> {
-  int selectedIndex = 0; // 0 = Current, 1 = Past
+  int selectedIndex = 1; // 0 = Current, 1 = Past
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +82,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
   Widget _buildCurrentOrders() {
     return ListView.builder(
       physics: BouncingScrollPhysics(),
-      itemCount: 10,
+      itemCount: 5,
       shrinkWrap: true,
       itemBuilder: (context, index) {
         return GestureDetector(
@@ -90,8 +90,12 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    SelectedOrder(isCancelled: false, isCurrent: true),
+                builder: (_) => SelectedOrder(
+                  isCurrent: true, // shows stepper
+                  isAccepted: true,
+                  isComplete: false,
+                  isCancelled: false,
+                ),
               ),
             );
           },
@@ -114,8 +118,12 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    SelectedOrder(isCancelled: cancelled[index], isCurrent: false),
+                builder: (_) => SelectedOrder(
+                  isComplete: true, // shows completed stepper only
+                  isCancelled: cancelled[index],
+                  isCurrent: false,
+                  isAccepted: true,
+                ),
               ),
             );
           },

@@ -16,6 +16,7 @@ class MyProductsScreen extends StatefulWidget {
 
 class _MyProductsScreenState extends State<MyProductsScreen> {
   bool isVendor = false;
+  List<bool> hasDiscount = [true, false, false, false, false];
 
   final prefs = SharedPrefs();
 
@@ -30,7 +31,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     return AppBarBaseView(
       title: "My Products",
       body: ListView.builder(
-        itemCount: 5,
+        itemCount: hasDiscount.length,
         shrinkWrap: true,
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         itemBuilder: (context, index) {
@@ -40,7 +41,10 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => SelectedProduct(isVendor: isVendor),
+                  builder: (_) => SelectedProduct(
+                    isVendor: isVendor,
+                    hasDiscount: hasDiscount[index],
+                  ),
                 ),
               );
             },

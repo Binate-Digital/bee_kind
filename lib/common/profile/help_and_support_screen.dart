@@ -54,7 +54,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
             SizedBox(height: 40.h),
             CustomButton(
               borderColor: AppColors.blackColor,
-              onTap: () {},
+              onTap: () => Navigator.pop(context),
               text: "Send",
             ),
           ],

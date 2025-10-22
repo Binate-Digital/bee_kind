@@ -79,7 +79,7 @@ Future<void> addNewAccountDialog(BuildContext context) async {
                     child: CustomTextField(hint: "Account Number"),
                   ),
 
-                  SizedBox(height: 30.h),
+                  SizedBox(height: 20.h),
 
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -88,13 +88,19 @@ Future<void> addNewAccountDialog(BuildContext context) async {
                         Expanded(
                           child: Padding(
                             padding: EdgeInsets.only(right: 15.w),
-                            child: CustomTextField(hint: "Exp Date"),
+                            child: CustomTextField(
+                              hint: "Exp Date",
+                              keyboardType: TextInputType.number,
+                            ),
                           ),
                         ),
                         Expanded(
                           child: Padding(
                             padding: EdgeInsets.only(left: 15.w),
-                            child: CustomTextField(hint: "CVV"),
+                            child: CustomTextField(
+                              hint: "CVV",
+                              keyboardType: TextInputType.number,
+                            ),
                           ),
                         ),
                       ],

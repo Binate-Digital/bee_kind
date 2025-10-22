@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 class Validation {
   // Phone number regex (basic international format)
   static final RegExp phoneRegex = RegExp(
-    r'^\+?1?[-.\s]?\(?[1-9]\d{2}\)?[-.\s]?\d{3}[-.\s]?\d{4}$',
-  );
+  r'^\+?\d{0,3}?[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}$',
+);
 
   // ignore: non_constant_identifier_names
   static String? validateName(String? value, String? Name) {
@@ -102,16 +102,16 @@ class Validation {
   }
 
   static String? validatePhoneNumber(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Phone number can't be empty.";
-    }
-
-    if (!phoneRegex.hasMatch(value)) {
-      return "Please enter a valid phone number.";
-    }
-
-    return null;
+  if (value == null || value.trim().isEmpty) {
+    return "Phone number can't be empty.";
   }
+
+  if (!phoneRegex.hasMatch(value.trim())) {
+    return "Please enter a valid phone number.";
+  }
+
+  return null;
+}
 
   static String extractDigits(String formattedPhone) {
     return formattedPhone.replaceAll(RegExp(r'[^\d]'), '');

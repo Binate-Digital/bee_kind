@@ -76,7 +76,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       Padding(
         padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 20.w),
         child: CustomButton(
-          onTap: () {},
+          onTap: () => Navigator.pop(context),
           text: "Save",
           borderColor: AppColors.blackColor,
           verticalPadding: 20.h,

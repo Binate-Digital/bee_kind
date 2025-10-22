@@ -119,6 +119,7 @@ class CustomDrawer extends StatelessWidget {
                         icon: AssetsPath.myProducts,
                         title: "My Products",
                         onTap: () {
+                          Navigator.pop(context);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -132,6 +133,7 @@ class CustomDrawer extends StatelessWidget {
                         icon: AssetsPath.orders,
                         title: "Order History",
                         onTap: () {
+                          Navigator.pop(context);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -147,6 +149,7 @@ class CustomDrawer extends StatelessWidget {
                         icon: AssetsPath.mySubsciptions,
                         title: "My Subscriptions",
                         onTap: () {
+                          Navigator.pop(context);
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (_) => PackagesScreen()),
@@ -159,6 +162,7 @@ class CustomDrawer extends StatelessWidget {
                   icon: AssetsPath.payment,
                   title: "Payment Accounts",
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -172,6 +176,7 @@ class CustomDrawer extends StatelessWidget {
                   icon: AssetsPath.terms,
                   title: "Terms & Conditions",
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -187,6 +192,7 @@ class CustomDrawer extends StatelessWidget {
                   icon: AssetsPath.privacy,
                   title: "Privacy Policy",
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(

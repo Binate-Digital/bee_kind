@@ -5,6 +5,7 @@ class CustomGoogleMap extends StatelessWidget {
   final CameraPosition initialCameraPosition;
   final Set<Marker> markers;
   final Set<Circle> circles;
+  final Set<Polyline> polylines;
   final bool myLocationEnabled;
   final bool myLocationButtonEnabled;
   final bool zoomControlsEnabled;
@@ -20,6 +21,7 @@ class CustomGoogleMap extends StatelessWidget {
     required this.initialCameraPosition,
     this.markers = const {},
     this.circles = const {},
+    this.polylines = const {},
     this.myLocationEnabled = false,
     this.myLocationButtonEnabled = true,
     this.zoomControlsEnabled = false,
@@ -39,6 +41,7 @@ class CustomGoogleMap extends StatelessWidget {
           initialCameraPosition: initialCameraPosition,
           markers: markers,
           circles: circles,
+          polylines: polylines,
           myLocationEnabled: myLocationEnabled,
           myLocationButtonEnabled: myLocationButtonEnabled,
           zoomControlsEnabled: zoomControlsEnabled,

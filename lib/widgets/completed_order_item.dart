@@ -34,7 +34,7 @@ class _CompletedOrderItemState extends State<CompletedOrderItem> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: EdgeInsets.symmetric(vertical: 55.h, horizontal: 55.w),
+            padding: EdgeInsets.symmetric(vertical: 45.h, horizontal: 45.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(color: AppColors.yellow2, width: 1.w),
@@ -50,7 +50,7 @@ class _CompletedOrderItemState extends State<CompletedOrderItem> {
             children: [
               CustomText(
                 text: "Lorem Ipsum",
-                fontSize: 20.sp,
+                fontSize: 18.sp,
                 weight: FontWeight.bold,
               ),
               SizedBox(height: 10.h),
