@@ -216,18 +216,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       initialTime: TimeOfDay.now(),
       builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppColors.yellow2,
-              onPrimary: AppColors.whiteColor,
-              onSurface: AppColors.blackColor,
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: ColorScheme.light(
+                primary: AppColors.yellow2,
+                onPrimary: AppColors.whiteColor,
+                onSurface: AppColors.blackColor,
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(foregroundColor: AppColors.yellow2),
+              ),
             ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(foregroundColor: AppColors.yellow2),
-            ),
+            child: child!,
           ),
-          child: child!,
         );
       },
     );
@@ -564,119 +567,116 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
 
-                if (isVendor)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      GestureDetector(
-                        onTap: () async {
-                          debugPrint("Location tapped");
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Theme(
-                                data: ThemeData.light(),
-                                child: MapLocationPicker(
-                                  config: MapLocationPickerConfig(
-                                    floatingControlsColor: AppColors.whiteColor,
-                                    floatingControlsIconColor:
-                                        AppColors.yellow1,
-                                    apiKey: AppConstants.googleApiKey,
-                                    initialPosition: const LatLng(
-                                      38.7945952,
-                                      -106.5348379,
-                                    ),
-                                    bottomCardBuilder:
-                                        (
-                                          context,
-                                          place,
-                                          places,
-                                          formattedAddress,
-                                          isLoading,
-                                          onPlaceSelected,
-                                          searchBar,
-                                        ) {
-                                          return CupertinoActionSheet(
-                                            title: const Text(
-                                              "Selected Location",
-                                            ),
-                                            actions: [
-                                              CupertinoActionSheetAction(
-                                                onPressed: onPlaceSelected,
-                                                child: Text(
-                                                  formattedAddress,
-                                                  style: TextStyle(
-                                                    fontSize: 18.sp,
-                                                    color: AppColors.blackColor,
-                                                  ),
+                SizedBox(height: 10.h),
+
+                // if (isVendor)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        debugPrint("Location tapped");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Theme(
+                              data: ThemeData.light(),
+                              child: MapLocationPicker(
+                                config: MapLocationPickerConfig(
+                                  floatingControlsColor: AppColors.whiteColor,
+                                  floatingControlsIconColor: AppColors.yellow1,
+                                  apiKey: AppConstants.googleApiKey,
+                                  initialPosition: const LatLng(
+                                    38.7945952,
+                                    -106.5348379,
+                                  ),
+                                  bottomCardBuilder:
+                                      (
+                                        context,
+                                        place,
+                                        places,
+                                        formattedAddress,
+                                        isLoading,
+                                        onPlaceSelected,
+                                        searchBar,
+                                      ) {
+                                        return CupertinoActionSheet(
+                                          title: const Text(
+                                            "Selected Location",
+                                          ),
+                                          actions: [
+                                            CupertinoActionSheetAction(
+                                              onPressed: onPlaceSelected,
+                                              child: Text(
+                                                formattedAddress,
+                                                style: TextStyle(
+                                                  fontSize: 18.sp,
+                                                  color: AppColors.blackColor,
                                                 ),
                                               ),
-                                            ],
-                                          );
-                                        },
-                                    onNext: (loc) async {
-                                      setState(() {
-                                        location = loc?.formattedAddress ?? '';
-                                        addressError =
-                                            ""; // Clear error when address is selected
-                                      });
-                                      log('address ${loc?.formattedAddress}');
-                                      log('lat ${loc?.geometry?.location.lat}');
-                                      log(
-                                        'long ${loc?.geometry?.location.lng}',
-                                      );
-                                      Navigator.pop(context);
-                                    },
-                                  ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                  onNext: (loc) async {
+                                    setState(() {
+                                      location = loc?.formattedAddress ?? '';
+                                      addressError =
+                                          ""; // Clear error when address is selected
+                                    });
+                                    log('address ${loc?.formattedAddress}');
+                                    log('lat ${loc?.geometry?.location.lat}');
+                                    log('long ${loc?.geometry?.location.lng}');
+                                    Navigator.pop(context);
+                                  },
                                 ),
                               ),
                             ),
-                          );
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 15.h,
-                            horizontal: 15.w,
                           ),
-                          decoration: BoxDecoration(
-                            color: AppColors.yellow1.withValues(alpha: 0.2),
-                            border: Border.all(
-                              color: AppColors.yellow2,
-                              width: 1,
-                            ),
-                            borderRadius: BorderRadius.circular(30.r),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 15.h,
+                          horizontal: 15.w,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.yellow1.withValues(alpha: 0.2),
+                          border: Border.all(
+                            color: AppColors.yellow2,
+                            width: 1,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: CustomText(
-                                  text: location.isEmpty
-                                      ? "Location"
-                                      : location,
-                                  textAlign: TextAlign.start,
-                                  fontColor: AppColors.yellow2,
-                                  fontSize: 18.sp,
-                                ),
+                          borderRadius: BorderRadius.circular(30.r),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: CustomText(
+                                text: location.isEmpty ? "Location" : location,
+                                textAlign: TextAlign.start,
+                                fontColor: AppColors.yellow2,
+                                fontSize: 18.sp,
                               ),
-                              Icon(Icons.location_on, color: AppColors.yellow2),
-                            ],
-                          ),
+                            ),
+                            Icon(Icons.location_on, color: AppColors.yellow2),
+                          ],
                         ),
                       ),
-                      Visibility(
-                        visible: addressError.isNotEmpty,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 4.h, left: 15.w),
-                          child: CustomText(
-                            text: addressError,
-                            fontColor: AppColors.errorColor,
-                            fontSize: 14.sp,
-                          ),
+                    ),
+                    Visibility(
+                      visible: addressError.isNotEmpty,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 4.h, left: 15.w),
+                        child: CustomText(
+                          text: addressError,
+                          fontColor: AppColors.errorColor,
+                          fontSize: 14.sp,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
 
                 SizedBox(height: 10.h),
 

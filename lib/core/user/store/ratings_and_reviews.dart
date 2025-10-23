@@ -240,7 +240,7 @@ class _RatingScreenState extends State<RatingScreen> {
                   );
                 },
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  mainAxisExtent: 200.h,
+                  mainAxisExtent: widget.isVendor ? 130.h : 200.h,
                   crossAxisSpacing: 10.w,
                   crossAxisCount: 1,
                 ),

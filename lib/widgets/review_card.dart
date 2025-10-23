@@ -57,34 +57,38 @@ class _ReviewCardState extends State<ReviewCard> {
                 ),
                 SizedBox(width: 10.w),
 
-                // Name + Respond button (if vendor)
-                CustomText(
-                  text: "John Smith",
-                  fontSize: 18.sp,
-                  fontColor: AppColors.blackColor,
-                  weight: FontWeight.bold,
+                Column(
+                  children: [
+                    // Name + Respond button (if vendor)
+                    CustomText(
+                      text: "John Smith",
+                      fontSize: 18.sp,
+                      fontColor: AppColors.blackColor,
+                      weight: FontWeight.bold,
+                    ),
+                    widget.isVendor
+                        ? GestureDetector(
+                            onTap: () => showRespondDialog(context),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 8.h,
+                              ),
+                              margin: EdgeInsets.only(top: 10.h),
+                              decoration: BoxDecoration(
+                                color: AppColors.yellow2,
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: CustomText(
+                                text: "Respond",
+                                fontColor: Colors.black,
+                                fontSize: 16.sp,
+                              ),
+                            ),
+                          )
+                        : Offstage(),
+                  ],
                 ),
-                widget.isVendor && (widget.vendorResponse == null)
-                    ? GestureDetector(
-                        onTap: () => showRespondDialog(context),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 8.h,
-                          ),
-                          margin: EdgeInsets.only(top: 10.h),
-                          decoration: BoxDecoration(
-                            color: AppColors.yellow2,
-                            borderRadius: BorderRadius.circular(20.r),
-                          ),
-                          child: CustomText(
-                            text: "Respond",
-                            fontColor: Colors.black,
-                            fontSize: 16.sp,
-                          ),
-                        ),
-                      )
-                    : Offstage(),
               ],
             ),
 
@@ -116,7 +120,7 @@ class _ReviewCardState extends State<ReviewCard> {
         ),
 
         // === Vendor Response Section ===
-        if (widget.vendorResponse != null) ...[
+        if (!widget.isVendor && widget.vendorResponse != null) ...[
           SizedBox(height: 10.h),
           Container(
             width: double.infinity,
@@ -161,5 +165,4 @@ class _ReviewCardState extends State<ReviewCard> {
       ],
     );
   }
-
 }

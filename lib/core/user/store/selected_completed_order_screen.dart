@@ -28,7 +28,7 @@ class _SelectedCompletedOrderScreenState
   final List<String> _steps = [
     AssetsPath.box,
     AssetsPath.truck,
-    AssetsPath.carry
+    AssetsPath.carry,
   ];
 
   void nextStep() {
@@ -151,86 +151,90 @@ class _SelectedCompletedOrderScreenState
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CompletedOrderItem(hideDate: true),
-            SizedBox(height: 20.h),
-            HorizontalStepper(
-              currentStep: _currentStep,
-              steps: _steps,
-              activeColor: AppColors.blackColor,
-              inactiveColor: AppColors.whiteColor,
-            ),
-            SizedBox(height: 20.h),
-            Container(color: AppColors.blackColor, height: 0.5.w),
-            SizedBox(height: 20.h),
-            CustomText(
-              text: "Order Details",
-              weight: FontWeight.bold,
-              fontSize: 22.sp,
-            ),
-            SizedBox(height: 10.h),
-            CustomText(text: "Vendor: Lorem Ipsum", fontSize: 18.sp),
-            SizedBox(height: 10.h),
-            CustomText(text: "Placed On: 01-01-2025", fontSize: 18.sp),
-            SizedBox(height: 20.h),
-            CustomText(
-              text: "Address",
-              weight: FontWeight.bold,
-              fontSize: 22.sp,
-            ),
-            SizedBox(height: 10.h),
-            CustomText(
-              text: "Lorem Ipsum Road Street 21 California USA",
-              fontSize: 18.sp,
-            ),
-            SizedBox(height: 20.h),
-            CustomText(
-              text: "Additional Notes",
-              weight: FontWeight.bold,
-              fontSize: 22.sp,
-            ),
-            SizedBox(height: 10.h),
-            CustomText(
-              text:
-                  "Lorem ipsum dolor sit amet consectetur adipiscing elit nec est, primis sem",
-              maxLines: 3,
-              textAlign: TextAlign.start,
-              fontSize: 18.sp,
-            ),
-            SizedBox(height: 20.h),
-            Container(color: AppColors.blackColor, height: 0.5.w),
-            SizedBox(height: 20.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CustomText(
-                  text: "Payment Method",
-                  weight: FontWeight.bold,
-                  fontSize: 22.sp,
-                ),
-                CustomText(text: "Master Card ****4544", fontSize: 18.sp),
-              ],
-            ),
-            SizedBox(height: 20.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CustomText(
-                  text: "Total Bill",
-                  weight: FontWeight.bold,
-                  fontSize: 22.sp,
-                ),
-                CustomText(
-                  text: "\$20.00",
-                  fontSize: 20.sp,
-                  fontColor: AppColors.yellow2,
-                  weight: FontWeight.bold,
-                ),
-              ],
-            ),
-          ],
+        child: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CompletedOrderItem(hideDate: true),
+              SizedBox(height: 20.h),
+              HorizontalStepper(
+                currentStep: _currentStep,
+                steps: _steps,
+                activeColor: AppColors.blackColor,
+                inactiveColor: AppColors.whiteColor,
+              ),
+              SizedBox(height: 20.h),
+              Container(color: AppColors.blackColor, height: 0.5.w),
+              SizedBox(height: 20.h),
+              CustomText(
+                text: "Order Details",
+                weight: FontWeight.bold,
+                fontSize: 22.sp,
+              ),
+              SizedBox(height: 10.h),
+              CustomText(text: "Vendor: Lorem Ipsum", fontSize: 18.sp),
+              SizedBox(height: 10.h),
+              CustomText(text: "Placed On: 01-01-2025", fontSize: 18.sp),
+              SizedBox(height: 20.h),
+              CustomText(
+                text: "Address",
+                weight: FontWeight.bold,
+                fontSize: 22.sp,
+              ),
+              SizedBox(height: 10.h),
+              CustomText(
+                text: "Lorem Ipsum Road Street 21 California USA",
+                fontSize: 18.sp,
+              ),
+              SizedBox(height: 20.h),
+              CustomText(
+                text: "Additional Notes",
+                weight: FontWeight.bold,
+                fontSize: 22.sp,
+              ),
+              SizedBox(height: 10.h),
+              CustomText(
+                text:
+                    "Lorem ipsum dolor sit amet consectetur adipiscing elit nec est, primis sem",
+                maxLines: 3,
+                textAlign: TextAlign.start,
+                fontSize: 18.sp,
+              ),
+              SizedBox(height: 20.h),
+              Container(color: AppColors.blackColor, height: 0.5.w),
+              SizedBox(height: 20.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(
+                    text: "Payment Method",
+                    weight: FontWeight.bold,
+                    fontSize: 22.sp,
+                  ),
+                  CustomText(text: "Master Card ****4544", fontSize: 18.sp),
+                ],
+              ),
+              SizedBox(height: 20.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(
+                    text: "Total Bill",
+                    weight: FontWeight.bold,
+                    fontSize: 22.sp,
+                  ),
+                  CustomText(
+                    text: "\$20.00",
+                    fontSize: 20.sp,
+                    fontColor: AppColors.yellow2,
+                    weight: FontWeight.bold,
+                  ),
+                ],
+              ),
+              SizedBox(height: 200.h),
+            ],
+          ),
         ),
       ),
     );

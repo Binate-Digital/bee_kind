@@ -76,7 +76,10 @@ Future<void> addNewAccountDialog(BuildContext context) async {
 
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: CustomTextField(hint: "Account Number"),
+                    child: CustomTextField(
+                      hint: "Account Number",
+                      keyboardType: TextInputType.number,
+                    ),
                   ),
 
                   SizedBox(height: 20.h),

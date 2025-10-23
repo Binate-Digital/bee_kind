@@ -264,6 +264,8 @@ class _SelectedOrderState extends State<SelectedOrder> {
 
               // === ORDER STATE LOGIC ===
 
+              // === ORDER STATE LOGIC ===
+
               // 🟥 Cancelled Orders
               if (widget.isCancelled) ...[
                 CustomText(
@@ -288,9 +290,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                 ),
               ]
               // 🟨 Order Requests (Not Yet Accepted)
-              else if (!widget.isAccepted &&
-                  !widget.isCurrent &&
-                  !widget.isComplete) ...[
+              else if (!isAccepted && !isCurrent && !isComplete) ...[
                 Padding(
                   padding: EdgeInsets.only(top: 150.h),
                   child: Row(
@@ -313,7 +313,8 @@ class _SelectedOrderState extends State<SelectedOrder> {
                         onTap: () {
                           setState(() {
                             isAccepted = true;
-                            isCurrent = true; // start flow
+                            isCurrent =
+                                true; // ✅ Now this affects the condition below
                             currentStep = 0;
                             text = "Ready for Pickup";
                           });
@@ -327,7 +328,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                 ),
               ]
               // 🟩 Current Orders (Active Step Flow)
-              else if (widget.isCurrent && !widget.isComplete) ...[
+              else if (isCurrent && !isComplete) ...[
                 HorizontalStepper(currentStep: currentStep, steps: steps),
                 SizedBox(height: 20.h),
                 CustomText(
@@ -361,8 +362,17 @@ class _SelectedOrderState extends State<SelectedOrder> {
                       if (confirmResult == true) {
                         setState(() {
                           currentStep = 3;
-                          text = "Go to past orders";
+                          isComplete = true;
                         });
+                        Future.delayed(
+                          Duration(seconds: 1),
+                          () => Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => BaseView(currIndex: 2),
+                            ),
+                          ),
+                        );
                       }
                     } else if (currentStep >= 3) {
                       Navigator.pushReplacement(
@@ -376,7 +386,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                 ),
               ]
               // 🟦 Completed Orders (Past Orders)
-              else if (widget.isComplete) ...[
+              else if (isComplete) ...[
                 HorizontalStepper(currentStep: steps.length, steps: steps),
                 SizedBox(height: 20.h),
                 Center(

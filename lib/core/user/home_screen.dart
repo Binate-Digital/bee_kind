@@ -285,7 +285,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 ),
                 SizedBox(height: 10.h),
                 SizedBox(
-                  height: 268.h,
+                  height: 265.h,
                   child: ListView.builder(
                     itemCount: 6,
                     padding: EdgeInsets.zero,
