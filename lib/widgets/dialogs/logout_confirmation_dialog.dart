@@ -113,13 +113,16 @@ Future<void> logoutConfirmationDialog(BuildContext context) async {
                     width: 160.w,
                     onTap: () {
                       errorSnackBar("You've logged out!", context);
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => RoleTypeScreen(showLogoutSnack: true),
-                        ),
-                        (route) => false,
-                      );
+                      Future.delayed(Duration(seconds: 1), () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                RoleTypeScreen(showLogoutSnack: false),
+                          ),
+                          (route) => false,
+                        );
+                      });
                     },
                     text: "Logout",
                   ),
