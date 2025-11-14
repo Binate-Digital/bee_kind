@@ -84,8 +84,9 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        isVendor ? ProfileScreen(isEdit: true) : EditProfileScreen(),
+                    builder: (context) => isVendor
+                        ? CreateProfileScreen(isEdit: true)
+                        : EditProfileScreen(),
                   ),
                 );
               },

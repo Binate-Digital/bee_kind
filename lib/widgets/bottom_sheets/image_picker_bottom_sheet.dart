@@ -16,75 +16,84 @@ void showImagePickerBottomSheet({
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
-    builder: (context) => Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.r),
-          topRight: Radius.circular(20.r),
-        ),
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 20.h),
-            GestureDetector(
-              onTap: () async {
-                Navigator.pop(context);
-                final file = await chooseImage(
-                  context: context,
-                  source: ImageSource.camera,
-                  target: target,
-                );
-                if (file != null) onImagePicked(file);
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
-                child: Row(
-                  children: [
-                    Icon(Icons.camera_alt, color: AppColors.yellow2),
-                    SizedBox(width: 15.w),
-                    CustomText(
-                      text: "Take Photo",
-                      fontSize: 18.sp,
-                      fontColor: AppColors.blackColor,
-                    ),
-                  ],
-                ),
-              ),
+    builder:
+        (context) => Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20.r),
+              topRight: Radius.circular(20.r),
             ),
-
-            GestureDetector(
-              onTap: () async {
-                Navigator.pop(context);
-                final file = await chooseImage(
-                  context: context,
-                  source: ImageSource.gallery,
-                  target: target,
-                );
-                if (file != null) onImagePicked(file);
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
-                child: Row(
-                  children: [
-                    Icon(Icons.photo_library, color: AppColors.yellow2),
-                    SizedBox(width: 15.w),
-                    CustomText(
-                      text: "Choose from Gallery",
-                      fontSize: 18.sp,
-                      fontColor: AppColors.blackColor,
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 20.h),
+                InkWell(
+                  splashColor: AppColors.blackColor,
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final file = await chooseImage(
+                      context: context,
+                      source: ImageSource.camera,
+                      target: target,
+                    );
+                    if (file != null) onImagePicked(file);
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 12.h,
+                      horizontal: 20.w,
                     ),
-                  ],
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera_alt, color: AppColors.yellow2),
+                        SizedBox(width: 15.w),
+                        CustomText(
+                          text: "Take Photo",
+                          fontSize: 20.sp,
+                          fontColor: AppColors.blackColor,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            SizedBox(height: 20.h),
-          ],
+                InkWell(
+                  splashColor: AppColors.blackColor,
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final file = await chooseImage(
+                      context: context,
+                      source: ImageSource.gallery,
+                      target: target,
+                    );
+                    if (file != null) onImagePicked(file);
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 12.h,
+                      horizontal: 20.w,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.photo_library, color: AppColors.yellow2),
+                        SizedBox(width: 15.w),
+                        CustomText(
+                          text: "Choose from Gallery",
+                          fontSize: 20.sp,
+                          fontColor: AppColors.blackColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 20.h),
+              ],
+            ),
+          ),
         ),
-      ),
-    ),
   );
 }

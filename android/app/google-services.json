@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "880415272421",
+    "project_id": "beekind-71062",
+    "storage_bucket": "beekind-71062.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:880415272421:android:85dfa6b6a53e0b654ad30c",
+        "android_client_info": {
+          "package_name": "com.binatedigital.beekind"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "880415272421-dbb071alnh76nuc56nvj11j0mvjh283n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpmIvtybbRLxF_GnZSy7L1aslgLdV8wx8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "880415272421-dbb071alnh76nuc56nvj11j0mvjh283n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "880415272421-6h7lgbe6lsgqcat5g8nb52bfbrkuglvt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.binatedigital.beekind"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:880415272421:android:9d995bdf2cae8c6b4ad30c",
+        "android_client_info": {
+          "package_name": "com.binatedigital.beekind"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "880415272421-dbb071alnh76nuc56nvj11j0mvjh283n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpmIvtybbRLxF_GnZSy7L1aslgLdV8wx8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "880415272421-dbb071alnh76nuc56nvj11j0mvjh283n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "880415272421-6h7lgbe6lsgqcat5g8nb52bfbrkuglvt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.binatedigital.beekind"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

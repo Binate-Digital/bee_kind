@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:bee_kind/widgets/dialogs/error_dialog.dart';
+import 'package:bee_kind/utils/app_dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -25,8 +25,7 @@ Future<File?> chooseImage({
     }
   } catch (e) {
     debugPrint("Error picking $target image: $e");
-    errorSnackBar("Failed to upload $target image", context);
+    AppDialogs.showToast("Failed to upload $target image");
   }
   return null;
 }
-

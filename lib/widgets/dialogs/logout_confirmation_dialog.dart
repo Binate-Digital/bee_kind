@@ -1,11 +1,14 @@
 import 'package:bee_kind/core/role_type_screen.dart';
+import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/utils/app_colors.dart';
+import 'package:bee_kind/utils/app_dialogs.dart';
+import 'package:bee_kind/utils/app_navigation.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
-import 'package:bee_kind/widgets/dialogs/error_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 Future<void> logoutConfirmationDialog(BuildContext context) async {
   showDialog(
@@ -49,7 +52,7 @@ Future<void> logoutConfirmationDialog(BuildContext context) async {
                     right: 20.w,
                     top: 22.h,
                     child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => AppNavigation.navigatorPop(context),
                       child: Icon(
                         Icons.close,
                         size: 25.r,
@@ -112,17 +115,10 @@ Future<void> logoutConfirmationDialog(BuildContext context) async {
                   CustomButton(
                     width: 160.w,
                     onTap: () {
-                      errorSnackBar("You've logged out!", context);
-                      Future.delayed(Duration(seconds: 1), () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                RoleTypeScreen(showLogoutSnack: false),
-                          ),
-                          (route) => false,
-                        );
-                      });
+                      final prefs = SharedPrefs();
+                      prefs.remove(SharedPrefs.userToken);
+                      AppDialogs.showToast("You've logged out!");
+                      Get.offAll(() => RoleTypeScreen());
                     },
                     text: "Logout",
                   ),

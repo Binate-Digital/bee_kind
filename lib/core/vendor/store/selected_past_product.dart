@@ -1,10 +1,10 @@
 import 'package:bee_kind/common/base_view.dart';
 import 'package:bee_kind/utils/app_colors.dart';
+import 'package:bee_kind/utils/app_dialogs.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/dialogs/delivery_info_dialog.dart';
-import 'package:bee_kind/widgets/dialogs/error_dialog.dart';
 import 'package:bee_kind/widgets/dialogs/order_complete_confirmation_dialog.dart';
 import 'package:bee_kind/widgets/stepper_widget.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -299,7 +299,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                       CustomButton(
                         width: 160.w,
                         text: "Reject",
-                        onTap: () => errorSnackBar("Order Rejected!", context),
+                        onTap: () => AppDialogs.showToast("Order Rejected!"),
                         verticalPadding: 20.h,
                         gradientColors: [
                           AppColors.whiteColor,

@@ -1,4 +1,4 @@
-package com.example.bee_kind
+package com.binatedigital.beekind
 
 import io.flutter.embedding.android.FlutterActivity
 

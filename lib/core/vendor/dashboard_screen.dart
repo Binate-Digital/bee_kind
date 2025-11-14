@@ -153,9 +153,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   axisLine: const AxisLine(width: 1),
                   majorTickLines: const MajorTickLines(size: 4),
                   labelIntersectAction: AxisLabelIntersectAction
-                      .multipleRows, // ✅ stack labels if needed
+                      .multipleRows, //stack labels if needed
                   labelPlacement: LabelPlacement.onTicks,
-                  maximumLabels: 70, // ✅ allows more labels
+                  maximumLabels: 70, //allows more labels
                   arrangeByIndex: true,
                 ),
 

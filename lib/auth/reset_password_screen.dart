@@ -1,4 +1,3 @@
-import 'package:bee_kind/auth/sign_in_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/validation.dart';
@@ -8,32 +7,21 @@ import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import '../../controllers/auth_controller.dart'; // adjust path if needed
 
-class ResetPasswordScreen extends StatefulWidget {
+class ResetPasswordScreen extends StatelessWidget {
   const ResetPasswordScreen({super.key});
 
   @override
-  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
-}
-
-class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  TextEditingController passwordCtrl = TextEditingController();
-
-  TextEditingController confirmPasswordCtrl = TextEditingController();
-
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  bool isObscure = true;
-
-  bool isAlsoObscure = true;
-
-  @override
   Widget build(BuildContext context) {
+    final AuthController controller = Get.put(AuthController());
+
     return CustomScaffold(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Form(
-          key: formKey,
+          key: controller.resetFormKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -45,68 +33,67 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   weight: FontWeight.bold,
                 ),
               ),
-              CustomTextField(
-                hint: "Password",
-                prefxicon: AssetsPath.password,
-                controller: passwordCtrl,
-                validator: (value) => Validation.validatePassword(value),
-                isSuffixIcon: true,
-                isObscure: isObscure,
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isObscure = !isObscure;
-                    });
-                  },
-                  child: Icon(
-                    isObscure ? Icons.visibility_off : Icons.visibility,
-                    color: AppColors.blackColor.withValues(alpha: 0.4),
-                    size: 25.h,
+
+              // Password field
+              Obx(
+                () => CustomTextField(
+                  hint: "Password",
+                  prefxicon: AssetsPath.password,
+                  controller: controller.resetPasswordCtrl,
+                  validator: (value) => Validation.validatePassword(value),
+                  isSuffixIcon: true,
+                  isObscure: controller.resetIsObscure.value,
+                  suffixIcon: GestureDetector(
+                    onTap: controller.toggleResetPasswordVisibility,
+                    child: Icon(
+                      controller.resetIsObscure.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: AppColors.blackColor.withValues(alpha: 0.4),
+                      size: 25.h,
+                    ),
                   ),
                 ),
               ),
               SizedBox(height: 15.h),
-              CustomTextField(
-                hint: "Confirm Password",
-                prefxicon: AssetsPath.password,
-                controller: confirmPasswordCtrl,
-                isSuffixIcon: true,
-                validator: (value) => Validation.validateConfirmPassword(
-                  value,
-                  passwordCtrl.text,
-                ),
-                isObscure: isAlsoObscure,
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isAlsoObscure = !isAlsoObscure;
-                    });
-                  },
-                  child: Icon(
-                    isAlsoObscure ? Icons.visibility_off : Icons.visibility,
-                    color: AppColors.blackColor.withValues(alpha: 0.4),
-                    size: 25.h,
+
+              // Confirm password field
+              Obx(
+                () => CustomTextField(
+                  hint: "Confirm Password",
+                  prefxicon: AssetsPath.password,
+                  controller: controller.resetConfirmPasswordCtrl,
+                  validator: (value) => Validation.validateConfirmPassword(
+                    value,
+                    controller.resetPasswordCtrl.text,
+                  ),
+                  isSuffixIcon: true,
+                  isObscure: controller.resetIsAlsoObscure.value,
+                  suffixIcon: GestureDetector(
+                    onTap: controller.toggleResetConfirmPasswordVisibility,
+                    child: Icon(
+                      controller.resetIsAlsoObscure.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: AppColors.blackColor.withValues(alpha: 0.4),
+                      size: 25.h,
+                    ),
                   ),
                 ),
               ),
               SizedBox(height: 15.h),
-              Padding(
-                padding: EdgeInsets.only(bottom: 215.h),
-                child: CustomButton(
-                  onTap: () {
-                    if (formKey.currentState!.validate()) {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (_) => SignInScreen()),
-                        (Route<dynamic> route) => false,
-                      );
-                    }
-                  },
-                  text: "Reset Password",
-                  borderColor: AppColors.blackColor,
-                  verticalPadding: 20.h,
-                  horizontalPadding: 10.w,
-                  fontSize: 18.sp,
+              Obx(
+                () => Padding(
+                  padding: EdgeInsets.only(bottom: 215.h),
+                  child: CustomButton(
+                    onTap: controller.handleResetPassword,
+                    text: "Reset Password",
+                    isLoading: controller.isLoading.value,
+                    borderColor: AppColors.blackColor,
+                    verticalPadding: 20.h,
+                    horizontalPadding: 10.w,
+                    fontSize: 18.sp,
+                  ),
                 ),
               ),
             ],

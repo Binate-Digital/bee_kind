@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class CustomButton extends StatelessWidget {
   final String? text, fontFamily;
   final bool showIcon;
+  final bool isLoading;
   final double? fontSize,
       width,
       verticalPadding,
@@ -24,6 +25,7 @@ class CustomButton extends StatelessWidget {
     this.verticalPadding,
     this.iconSize,
     this.showIcon = false,
+    this.isLoading = false,
     this.borderCircular,
     this.backgroundColor,
     this.width,
@@ -36,10 +38,11 @@ class CustomButton extends StatelessWidget {
     this.horizontalPadding,
     super.key,
   });
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       child: Container(
         width: width ?? double.infinity,
         decoration: BoxDecoration(
@@ -51,19 +54,33 @@ class CustomButton extends StatelessWidget {
           borderRadius: BorderRadius.all(
             Radius.circular(borderCircular ?? 30.r),
           ),
-          border: Border.all(color: AppColors.blackColor, width: 1.w),
+          border: Border.all(
+            color: borderColor ?? AppColors.blackColor,
+            width: 1.w,
+          ),
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: verticalPadding ?? 20.h,
             horizontal: horizontalPadding ?? 30.w,
           ),
-          child: CustomText(
-            text: text,
-            weight: FontWeight.bold,
-            fontColor: textColor ?? AppColors.blackColor,
-            fontSize: fontSize ?? 16.sp,
-            fontFamily: fontFamily ?? AppFonts.ralewayBold,
+          child: Center(
+            child: isLoading
+                ? SizedBox(
+                    width: 20.w,
+                    height: 20.w,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: AppColors.whiteColor,
+                    ),
+                  )
+                : CustomText(
+                    text: text,
+                    weight: FontWeight.bold,
+                    fontColor: textColor ?? AppColors.blackColor,
+                    fontSize: fontSize ?? 16.sp,
+                    fontFamily: fontFamily ?? AppFonts.ralewayBold,
+                  ),
           ),
         ),
       ),

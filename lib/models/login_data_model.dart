@@ -1,0 +1,27 @@
+class LoginDataModel {
+  final String email;
+  final String password;
+  final String role;
+
+  LoginDataModel({
+    required this.email,
+    required this.password,
+    required this.role,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {"email": email, "password": password, "role": role};
+  }
+
+  factory LoginDataModel.fromJson(Map<String, dynamic> json) {
+    return LoginDataModel(
+      email: json["email"] ?? "",
+      password: json["password"] ?? "",
+      role: json["role"] ?? "",
+    );
+  }
+
+  @override
+  String toString() =>
+      'LoginDataModel(email: $email, password: $password, role: "$role")';
+}

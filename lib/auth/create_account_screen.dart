@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:bee_kind/auth/pin_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/app_fonts.dart';
 import 'package:bee_kind/utils/assets_path.dart';
@@ -11,39 +9,19 @@ import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import '../../controllers/auth_controller.dart';
 
-class CreateAccountScreen extends StatefulWidget {
+class CreateAccountScreen extends StatelessWidget {
   const CreateAccountScreen({super.key});
 
   @override
-  State<CreateAccountScreen> createState() => _CreateAccountScreenState();
-}
-
-class _CreateAccountScreenState extends State<CreateAccountScreen> {
-  final TextEditingController emailCtrl = TextEditingController();
-
-  final TextEditingController passwordCtrl = TextEditingController();
-
-  final TextEditingController confirmPasswordCtrl = TextEditingController();
-
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  bool isObscure = true;
-
-  bool isAlsoObscure = true;
-
-  bool isChecked = false;
-
-  @override
-  void dispose() {
-    super.dispose();
-    emailCtrl.dispose();
-    passwordCtrl.dispose();
-    confirmPasswordCtrl.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final AuthController controller = Get.put(
+      AuthController(),
+      permanent: true,
+    );
+
     return CustomScaffold(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -57,165 +35,169 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 weight: FontWeight.bold,
               ),
             ),
+
             Form(
-              key: formKey,
+              key: controller.formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CustomTextField(
                     hint: "Email",
                     prefxicon: AssetsPath.email,
-                    controller: emailCtrl,
+                    controller: controller.emailCtrl,
                     validator: (value) => Validation.validateEmail(value),
                   ),
                   SizedBox(height: 15.h),
-                  CustomTextField(
-                    hint: "Password",
-                    prefxicon: AssetsPath.password,
-                    isSuffixIcon: true,
-                    isObscure: isObscure,
-                    validator: (value) => Validation.validatePassword(value),
-                    controller: passwordCtrl,
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isObscure = !isObscure;
-                        });
-                      },
-                      child: Icon(
-                        isObscure ? Icons.visibility_off : Icons.visibility,
-                        color: AppColors.blackColor.withValues(alpha: 0.4),
-                        size: 25.h,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 15.h),
-                  CustomTextField(
-                    hint: "Confirm Password",
-                    prefxicon: AssetsPath.password,
-                    isSuffixIcon: true,
-                    controller: confirmPasswordCtrl,
-                    validator: (value) => Validation.validateConfirmPassword(
-                      value,
-                      passwordCtrl.text,
-                    ),
-                    isObscure: isAlsoObscure,
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isAlsoObscure = !isAlsoObscure;
-                        });
-                      },
-                      child: Icon(
-                        isAlsoObscure ? Icons.visibility_off : Icons.visibility,
-                        color: AppColors.blackColor.withValues(alpha: 0.4),
-                        size: 25.h,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 15.h),
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 15.h),
-                    child: CustomButton(
-                      onTap: () {
-                        if (formKey.currentState!.validate()) {
-                          debugPrint("VALIDATION SUCCESSFUL");
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PinScreen(isAccountCreate: true),
-                            ),
-                          );
-                        } else {
-                          debugPrint("VALIDATION failed");
-                        }
-                      },
-                      text: "Sign Up",
-                      borderColor: AppColors.blackColor,
-                      verticalPadding: 20.h,
-                      horizontalPadding: 10.w,
-                      fontSize: 18.sp,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 15.h),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 40.w,
-                          child: Checkbox(
-                            value: isChecked,
-                            checkColor: AppColors.yellow2,
-                            onChanged: (value) {
-                              setState(() {
-                                isChecked = value!;
-                              });
-                            },
-                            fillColor: WidgetStateProperty.all(
-                              AppColors.yellow1.withValues(alpha: 0.2),
-                            ),
-                            side: BorderSide(
-                              color: AppColors.yellow2,
-                              width: 1,
-                            ),
-                          ),
+
+                  // Password field
+                  Obx(
+                    () => CustomTextField(
+                      hint: "Password",
+                      prefxicon: AssetsPath.password,
+                      isSuffixIcon: true,
+                      isObscure: controller.isObscure.value,
+                      validator: (value) => Validation.validatePassword(value),
+                      controller: controller.passwordCtrl,
+                      suffixIcon: GestureDetector(
+                        onTap: controller.togglePasswordVisibility,
+                        child: Icon(
+                          controller.isObscure.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColors.blackColor.withValues(alpha: 0.4),
+                          size: 25.h,
                         ),
-                        SizedBox(
-                          width: 330.w,
-                          child: RichText(
-                            softWrap: true,
-                            text: TextSpan(
-                              text: "By sign-in you agree to our ",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: AppColors.blackColor,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15.h),
+
+                  // Confirm password field
+                  Obx(
+                    () => CustomTextField(
+                      hint: "Confirm Password",
+                      prefxicon: AssetsPath.password,
+                      isSuffixIcon: true,
+                      controller: controller.confirmPasswordCtrl,
+                      validator: (value) => Validation.validateConfirmPassword(
+                        value,
+                        controller.passwordCtrl.text,
+                      ),
+                      onchange: (value) => Validation.validateConfirmPassword(
+                        value,
+                        controller.passwordCtrl.text,
+                      ),
+                      isObscure: controller.isAlsoObscure.value,
+                      suffixIcon: GestureDetector(
+                        onTap: controller.toggleConfirmPasswordVisibility,
+                        child: Icon(
+                          controller.isAlsoObscure.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColors.blackColor.withValues(alpha: 0.4),
+                          size: 25.h,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15.h),
+
+                  Obx(
+                    () => Padding(
+                      padding: EdgeInsets.only(bottom: 15.h),
+                      child: CustomButton(
+                        onTap: () => controller.handleSignUp(context),
+                        text: "Sign Up",
+                        isLoading: controller.isLoading.value,
+                        borderColor: AppColors.blackColor,
+                        verticalPadding: 20.h,
+                        horizontalPadding: 10.w,
+                        fontSize: 18.sp,
+                      ),
+                    ),
+                  ),
+
+                  // Checkbox + Terms
+                  Obx(
+                    () => Padding(
+                      padding: EdgeInsets.only(bottom: 15.h),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 40.w,
+                            child: Checkbox(
+                              value: controller.isChecked.value,
+                              checkColor: AppColors.yellow2,
+                              onChanged: controller.toggleTerms,
+                              fillColor: WidgetStateProperty.all(
+                                AppColors.yellow1.withValues(alpha: 0.2),
                               ),
-                              children: [
-                                TextSpan(
-                                  text: "Terms & Conditions",
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: AppColors.blackColor,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: " & ",
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: AppColors.blackColor,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: "Privacy Policy",
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: AppColors.blackColor,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ],
+                              side: BorderSide(
+                                color: AppColors.yellow2,
+                                width: 1,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                            width: 330.w,
+                            child: RichText(
+                              softWrap: true,
+                              text: TextSpan(
+                                text: "By sign-in you agree to our ",
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: AppColors.blackColor,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: "Terms & Conditions",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: AppColors.blackColor,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: " & ",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: AppColors.blackColor,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: "Privacy Policy",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: AppColors.blackColor,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+
                   socialLoginButton(
-                    onTap: () {},
+                    // onTap: controller.signInWithGoogle,
                     icon: AssetsPath.google,
                     buttonColor: Colors.red,
                     text: "Sign Up with Google",
                   ),
                   SizedBox(height: 20.h),
+
                   Platform.isIOS
                       ? socialLoginButton(
-                          onTap: () {},
+                          onTap: controller.signInWithApple,
                           icon: AssetsPath.apple,
                           buttonColor: AppColors.blackColor,
                           text: "Sign Up with Apple",
                         )
-                      : Offstage(),
+                      : const Offstage(),
+
                   Padding(
                     padding: EdgeInsets.only(
                       bottom: 35.h,
@@ -226,13 +208,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       children: [
                         CustomText(
                           text: "Already have an account?\t\t",
-                          fontSize: 20.sp,
+                          fontSize: 22.sp,
                         ),
                         GestureDetector(
                           onTap: () => Navigator.pop(context),
                           child: CustomText(
                             text: "Sign In",
-                            fontSize: 20.sp,
+                            fontSize: 22.sp,
                             underlined: true,
                             weight: FontWeight.bold,
                           ),

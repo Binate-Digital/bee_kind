@@ -1,4 +1,3 @@
-import 'package:bee_kind/auth/pin_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/validation.dart';
@@ -8,15 +7,16 @@ import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import '../../controllers/auth_controller.dart'; // adjust import path as needed
 
 class ForgotPasswordScreen extends StatelessWidget {
-  ForgotPasswordScreen({super.key});
-
-  final TextEditingController emailController = TextEditingController();
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  const ForgotPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final AuthController controller = Get.put(AuthController());
+
     return CustomScaffold(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -31,29 +31,31 @@ class ForgotPasswordScreen extends StatelessWidget {
                 weight: FontWeight.bold,
               ),
             ),
+
             Form(
-              key: formKey,
+              key: controller.forgotFormKey,
               child: CustomTextField(
                 hint: "Email",
                 prefxicon: AssetsPath.email,
                 validator: (value) => Validation.validateEmail(value),
-                controller: emailController,
+                controller: controller.forgotEmailCtrl,
               ),
             ),
+
             SizedBox(height: 15.h),
-            Padding(
-              padding: EdgeInsets.only(bottom: 215.h),
-              child: CustomButton(
-                onTap: () => formKey.currentState!.validate()
-                    ? Navigator.of(
-                        context,
-                      ).push(MaterialPageRoute(builder: (_) => PinScreen()))
-                    : debugPrint("invalid email error"),
-                text: "Continue",
-                borderColor: AppColors.blackColor,
-                verticalPadding: 20.h,
-                horizontalPadding: 10.w,
-                fontSize: 18.sp,
+
+            Obx(
+              () => Padding(
+                padding: EdgeInsets.only(bottom: 215.h),
+                child: CustomButton(
+                  onTap: () => controller.handleForgotPassword(context),
+                  text: "Continue",
+                  isLoading: controller.isLoading.value,
+                  borderColor: AppColors.blackColor,
+                  verticalPadding: 20.h,
+                  horizontalPadding: 10.w,
+                  fontSize: 18.sp,
+                ),
               ),
             ),
           ],

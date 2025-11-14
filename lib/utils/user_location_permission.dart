@@ -9,7 +9,7 @@ class UserLocation {
     // ✅ 1. Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      debugPrint('⚠️ Location services are disabled.');
+      debugPrint('Location services are disabled.');
       await Geolocator.openLocationSettings();
       // Give user time to enable and recheck
       await Future.delayed(const Duration(seconds: 2));
@@ -39,7 +39,7 @@ class UserLocation {
     // Denied forever
     if (permission == LocationPermission.deniedForever) {
       debugPrint(
-        '🚫 Location permission permanently denied. Opening settings...',
+        ' Location permission permanently denied. Opening settings...',
       );
       await Geolocator.openAppSettings();
       // Wait a bit and recheck
