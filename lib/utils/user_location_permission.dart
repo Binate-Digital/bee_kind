@@ -1,32 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class UserLocation {
+class UserPermissions {
   static Future<bool> handleLocationPermission() async {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // ✅ 1. Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       debugPrint('Location services are disabled.');
       await Geolocator.openLocationSettings();
-      // Give user time to enable and recheck
+
       await Future.delayed(const Duration(seconds: 2));
       serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) return false;
     }
-
-    // ✅ 2. Check existing permission status
     permission = await Geolocator.checkPermission();
 
-    // Denied (not forever)
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        debugPrint('⚠️ Location permission denied. Opening app settings...');
+        debugPrint('Location permission denied. Opening app settings...');
         await Geolocator.openAppSettings();
-        // Wait for user to return and recheck
+
         await Future.delayed(const Duration(seconds: 2));
         permission = await Geolocator.checkPermission();
         if (permission == LocationPermission.denied ||
@@ -51,7 +48,6 @@ class UserLocation {
       }
     }
 
-    // ✅ 3. Permission granted
     return true;
   }
 
@@ -65,5 +61,23 @@ class UserLocation {
       // ignore: deprecated_member_use
       desiredAccuracy: LocationAccuracy.high,
     );
+  }
+
+  static Future<void> requestCameraAndMicrophonePermission() async {
+    final cameraStatus = await Permission.camera.request();
+    final microphoneStatus = await Permission.microphone.request();
+
+    if (cameraStatus.isGranted && microphoneStatus.isGranted) {
+      debugPrint('Camera and Microphone permissions granted');
+      // You can now access camera and microphone
+    } else if (cameraStatus.isDenied || microphoneStatus.isDenied) {
+      debugPrint('Camera or Microphone permissions denied');
+      // Handle denied permission (e.g., show a message, disable features)
+    } else if (cameraStatus.isPermanentlyDenied ||
+        microphoneStatus.isPermanentlyDenied) {
+      debugPrint('Camera or Microphone permissions permanently denied');
+      // Guide the user to app settings to grant permissions manually
+      openAppSettings();
+    }
   }
 }

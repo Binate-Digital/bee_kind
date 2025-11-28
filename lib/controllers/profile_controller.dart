@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:bee_kind/auth/web_view.dart';
 import 'package:bee_kind/common/base_view.dart';
-import 'package:bee_kind/models/user_profile_data_model.dart';
-import 'package:bee_kind/models/vendor_profile_data_model.dart';
+import 'package:bee_kind/models/data_models/user_profile_data_model.dart';
+import 'package:bee_kind/models/data_models/vendor_profile_data_model.dart';
 import 'package:bee_kind/services/network.dart';
 import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/utils/app_colors.dart';
@@ -27,11 +29,13 @@ class ProfileController extends GetxController {
   /// Reactive state
   RxBool isVendor = false.obs;
   RxBool isLoading = false.obs;
-  Map<String, dynamic> location = {
-    "type": "Point",
-    "coordinates": [67.0152705, 24.8109828],
-    "address": "Dolmen Mall, Block 4 Clifton, Karachi, 75600",
-  };
+  RxBool isVerifyLoading = false.obs;
+  Map<String, dynamic> location = {};
+  // = {
+  //   "type": "Point",
+  //   "coordinates": [67.0152705, 24.8109828],
+  //   "address": "Dolmen Mall, Block 4 Clifton, Karachi, 75600",
+  // };
 
   /// Dropdown / date / time fields
   RxnString selectedGender = RxnString(null);
@@ -59,6 +63,7 @@ class ProfileController extends GetxController {
   RxString dateError = ''.obs;
   RxString genderError = ''.obs;
   RxString addressError = ''.obs;
+  RxString locationAddressError = ''.obs;
   RxString openTimeError = ''.obs;
   RxString closeTimeError = ''.obs;
   RxString licenseError = ''.obs;
@@ -87,6 +92,7 @@ class ProfileController extends GetxController {
   final streetAddressController = TextEditingController();
   final apartmentNumberController = TextEditingController();
   final floorNumberController = TextEditingController();
+  final RxString locationAddress = ''.obs;
 
   /// Form key
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -104,6 +110,105 @@ class ProfileController extends GetxController {
     final storedEmail = prefs.getGlobalEmail();
     if (storedEmail != null) {
       emailController.text = storedEmail;
+    }
+  }
+
+  /// Launch Veriff verification
+  Future<void> launchVeriffVerification(BuildContext context) async {
+    log("INSIDE VERIFF FUNCTION");
+    if (!isChecked.value) {
+      log(" Validation Failed: Age verification consent missing");
+      AppDialogs.showToast(
+        "You must consent to upload your ID and confirm your age.",
+      );
+      return;
+    }
+    try {
+      isVerifyLoading.value = true;
+
+      // Call your API to create Veriff session
+      final response = await network.postRequest(
+        endPoint: NetworkStrings.verifyVeriff,
+        isHeaderRequire: true,
+      );
+
+      isVerifyLoading.value = false;
+
+      if (response == null) {
+        AppDialogs.showToast("Failed to connect to verification service");
+        return;
+      }
+
+      final data = response.data;
+      log("Veriff API Response: $data");
+
+      if (data["status"] == true) {
+        final verificationUrl = data["data"]["url"];
+        final sessionId = data["data"]["sessionId"];
+
+        // Store session ID for later reference
+        await prefs.setVeriffSessionId(sessionId);
+
+        // Navigate to WebView screen
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => VeriffWebViewScreen(
+              verificationUrl: verificationUrl,
+              sessionId: sessionId,
+            ),
+          ),
+        );
+
+        // Handle the result when user returns from verification
+        if (result == true) {
+          // Verification was successful
+          AppDialogs.showToast("Verification completed successfully!");
+          isVerifyLoading.value = false;
+
+          // Check verification status with your backend
+          await _checkVerificationStatus();
+        } else {
+          // User cancelled or verification failed
+          isVerifyLoading.value = false;
+          AppDialogs.showToast("Verification was not completed");
+        }
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to start verification");
+      }
+    } catch (e) {
+      isVerifyLoading.value = false;
+      log("Veriff verification error: $e");
+      AppDialogs.showToast("Something went wrong during verification");
+    }
+  }
+
+  /// Check verification status with your backend
+  Future<void> _checkVerificationStatus() async {
+    try {
+      final sessionId = await prefs.getVeriffSessionId();
+      if (sessionId == null) return;
+
+      final response = await network.getRequest(
+        endPoint:
+            'auth/verification-status/$sessionId', // Adjust endpoint as needed
+        isHeaderRequire: true,
+      );
+
+      if (response?.data['status'] == true) {
+        final verificationData = response?.data['data'];
+        final isVerified = verificationData['isVerified'];
+        final status = verificationData['status'];
+
+        log("Verification status: $status, Verified: $isVerified");
+
+        // Update UI or state based on verification status
+        if (isVerified == true) {
+          // You might want to update a flag in your controller
+          // or refresh the user profile
+        }
+      }
+    } catch (e) {
+      log("Error checking verification status: $e");
     }
   }
 
@@ -133,6 +238,7 @@ class ProfileController extends GetxController {
 
       if (!isVendor.value) {
         // --------------------- USER MODEL ---------------------
+        log("LOcation before creating USER model: $location");
         model = UserProfileDataModel(
           firstName: firstNameController.text.trim(),
           lastName: lastNameController.text.trim(),
@@ -220,20 +326,17 @@ class ProfileController extends GetxController {
           data["message"] ?? "Profile submitted successfully",
         );
 
-        if (isVendor.value){
-          await prefs.isProfileComplete(data["data"]["user"]["isProfileCompleted"]);
-        } else {
-          await prefs.isProfileComplete(data['data']["isProfileCompleted"]);
-        }
-        
+        await prefs.isProfileComplete(
+          data["data"]["user"]["isProfileCompleted"],
+        );
 
         log("IS PROFILE COMPLETE: ${prefs.checkProfile()}");
 
-        // if (!isEdit) {
-        //   Get.offAll(() => BaseView());
-        // } else {
-        //   Get.back();
-        // }
+        if (!isEdit) {
+          Get.offAll(() => BaseView());
+        } else {
+          Get.back();
+        }
       } else {
         isLoading.value = false;
         AppDialogs.showToast(data["message"] ?? "Profile submit failed");
@@ -337,14 +440,38 @@ class ProfileController extends GetxController {
     return TimeOfDay.fromDateTime(dt).format(Get.context!);
   }
 
+  Map<String, dynamic> locationToJson(LocationResult result) {
+    return {
+      "formattedAddress": result.formattedAddress,
+      "coordinates": [result.latLng!.latitude, result.latLng!.longitude],
+      "placeId": result.placeId,
+      "locality": result.locality,
+      "country": result.country?.name,
+      "postalCode": result.postalCode,
+    };
+  }
+
   Future<void> pickLocation(context) async {
-    LocationResult result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PlacePicker(AppConstants.googleApiKey),
-      ),
-    );
-    streetAddressController.text = result.formattedAddress ?? 'Dummy Address';
-    log('location result here: $result');
+    try {
+      LocationResult result = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => PlacePicker(AppConstants.googleApiKey),
+        ),
+      );
+
+      location = {
+        "address": result.formattedAddress,
+        "coordinates": [result.latLng?.latitude, result.latLng?.longitude],
+        "type": "Point",
+        "floorNumber": floorNumberController.text.trim(),
+        "apartmentNumber": apartmentNumberController.text.trim(),
+      };
+      log("FULL RESULT: ${jsonEncode(locationToJson(result))}");
+      locationAddress.value = result.formattedAddress ?? '';
+      streetAddressController.text = result.formattedAddress ?? 'Dummy Address';
+    } catch (e) {
+      log('Error picking location: $e');
+    }
   }
 
   /// Validate form data
@@ -409,6 +536,12 @@ class ProfileController extends GetxController {
         log("Validation Failed: Address Type missing");
         isValid = false;
       }
+
+      if (locationAddress.value.isEmpty) {
+        log("Validation Failed: Location address missing");
+        locationAddressError.value = "Location address is required";
+        isValid = false;
+      }
     }
 
     // ---------------------- VENDOR VALIDATION ----------------------
@@ -427,7 +560,8 @@ class ProfileController extends GetxController {
         isValid = false;
       }
 
-      if (streetAddressController.text.trim().isEmpty) {
+      if (streetAddressController.text.trim().isEmpty ||
+          locationAddress.value.isEmpty) {
         log("Validation Failed: Street Address missing");
         addressError.value = "Street Address is required";
         isValid = false;
@@ -468,11 +602,11 @@ class ProfileController extends GetxController {
   }
 
   /// Handle Verify ID
-  void handleVerifyID(BuildContext context) {
-    if (validateForm(context)) {
-      showSuccessDialog(context);
-    }
-  }
+  // void handleVerifyID(BuildContext context) {
+  //   if (validateForm(context)) {
+  //     showSuccessDialog(context);
+  //   }
+  // }
 
   // ---------------- UI HELPERS ----------------
   Widget buildImageContainer({

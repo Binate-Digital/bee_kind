@@ -6,6 +6,10 @@ import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:bee_kind/services/network.dart';
+import 'package:bee_kind/utils/network_strings.dart';
+import 'package:bee_kind/services/shared_prefs_services.dart';
+import 'package:get/get.dart';
 
 Future<void> deleteAccountConfirmationDialog(BuildContext context) async {
   showDialog(
@@ -134,4 +138,38 @@ Future<void> deleteAccountConfirmationDialog(BuildContext context) async {
       );
     },
   );
+}
+
+Future<void> deleteUserAccount(BuildContext context) async {
+  final network = Network();
+  final prefs = SharedPrefs();
+
+  AppDialogs.progressAlertDialog(context: context);
+
+  final response = await network.deleteRequest(
+    endPoint: NetworkStrings.deleteAccount,
+    isHeaderRequire: true,
+  );
+
+  Navigator.pop(context); // close loading dialog
+
+  if (response == null) {
+    AppDialogs.showToast("Something went wrong");
+    return;
+  }
+
+  final json = response.data;
+
+  if (json["status"] == true) {
+    AppDialogs.showToast("Account deleted successfully");
+
+    // CLEAR ALL PREFS
+    await prefs.clear();
+
+    await Future.delayed(Duration(milliseconds: 800));
+
+    Get.offAll(const RoleTypeScreen());
+  } else {
+    AppDialogs.showToast(json["message"] ?? "Failed to delete account");
+  }
 }

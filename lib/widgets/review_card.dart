@@ -2,6 +2,7 @@ import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/dialogs/response_dialog.dart';
+import 'package:bee_kind/widgets/user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,12 +12,20 @@ class ReviewCard extends StatefulWidget {
     super.key,
     this.enabled = false,
     this.isVendor = false,
-    this.vendorResponse, // ✅ new field
+    this.vendorResponse,
+    this.review,
+    this.ratingCount,
+    this.userImage,
+    this.userName,
   });
 
   final bool enabled;
   final bool isVendor;
-  final String? vendorResponse; // ✅ vendor response text
+  final String? vendorResponse;
+  final String? review;
+  final int? ratingCount;
+  final String? userImage;
+  final String? userName;
 
   @override
   State<ReviewCard> createState() => _ReviewCardState();
@@ -28,7 +37,7 @@ class _ReviewCardState extends State<ReviewCard> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start, // ✅ keep left-aligned
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // === Reviewer Info Row ===
         Row(
@@ -37,23 +46,11 @@ class _ReviewCardState extends State<ReviewCard> {
             Row(
               children: [
                 // Profile Image
-                Container(
-                  width: 40.w,
-                  height: 40.h,
-                  margin: EdgeInsets.symmetric(vertical: 15.h),
-                  decoration: BoxDecoration(shape: BoxShape.circle),
-                  child: ClipOval(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.yellow2, width: 1),
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: AssetImage(AssetsPath.placeholder),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
+                UserAvatarWidget(
+                  radius: 40.r,
+                  selectedImgPath: widget.userImage,
+                  isViewOnly: true,
+                  placeHolder: AssetsPath.placeholder,
                 ),
                 SizedBox(width: 10.w),
 
@@ -61,7 +58,7 @@ class _ReviewCardState extends State<ReviewCard> {
                   children: [
                     // Name + Respond button (if vendor)
                     CustomText(
-                      text: "John Smith",
+                      text: widget.userName ?? "John Smith",
                       fontSize: 18.sp,
                       fontColor: AppColors.blackColor,
                       weight: FontWeight.bold,
@@ -95,23 +92,24 @@ class _ReviewCardState extends State<ReviewCard> {
             // Rating Stars
             StarRating(
               size: 20.r,
-              rating: rating,
+              rating: double.tryParse(widget.ratingCount.toString()) ?? 0.0,
               color: AppColors.yellow2,
               borderColor: Colors.grey,
               allowHalfRating: true,
               starCount: 5,
-              onRatingChanged: (rating) =>
-                  widget.enabled ? setState(() => this.rating = rating) : null,
+              onRatingChanged: (rate) =>
+                  widget.enabled ? setState(() => rating = rate) : null,
             ),
           ],
         ),
+
+        SizedBox(height: 10.h),
 
         // === Review Text ===
         SizedBox(
           width: double.infinity,
           child: CustomText(
-            text:
-                "Lorem ipsum dolor sit amet consectetur adipiscing elit porta, leo erat parturient arcu.",
+            text: widget.review ?? "",
             fontSize: 16.sp,
             textAlign: TextAlign.start,
             maxLines: 2,
@@ -119,9 +117,11 @@ class _ReviewCardState extends State<ReviewCard> {
           ),
         ),
 
+        SizedBox(height: 10.h),
+
         // === Vendor Response Section ===
         if (!widget.isVendor && widget.vendorResponse != null) ...[
-          SizedBox(height: 10.h),
+          SizedBox(height: 8.h),
           Container(
             width: double.infinity,
             // height: 120.h,
@@ -142,7 +142,7 @@ class _ReviewCardState extends State<ReviewCard> {
                   ),
                   SizedBox(height: 6.h),
                   CustomText(
-                    text: widget.vendorResponse!,
+                    text: widget.vendorResponse ?? "",
                     fontSize: 15.sp,
                     fontColor: AppColors.blackColor,
                     maxLines: 3,
@@ -154,7 +154,7 @@ class _ReviewCardState extends State<ReviewCard> {
           ),
         ],
 
-        SizedBox(height: 20.h),
+        SizedBox(height: 15.h),
         Container(
           decoration: BoxDecoration(
             color: AppColors.blackColor.withValues(alpha: 0.3),

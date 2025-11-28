@@ -300,7 +300,13 @@ class CreateProfileScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: CustomText(
-                                  text: "Location",
+                                  text:
+                                      controller
+                                          .locationAddress
+                                          .value
+                                          .isNotEmpty
+                                      ? controller.locationAddress.value
+                                      : "Location",
                                   textAlign: TextAlign.start,
                                   fontColor: AppColors.yellow2,
                                   fontSize: 18.sp,
@@ -312,11 +318,12 @@ class CreateProfileScreen extends StatelessWidget {
                         ),
                       ),
                       Visibility(
-                        visible: controller.addressError.value.isNotEmpty,
+                        visible:
+                            controller.locationAddressError.value.isNotEmpty,
                         child: Padding(
                           padding: EdgeInsets.only(top: 4.h, left: 15.w),
                           child: CustomText(
-                            text: controller.addressError.value,
+                            text: controller.locationAddressError.value,
                             fontColor: AppColors.errorColor,
                             fontSize: 14.sp,
                           ),
@@ -484,11 +491,18 @@ class CreateProfileScreen extends StatelessWidget {
                           ),
                       ],
                     ),
-
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 10.h),
+                      child: CustomText(
+                        text: "Delivery Radius",
+                        fontFamily: "Raleway",
+                        weight: FontWeight.bold,
+                        fontSize: 18.sp,
+                      ),
+                    ),
                     Padding(
                       padding: EdgeInsets.only(top: 30.h),
                       child: CustomSliderWidget(
-                        label: "Delivery Radius",
                         min: controller.minRadius,
                         max: controller.maxRadius,
                         initialValue: controller.currentRadius.value,
@@ -528,6 +542,7 @@ class CreateProfileScreen extends StatelessWidget {
 
                   /// -------------------- USER CONSENT --------------------
                   if (!controller.isVendor.value) ...[
+                    SizedBox(height: 10.h),
                     CustomText(
                       text: "Identity & Age Verification",
                       fontSize: 20.sp,
@@ -572,9 +587,11 @@ class CreateProfileScreen extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 10.h),
                       child: CustomButton(
-                        onTap: () => controller.handleVerifyID(context),
+                        onTap: () =>
+                            controller.launchVeriffVerification(context),
                         text: "Verify Age & Id",
                         borderColor: AppColors.blackColor,
+                        isLoading: controller.isVerifyLoading.value,
                         verticalPadding: 20.h,
                         horizontalPadding: 10.w,
                         fontSize: 18.sp,

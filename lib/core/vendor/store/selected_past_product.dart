@@ -368,18 +368,14 @@ class _SelectedOrderState extends State<SelectedOrder> {
                           Duration(seconds: 1),
                           () => Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(
-                              builder: (_) => BaseView(currIndex: 2),
-                            ),
+                            MaterialPageRoute(builder: (_) => BaseView()),
                           ),
                         );
                       }
                     } else if (currentStep >= 3) {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => BaseView(currIndex: 2),
-                        ),
+                        MaterialPageRoute(builder: (_) => BaseView()),
                       );
                     }
                   },

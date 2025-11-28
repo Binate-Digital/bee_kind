@@ -33,7 +33,7 @@ class RoleController extends GetxController {
     if (hasSelectedRole) {
       if (hasUserToken) {
         if (hasCompletedProfile) {
-          Get.offAll(() => const BaseView());
+          Get.offAll(() => BaseView());
         } else {
           Get.offAll(() => CreateProfileScreen());
         }
@@ -42,7 +42,9 @@ class RoleController extends GetxController {
       }
     }
 
-    UserLocation.handleLocationPermission();
+    UserPermissions.handleLocationPermission().then((value) {
+      UserPermissions.requestCameraAndMicrophonePermission();
+    });
   }
 
   Future<void> selectRole(String role) async {

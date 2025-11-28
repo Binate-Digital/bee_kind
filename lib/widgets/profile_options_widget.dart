@@ -24,46 +24,60 @@ class ProfileOption extends StatefulWidget {
 class _ProfileOptionState extends State<ProfileOption> {
   bool isToggled = false;
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: SizedBox(
-        height: 40.h,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Image.asset(widget.image, height: 30.h, width: 30.h),
-                    SizedBox(width: 10.w),
-                    CustomText(text: widget.text, fontSize: 18.sp),
-                  ],
-                ),
-                widget.isNotification
-                    ? slidingToggleButton(
+@override
+Widget build(BuildContext context) {
+  return InkWell(
+    onTap: widget.isNotification ? null : widget.onTap,
+    borderRadius: BorderRadius.circular(10.r),
+    child: SizedBox(
+      height: 50.h,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Image.asset(widget.image, height: 30.h, width: 30.h),
+                  SizedBox(width: 10.w),
+                  CustomText(text: widget.text, fontSize: 18.sp),
+                ],
+              ),
+
+              /// Toggle OR Navigate arrow
+              widget.isNotification
+                  ? GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        setState(() => isToggled = !isToggled);
+                      },
+                      child: slidingToggleButton(
                         value: isToggled,
                         onChanged: (newValue) {
-                          setState(() {
-                            isToggled = newValue;
-                          });
+                          setState(() => isToggled = newValue);
                         },
-                      )
-                    : Icon(Icons.arrow_forward_rounded),
-              ],
+                      ),
+                    )
+                  : GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: widget.onTap,
+                      child: Icon(Icons.arrow_forward_rounded),
+                    ),
+            ],
+          ),
+
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.blackColor.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(30.r),
             ),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.blackColor.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(30.r),
-              ),
-              height: 2.w,
-            ),
-          ],
-        ),
+            height: 2.w,
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 }

@@ -4,9 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AddressBar extends StatefulWidget {
-  const AddressBar({super.key, required this.onTap, this.isEdit = false});
+  const AddressBar({
+    super.key,
+    required this.onTap,
+    this.isEdit = false,
+    this.address,
+  });
   final VoidCallback onTap;
   final bool isEdit;
+  final String? address;
 
   @override
   State<AddressBar> createState() => _AddressBarState();
@@ -46,7 +52,7 @@ class _AddressBarState extends State<AddressBar> {
             ),
             Expanded(
               child: CustomText(
-                text: "USA New York, Lorem ipsum road",
+                text: widget.address ?? "Address not available.",
                 textAlign: TextAlign.start,
                 fontColor: AppColors.blackColor.withValues(alpha: 0.3),
                 fontSize: 18.sp,

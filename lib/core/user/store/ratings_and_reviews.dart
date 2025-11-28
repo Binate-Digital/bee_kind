@@ -1,3 +1,4 @@
+import 'package:bee_kind/models/response_models/product_reviews_response_model.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
@@ -9,21 +10,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class RatingScreen extends StatefulWidget {
-  const RatingScreen({
+// ignore: must_be_immutable
+class RatingScreen extends StatelessWidget {
+  RatingScreen({
     super.key,
     this.addReview = false,
     this.isVendor = false,
+    this.avgRating,
+    this.reviews,
+    this.totalReviews,
   });
   final bool addReview;
   final bool isVendor;
+  final dynamic avgRating;
+  final dynamic totalReviews;
+  final List<Reviews>? reviews;
 
-  @override
-  State<RatingScreen> createState() => _RatingScreenState();
-}
-
-class _RatingScreenState extends State<RatingScreen> {
   double rating = 3.00;
+
   @override
   Widget build(BuildContext context) {
     return AppBarBaseView(
@@ -36,7 +40,7 @@ class _RatingScreenState extends State<RatingScreen> {
             Padding(
               padding: EdgeInsets.only(bottom: 10.h),
               child: CustomText(
-                text: "4.8",
+                text: avgRating.toString(),
                 fontSize: 35.sp,
                 weight: FontWeight.bold,
               ),
@@ -45,14 +49,14 @@ class _RatingScreenState extends State<RatingScreen> {
               padding: EdgeInsets.only(bottom: 10.h),
               child: StarRating(
                 size: 15.r,
-                rating: 4.5,
+                rating: double.tryParse(avgRating.toString()) ?? 0.0,
                 color: AppColors.yellow2,
                 borderColor: Colors.grey,
                 allowHalfRating: true,
                 starCount: 5,
               ),
             ),
-            CustomText(text: "52 Reviews", fontSize: 18.sp),
+            CustomText(text: "$totalReviews Reviews", fontSize: 18.sp),
           ],
         ),
       ),
@@ -63,7 +67,7 @@ class _RatingScreenState extends State<RatingScreen> {
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Column(
             children: [
-              widget.addReview
+              addReview
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -228,19 +232,22 @@ class _RatingScreenState extends State<RatingScreen> {
                     )
                   : Offstage(),
               GridView.builder(
-                itemCount: 5,
+                itemCount: reviews?.length ?? 0,
                 shrinkWrap: true,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
+                  final data = reviews?[index];
                   return ReviewCard(
-                    isVendor: widget.isVendor,
-                    vendorResponse: index % 2 == 0
-                        ? "Thank you for your feedback! We’re glad you enjoyed the experience."
-                        : "No response from vendor", // only some reviews have responses
+                    isVendor: isVendor,
+                    review: data?.review ?? "",
+                    vendorResponse: data?.reply ?? "",
+                    ratingCount: data?.rating ?? 0,
+                    userName: data?.user?.fullName,
+                    userImage: data?.user?.profileImage,
                   );
                 },
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  mainAxisExtent: widget.isVendor ? 130.h : 200.h,
+                  mainAxisExtent: isVendor ? 130.h : 200.h,
                   crossAxisSpacing: 10.w,
                   crossAxisCount: 1,
                 ),

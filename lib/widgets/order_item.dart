@@ -13,12 +13,26 @@ class OrderItem extends StatelessWidget {
     this.verticalPadding,
     this.horizontalPadding,
     this.fontSize,
+
+    // 🔥 New fields
+    this.productName,
+    this.quantity,
+    this.price,
+    this.status,
+    this.imageUrl,
   });
+
   final bool hideButton;
   final VoidCallback onTap;
   final double? verticalPadding;
   final double? horizontalPadding;
   final double? fontSize;
+
+  final String? productName;
+  final int? quantity;
+  final int? price;
+  final String? status;
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +46,6 @@ class OrderItem extends StatelessWidget {
             color: AppColors.blackColor.withValues(alpha: 0.15),
             blurRadius: 25.r,
             offset: const Offset(0, 5),
-            spreadRadius: 0,
           ),
         ],
         color: AppColors.whiteColor,
@@ -40,6 +53,7 @@ class OrderItem extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          /// IMAGE
           Container(
             padding: EdgeInsets.symmetric(
               vertical: verticalPadding ?? 45.h,
@@ -50,21 +64,25 @@ class OrderItem extends StatelessWidget {
               border: Border.all(color: AppColors.yellow2, width: 1.w),
               color: AppColors.whiteColor,
               image: DecorationImage(
-                image: AssetImage(AssetsPath.product),
+                image: imageUrl != null
+                    ? NetworkImage(imageUrl!)
+                    : AssetImage(AssetsPath.product) as ImageProvider,
                 fit: BoxFit.cover,
               ),
             ),
           ),
+
+          /// MIDDLE TEXT
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomText(
-                text: "Lorem Ipsum",
+                text: productName ?? "N/A",
                 fontSize: fontSize ?? 18.sp,
                 weight: FontWeight.bold,
               ),
               SizedBox(height: 10.h),
-              CustomText(text: "Qty:01", fontSize: 18.sp),
+              CustomText(text: "Qty: ${quantity ?? '--'}", fontSize: 18.sp),
               SizedBox(height: 10.h),
               Container(
                 decoration: BoxDecoration(
@@ -73,17 +91,20 @@ class OrderItem extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: CustomText(text: "In Delivery", fontSize: 12.sp),
+                  child: CustomText(text: status ?? "N/A", fontSize: 12.sp),
                 ),
               ),
             ],
           ),
+
           SizedBox(width: 35.w),
+
+          /// PRICE + BUTTON
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               CustomText(
-                text: "\$20.00",
+                text: price != null ? "\$$price" : "\$0.00",
                 fontSize: 20.sp,
                 fontColor: AppColors.yellow2,
                 weight: FontWeight.bold,

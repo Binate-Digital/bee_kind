@@ -1,31 +1,18 @@
+import 'package:bee_kind/controllers/store_controller.dart';
+import 'package:bee_kind/models/data_models/create_order_data_model.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
-class CartItem extends StatefulWidget {
-  const CartItem({super.key});
+class CartItem extends GetView<StoreController> {
+  const CartItem({super.key, this.item, required this.index});
 
-  @override
-  State<CartItem> createState() => _CartItemState();
-}
-
-class _CartItemState extends State<CartItem> {
-  int _count = 1;
-
-  void increment() {
-    setState(() {
-      _count++;
-    });
-  }
-
-  void decrement() {
-    setState(() {
-      if (_count > 0) _count--;
-    });
-  }
+  final OrderItem? item;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -38,167 +25,224 @@ class _CartItemState extends State<CartItem> {
           BoxShadow(
             color: AppColors.blackColor.withValues(alpha: 0.15),
             blurRadius: 25.r,
-            offset: const Offset(0, 5),
-            spreadRadius: 0,
+            offset: Offset(0, 5),
           ),
         ],
         color: AppColors.whiteColor,
       ),
       child: Row(
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 40.h, horizontal: 40.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: AppColors.yellow2, width: 1.w),
-              color: AppColors.whiteColor,
-              image: DecorationImage(
-                image: AssetImage(AssetsPath.product),
-                fit: BoxFit.cover,
+          // ---------- IMAGE ----------
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20.r),
+            child: Container(
+              width: 100.w,
+              height: 100.h,
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.yellow2, width: 1.w),
               ),
+              child:
+                  (item?.productImage != null &&
+                      item!.productImage!.isNotEmpty &&
+                      item?.productImage != "null")
+                  ? Image.network(
+                      item!.productImage!,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) =>
+                          Image.asset(AssetsPath.product, fit: BoxFit.contain),
+                    )
+                  : Image.asset(AssetsPath.product, fit: BoxFit.contain),
             ),
           ),
+
           SizedBox(width: 10.w),
+
+          // ---------- NAME & QUANTITY ----------
           Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomText(
-                text: "Lorem Ipsum",
+                text: item?.productName ?? "",
                 fontSize: 18.sp,
                 weight: FontWeight.bold,
               ),
+
               SizedBox(height: 20.h),
-              Row(
-                children: [
-                  // Minus Button
-                  GestureDetector(
-                    onTap: decrement, // Use local decrement method
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: _count > 0
-                            ? AppColors.blackColor
-                            : Colors.grey[300],
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(24.r),
-                          bottomLeft: Radius.circular(24.r),
+
+              // ONLY THIS PART IS REACTIVE
+              Obx(() {
+                if (controller.orderItems!.length <= index) {
+                  return SizedBox();
+                }
+
+                final currentItem = controller.orderItems![index];
+                final qty = currentItem.quantity ?? 0;
+
+                return Row(
+                  children: [
+                    // MINUS
+                    GestureDetector(
+                      onTap: () {
+                        if (qty > 1) {
+                          final unit = currentItem.unitPrice! / qty;
+                          controller.addItems(
+                            OrderItem(
+                              productId: currentItem.productId,
+                              productName: currentItem.productName,
+                              productImage: currentItem.productImage,
+                              unitPrice: unit,
+                              quantity: qty - 1,
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: qty > 1
+                              ? AppColors.blackColor
+                              : Colors.grey[300],
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(24.r),
+                            bottomLeft: Radius.circular(24.r),
+                          ),
                         ),
-                      ),
-                      child: Center(
                         child: Icon(
                           Icons.remove,
                           size: 30.w,
-                          color: _count > 0 ? Colors.white : Colors.grey,
+                          color: qty > 1 ? Colors.white : Colors.grey,
                         ),
                       ),
                     ),
-                  ),
 
-                  // Count Display
-                  Container(
-                    width: 50.w,
-                    color: Colors.transparent,
-                    child: Center(
-                      child: CustomText(
-                        text: '$_count', // Use local _count
-                        fontSize: 22.sp,
-                        weight: FontWeight.bold,
-                        fontColor: AppColors.blackColor,
-                      ),
-                    ),
-                  ),
-
-                  // Plus Button
-                  GestureDetector(
-                    onTap: increment, // Use local increment method
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.yellow2,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(24.r),
-                          bottomRight: Radius.circular(24.r),
-                        ),
-                      ),
+                    // COUNT
+                    SizedBox(
+                      width: 50.w,
                       child: Center(
+                        child: CustomText(
+                          text: '$qty',
+                          fontSize: 22.sp,
+                          weight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                    // PLUS
+                    GestureDetector(
+                      onTap: () {
+                        final unit = currentItem.unitPrice! / qty;
+                        controller.addItems(
+                          OrderItem(
+                            productId: currentItem.productId,
+                            productName: currentItem.productName,
+                            productImage: currentItem.productImage,
+                            unitPrice: unit,
+                            quantity: qty + 1,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.yellow2,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(24.r),
+                            bottomRight: Radius.circular(24.r),
+                          ),
+                        ),
                         child: Icon(Icons.add, size: 30.w, color: Colors.white),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                );
+              }),
             ],
           ),
-          SizedBox(width: 110.w),
-          Column(
-            children: [
-              CustomText(
-                text: "\$20.00",
-                fontSize: 18.sp,
-                fontColor: AppColors.yellow2,
-                weight: FontWeight.bold,
-              ),
-              SizedBox(height: 20.h),
-              GestureDetector(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20.r),
-                        topRight: Radius.circular(20.r),
+
+          Spacer(),
+
+          // ---------- PRICE + DELETE ----------
+          Obx(() {
+            if (controller.orderItems!.length <= index) {
+              return Offstage();
+            }
+
+            final currentItem = controller.orderItems![index];
+
+            return Column(
+              children: [
+                CustomText(
+                  text:
+                      "\$${currentItem.unitPrice?.toStringAsFixed(2) ?? "0.00"}",
+                  fontSize: 18.sp,
+                  fontColor: AppColors.yellow2,
+                  weight: FontWeight.bold,
+                ),
+
+                SizedBox(height: 20.h),
+
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.r),
+                          topRight: Radius.circular(20.r),
+                        ),
                       ),
-                    ),
-                    builder: (context) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(height: 20.h),
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20.w),
-                            child: CustomText(
-                              text: "Remove from Cart?",
-                              fontSize: 22.sp,
-                              weight: FontWeight.bold,
-                            ),
+                      builder: (_) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: 30.h,
+                            horizontal: 20.w,
                           ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 20.h,
-                              horizontal: 20.h,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CustomButton(
-                                  width: 180.w,
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                  text: "Cancel",
-                                  gradientColors: [
-                                    AppColors.whiteColor,
-                                    AppColors.whiteColor,
-                                  ],
-                                  borderColor: AppColors.blackColor,
-                                ),
-                                SizedBox(width: 20.w),
-                                CustomButton(
-                                  width: 180.w,
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                  text: "Yes Remove",
-                                ),
-                              ],
-                            ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CustomText(
+                                text: "Remove this item?",
+                                fontSize: 22.sp,
+                                weight: FontWeight.bold,
+                              ),
+                              SizedBox(height: 30.h),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CustomButton(
+                                    width: 180.w,
+                                    onTap: () => Navigator.pop(context),
+                                    text: "Cancel",
+                                    gradientColors: [
+                                      AppColors.whiteColor,
+                                      AppColors.whiteColor,
+                                    ],
+                                    borderColor: AppColors.blackColor,
+                                  ),
+                                  SizedBox(width: 20.w),
+                                  CustomButton(
+                                    width: 180.w,
+                                    onTap: () {
+                                      controller.removeItem(
+                                        currentItem.productId!,
+                                      );
+                                      Navigator.pop(context);
+                                    },
+                                    text: "Remove",
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.h),
+                            ],
                           ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: Image.asset(AssetsPath.delete, width: 18.w),
-              ),
-            ],
-          ),
+                        );
+                      },
+                    );
+                  },
+                  child: Image.asset(AssetsPath.delete, width: 18.w),
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );

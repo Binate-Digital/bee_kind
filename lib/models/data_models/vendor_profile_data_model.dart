@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -37,6 +38,7 @@ class VendorProfileDataModel {
   });
 
   Map<String, dynamic> toFormDataMap() {
+    log("LOCATION IN VENDOR PROFILE MODEL: $location");
     return {
       "businessName": businessName,
       "businessDescription": businessDescription,

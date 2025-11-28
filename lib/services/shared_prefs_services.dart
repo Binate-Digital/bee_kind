@@ -75,6 +75,14 @@ class SharedPrefs {
 
   bool checkProfile() => _prefs.getBool(isProfileCompleted) ?? false;
 
+  /// ---------------- USER ----------------
+  static const user = "user";
+
+  Future<void> setuser(String user) async =>
+      await _prefs.setString(userId, user);
+
+  String? getUser() => _prefs.getString(user);
+
   /// ---------------- USER ID ----------------
   static const userId = "user_id";
 
@@ -89,4 +97,17 @@ class SharedPrefs {
       await _prefs.setString(globalEmailKey, email);
 
   String? getGlobalEmail() => _prefs.getString(globalEmailKey);
+
+  // In SharedPrefs class
+  Future<void> setVeriffSessionId(String sessionId) async {
+    await _prefs.setString('veriff_session_id', sessionId);
+  }
+
+  Future<String?> getVeriffSessionId() async {
+    return _prefs.getString('veriff_session_id');
+  }
+
+  Future<void> clearVeriffSessionId() async {
+    await _prefs.remove('veriff_session_id');
+  }
 }

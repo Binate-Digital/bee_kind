@@ -28,6 +28,7 @@ class Data {
   String? role;
   String? stripeCustomerId;
   String? userAuthToken;
+  bool? isProfileCompleted;
 
   Data({
     this.sId,
@@ -35,12 +36,14 @@ class Data {
     this.role,
     this.stripeCustomerId,
     this.userAuthToken,
+    this.isProfileCompleted,
   });
 
   Data.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     email = json['email'];
     role = json['role'];
+    isProfileCompleted = json["isProfileCompleted"];
     stripeCustomerId = json['stripeCustomerId'];
     userAuthToken = json['userAuthToken'];
   }
@@ -50,6 +53,7 @@ class Data {
     data['_id'] = sId;
     data['email'] = email;
     data['role'] = role;
+    data["isProfileCompleted"] = isProfileCompleted;
     data['stripeCustomerId'] = stripeCustomerId;
     data['userAuthToken'] = userAuthToken;
     return data;

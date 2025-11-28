@@ -52,10 +52,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 SizedBox(height: 10.h),
                 CustomTextField(hint: "Product Name"),
                 SizedBox(height: 10.h),
-                CustomDropdown(
-                  items: ["Category 1", "Category 2", "Category 3"],
-                  hintText: "Product Category",
-                ),
+                CustomDropdown(items: [], hintText: "Product Category"),
                 SizedBox(height: 10.h),
                 CustomTextField(hint: "Product Quantity"),
                 SizedBox(height: 10.h),

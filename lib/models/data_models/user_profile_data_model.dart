@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 
 class UserProfileDataModel {
@@ -34,8 +33,23 @@ class UserProfileDataModel {
     this.profilePicture,
   });
 
+  /// --- Validate File Before Upload ---
+  bool _isValidLocalFile(File? file) {
+    if (file == null) return false;
+
+    try {
+      final exists = file.existsSync();
+      final isFile =
+          FileSystemEntity.typeSync(file.path) == FileSystemEntityType.file;
+
+      return exists && isFile;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Map<String, dynamic> toFormDataMap() {
-    return {
+    final map = {
       "firstName": firstName,
       "lastName": lastName,
       "phoneNumber": phoneNumber,
@@ -45,15 +59,20 @@ class UserProfileDataModel {
       "suiteNumber": suiteNumber,
       "appartmentNumber": appartmentNumber,
       "floorNumber": floorNumber,
-
       "address": address,
-
       "location": location,
-      if (profilePicture != null)
-        "profilePicture": MultipartFile.fromFile(
-          profilePicture!.path,
-          filename: profilePicture!.path.split('/').last,
-        ),
     };
+
+    // Only include image if valid local file
+    if (_isValidLocalFile(profilePicture)) {
+      map["profilePicture"] = MultipartFile.fromFileSync(
+        profilePicture!.path,
+        filename: profilePicture!.path.split('/').last,
+      );
+    } else {
+      print("No valid local image selected — ${profilePicture}");
+    }
+
+    return map;
   }
 }

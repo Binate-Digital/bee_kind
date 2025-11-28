@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'package:bee_kind/auth/pin_screen.dart';
 import 'package:bee_kind/auth/sign_in_screen.dart';
 import 'package:bee_kind/common/base_view.dart';
-import 'package:bee_kind/models/login_data_model.dart';
-import 'package:bee_kind/models/login_response_model.dart';
-import 'package:bee_kind/models/sign_up_data_model.dart';
-import 'package:bee_kind/models/signup_response_model.dart';
+import 'package:bee_kind/models/data_models/login_data_model.dart';
+import 'package:bee_kind/models/response_models/login_response_model.dart';
+import 'package:bee_kind/models/data_models/sign_up_data_model.dart';
+import 'package:bee_kind/models/response_models/signup_response_model.dart';
 import 'package:bee_kind/services/network.dart';
 import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/utils/app_dialogs.dart';
@@ -96,6 +96,7 @@ class AuthController extends GetxController {
         }
       } else {
         log(" Signup failed with response: ${response?.data}");
+        AppDialogs.showToast(response?.data["message"]);
         isLoading.value = false;
       }
     } catch (e) {
@@ -140,6 +141,9 @@ class AuthController extends GetxController {
           // Save user data locally
           await prefs.setGlobalEmail(loginResponse.data?.email ?? "");
           await prefs.setuserId(loginResponse.data?.sId ?? "");
+          await prefs.isProfileComplete(
+            loginResponse.data?.isProfileCompleted ?? false,
+          );
           await prefs.setuserToken(loginResponse.data?.userAuthToken ?? "");
           log("token is during sign in: ${prefs.getUserToken()}");
 
@@ -147,12 +151,13 @@ class AuthController extends GetxController {
             "Stored user data -> "
             "Email: ${loginResponse.data?.email}, "
             "Role: ${loginResponse.data?.role}, "
+            "isProfileCompleted: ${loginResponse.data?.isProfileCompleted}"
             "Token: ${loginResponse.data?.userAuthToken}",
           );
 
           isLoading.value = false;
 
-          Get.off(() => const BaseView());
+          Get.off(() => BaseView());
         } else {
           isLoading.value = false;
           AppDialogs.showToast(

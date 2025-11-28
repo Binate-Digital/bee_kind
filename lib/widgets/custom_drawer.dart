@@ -1,14 +1,17 @@
 import 'package:bee_kind/common/payment_accounts.dart';
 import 'package:bee_kind/common/terms_and_conditions_screen.dart';
+import 'package:bee_kind/controllers/base_view_controller.dart';
 import 'package:bee_kind/core/user/store/orders_history.dart';
 import 'package:bee_kind/core/vendor/packages_screen.dart';
 import 'package:bee_kind/core/vendor/store/my_products_screen.dart';
 import 'package:bee_kind/widgets/dialogs/logout_confirmation_dialog.dart';
+import 'package:bee_kind/widgets/user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
+import 'package:get/get.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({
@@ -21,6 +24,7 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(BaseViewController());
     return Container(
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -59,32 +63,39 @@ class CustomDrawer extends StatelessWidget {
                   ),
                 ),
                 // Profile Picture
-                Container(
-                  width: 120.w,
-                  height: 120.h,
-                  decoration: BoxDecoration(shape: BoxShape.circle),
-                  margin: EdgeInsets.symmetric(vertical: 15.h),
-                  child: ClipOval(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.yellow1.withValues(alpha: 0.2),
-                        border: Border.all(
-                          color: AppColors.blackColor,
-                          width: 2.5,
-                        ),
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: AssetImage(AssetsPath.dummy),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
+                // Container(
+                //   width: 120.w,
+                //   height: 120.h,
+                //   decoration: BoxDecoration(shape: BoxShape.circle),
+                //   margin: EdgeInsets.symmetric(vertical: 15.h),
+                //   child: ClipOval(
+                //     child: Container(
+                //       decoration: BoxDecoration(
+                //         color: AppColors.yellow1.withValues(alpha: 0.2),
+                //         border: Border.all(
+                //           color: AppColors.blackColor,
+                //           width: 2.5,
+                //         ),
+                //         shape: BoxShape.circle,
+                //         image: DecorationImage(
+                //           image: AssetImage(AssetsPath.dummy),
+                //           fit: BoxFit.cover,
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                UserAvatarWidget(
+                  radius: 130.r,
+                  isViewOnly: true,
+                  selectedImgPath: controller.prefs.getString("profileImage"),
+                  placeHolder: AssetsPath.dummy,
                 ),
-                SizedBox(width: 16.w),
+                SizedBox(height: 16.h),
                 // Name and Phone Number
                 CustomText(
-                  text: "John Doe",
+                  text:
+                      "${controller.prefs.getString("firstName")}\t${controller.prefs.getString("lastName")}",
                   fontSize: 18.sp,
                   weight: FontWeight.bold,
                   fontColor: AppColors.blackColor,
@@ -100,7 +111,9 @@ class CustomDrawer extends StatelessWidget {
                     ),
                     SizedBox(width: 10.w),
                     CustomText(
-                      text: "+1 (555) 123-4567",
+                      text:
+                          controller.prefs.getString("phone") ??
+                          "+1 (555) 123-4567",
                       fontSize: 18.sp,
                       fontColor: AppColors.blackColor,
                     ),

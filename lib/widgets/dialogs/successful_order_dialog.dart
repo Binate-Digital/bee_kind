@@ -89,7 +89,7 @@ Future<void> successfulOrderDialog(BuildContext context) async {
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => BaseView(currIndex: 2)),
+                      MaterialPageRoute(builder: (context) => BaseView()),
                     );
                     // Add your navigation logic here
                   },

@@ -42,7 +42,7 @@ class SalesInfo extends StatelessWidget {
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-      
+
         children: [
           child ??
               CustomText(

@@ -5,14 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Product extends StatelessWidget {
-  const Product({super.key, this.isOutOfStock = false});
-  final bool isOutOfStock;
+  const Product({
+    super.key,
+    this.stockStatus,
+    this.isDiscountAvailable = false,
+    this.price,
+    this.afterDiscountPrice,
+    this.productName,
+  });
+  final String? stockStatus;
+  final bool isDiscountAvailable;
+  final int? price;
+  final int? afterDiscountPrice;
+  final String? productName;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
+        SizedBox(
+          height: 120.h,
           child: Stack(
             children: [
               Container(
@@ -27,7 +39,7 @@ class Product extends StatelessWidget {
                   ),
                 ),
               ),
-              isOutOfStock
+              stockStatus == "out-of-stock"
                   ? Positioned(
                       top: 10.h,
                       left: 55.w,
@@ -43,20 +55,27 @@ class Product extends StatelessWidget {
           child: Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CustomText(
-                    text: "Lorem Ipsum",
-                    fontSize: 16.sp,
-                    fontColor: AppColors.blackColor,
-                    weight: FontWeight.bold,
+                  SizedBox(
+                    height: 30.h,
+                    width: 95.w,
+                    child: Center(
+                      child: CustomText(
+                        text: productName ?? "Lorem Ipsum",
+                        fontSize: 16.sp,
+                        fontColor: AppColors.blackColor,
+                        weight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   SizedBox(width: 20.w),
                   Row(
                     children: [
-                      Image.asset(AssetsPath.star, width: 18.w),
+                      Image.asset(AssetsPath.star, width: 15.w),
                       CustomText(
                         text: "4.8",
-                        fontSize: 16.sp,
+                        fontSize: 15.sp,
                         fontColor: AppColors.blackColor,
                       ),
                     ],
@@ -67,7 +86,8 @@ class Product extends StatelessWidget {
               Row(
                 children: [
                   CustomText(
-                    text: "\$20.00",
+                    text:
+                        "\$${isDiscountAvailable == true ? afterDiscountPrice : price}",
                     fontSize: 16.sp,
                     fontColor: AppColors.yellow2,
                     weight: FontWeight.bold,

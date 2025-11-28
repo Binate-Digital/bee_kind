@@ -10,6 +10,7 @@ class CustomButton extends StatelessWidget {
   final bool isLoading;
   final double? fontSize,
       width,
+      height,
       verticalPadding,
       borderCircular,
       horizontalPadding,
@@ -37,6 +38,7 @@ class CustomButton extends StatelessWidget {
     this.textColor,
     this.horizontalPadding,
     super.key,
+    this.height,
   });
 
   @override
@@ -45,41 +47,46 @@ class CustomButton extends StatelessWidget {
       onTap: isLoading ? null : onTap,
       child: Container(
         width: width ?? double.infinity,
+        height: height ?? 60.h, // <-- FIXED HEIGHT
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: gradientColors,
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
-          borderRadius: BorderRadius.all(
-            Radius.circular(borderCircular ?? 30.r),
-          ),
+          borderRadius: BorderRadius.circular(borderCircular ?? 30.r),
           border: Border.all(
             color: borderColor ?? AppColors.blackColor,
             width: 1.w,
           ),
         ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: verticalPadding ?? 20.h,
-            horizontal: horizontalPadding ?? 30.w,
-          ),
+
+        child: SizedBox.expand(
+          // <-- KEY FIX: keeps height & layout identical
           child: Center(
             child: isLoading
                 ? SizedBox(
-                    width: 20.w,
-                    height: 20.w,
+                    width: 24,
+                    height: 24,
                     child: const CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: AppColors.whiteColor,
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.whiteColor,
+                      ),
                     ),
                   )
-                : CustomText(
-                    text: text,
-                    weight: FontWeight.bold,
-                    fontColor: textColor ?? AppColors.blackColor,
-                    fontSize: fontSize ?? 16.sp,
-                    fontFamily: fontFamily ?? AppFonts.ralewayBold,
+                : Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: verticalPadding ?? 20.h,
+                      horizontal: horizontalPadding ?? 30.w,
+                    ),
+                    child: CustomText(
+                      text: text,
+                      weight: FontWeight.bold,
+                      fontColor: textColor ?? AppColors.blackColor,
+                      fontSize: fontSize ?? 16.sp,
+                      fontFamily: fontFamily ?? AppFonts.ralewayBold,
+                    ),
                   ),
           ),
         ),

@@ -1,21 +1,24 @@
-import 'package:bee_kind/core/user/store/product_categories_list.dart';
+import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/core/user/store/selected_product.dart';
+import 'package:bee_kind/models/response_models/store_detail_response_model.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
-import 'package:bee_kind/widgets/categories.dart';
+import 'package:bee_kind/widgets/categories.dart' as cat;
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:bee_kind/widgets/product.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
-class StoreScreen extends StatelessWidget {
-  StoreScreen({super.key});
+class StoreScreen extends GetView<StoreController> {
+  const StoreScreen({super.key, this.data});
 
-  final List<bool> stock = [true, false, false];
+  final StoreDetail? data;
 
   @override
   Widget build(BuildContext context) {
+    controller.setStoreData(data);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size(30.w, 340.h),
@@ -69,7 +72,8 @@ class StoreScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               CustomText(
-                                text: "Lorem Ipsum",
+                                text:
+                                    data?.store?.businessName ?? "Lorem Ipsum",
                                 fontSize: 22.sp,
                                 fontColor: AppColors.blackColor,
                                 weight: FontWeight.bold,
@@ -84,7 +88,8 @@ class StoreScreen extends StatelessWidget {
                                   Padding(
                                     padding: EdgeInsets.only(left: 10.h),
                                     child: CustomText(
-                                      text: "9 AM To 6PM",
+                                      text:
+                                          "${controller.convertTo12HourFormat(data?.store?.openTime ?? "10:00")} to ${controller.convertTo12HourFormat(data?.store?.closeTime ?? "6:00")}",
                                       fontSize: 18.sp,
                                       fontColor: AppColors.blackColor,
                                     ),
@@ -110,8 +115,10 @@ class StoreScreen extends StatelessWidget {
                                     width: 200.w,
                                     padding: EdgeInsets.only(left: 11.h),
                                     child: CustomText(
-                                      text: "Lorem ipsum road street 26",
-                                      fontSize: 18.sp,
+                                      text:
+                                          data?.store?.vendorAddress?.address ??
+                                          "Address not available",
+                                      fontSize: 16.sp,
                                       maxLines: 2,
                                       textAlign: TextAlign.start,
                                       overflow: TextOverflow.ellipsis,
@@ -130,8 +137,10 @@ class StoreScreen extends StatelessWidget {
                                   Padding(
                                     padding: EdgeInsets.only(left: 8.h),
                                     child: CustomText(
-                                      text: "+123-456-7890",
-                                      fontSize: 18.sp,
+                                      text:
+                                          data?.store?.phoneNumber ??
+                                          "No. not available",
+                                      fontSize: 17.sp,
                                       fontColor: AppColors.blackColor,
                                     ),
                                   ),
@@ -146,6 +155,8 @@ class StoreScreen extends StatelessWidget {
                 ],
               ),
             ),
+
+            /// SEARCH FIELD
             Padding(
               padding: EdgeInsets.only(left: 20.h, right: 20.w, top: 20.h),
               child: CustomTextField(
@@ -154,114 +165,260 @@ class StoreScreen extends StatelessWidget {
                 bdColor: AppColors.yellow2,
                 hintColor: AppColors.blackColor.withValues(alpha: 0.3),
                 prefxicon: AssetsPath.search,
+                onchange: controller.search,
               ),
             ),
           ],
         ),
       ),
-      body: SingleChildScrollView(
+
+      body: Obx(() {
+        if (controller.searchQuery.isNotEmpty) {
+          return _buildSearchResults(controller);
+        }
+
+        return _buildOriginalBody(context, controller);
+      }),
+    );
+  }
+
+  /// --------------------------------------------
+  ///  SEARCH RESULTS VIEW
+  /// --------------------------------------------
+  Widget _buildSearchResults(StoreController controller) {
+    return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
+      child: Column(
+        children: [
+          SizedBox(height: 20.h),
+          if (controller.searchedItems.isEmpty)
+            Padding(
+              padding: EdgeInsets.only(top: 50.h),
+              child: CustomText(
+                text: "No products found",
+                fontSize: 20.sp,
+                weight: FontWeight.w600,
+              ),
+            ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: GridView.builder(
+              itemCount: controller.searchedItems.length,
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                mainAxisExtent: 200.h,
+                mainAxisSpacing: 20.h,
+                crossAxisSpacing: 10.w,
+                crossAxisCount: 2,
+              ),
+              itemBuilder: (context, index) {
+                final item = controller.searchedItems[index];
+
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SelectedProduct(
+                          productId: item.productId,
+                          productName: item.productName,
+                          ingredients: item.ingredients,
+                          description: item.description,
+                          effets: item.effects,
+                          price: item.price,
+                          afterDiscountPrice: item.afterDiscountPrice,
+                          inventoryStatus: item.inventoryStatus,
+                          hasDiscount: item.isDiscountAvailable ?? false,
+                          isAvailable: item.isAvailable ?? false,
+                          quantity: item.quantity,
+                          productImages: item.productImages,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Product(
+                    stockStatus: item.inventoryStatus,
+                    isDiscountAvailable: item.isDiscountAvailable ?? false,
+                    productName: item.productName,
+                    price: item.price,
+                    afterDiscountPrice: item.afterDiscountPrice,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// --------------------------------------------
+  ///  ORIGINAL BODY (when no search)
+  /// --------------------------------------------
+  Widget _buildOriginalBody(BuildContext context, StoreController controller) {
+    return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Column(
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                children: [
-                  SizedBox(height: 30.h),
-                  Row(
-                    children: [
-                      CustomText(
-                        text: "Most Demanded Products",
-                        fontColor: AppColors.blackColor,
-                        fontSize: 20.sp,
-                        weight: FontWeight.bold,
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.h),
-                  SizedBox(
-                    height: 195.h,
-                    child: ListView.builder(
-                      itemCount: stock.length,
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 5.w),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => SelectedProduct(hasDiscount: true),
-                                ),
-                              );
-                            },
-                            child: Product(isOutOfStock: stock[index]),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(height: 30.h),
-                  Row(
-                    children: [
-                      CustomText(
-                        text: "Categories",
-                        fontColor: AppColors.blackColor,
-                        fontSize: 20.sp,
-                        weight: FontWeight.bold,
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.h),
-                  SizedBox(
-                    height: 150.h,
-                    child: ListView.builder(
-                      itemCount: 6,
-                      padding: EdgeInsets.zero,
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  CategoryWiseProductsList(fromHome: false),
-                            ),
-                          ),
-                          child: Categories(),
-                        );
-                      },
-                    ),
-                  ),
-                  GridView.builder(
-                    itemCount: 6,
-                    shrinkWrap: true,
-                    padding: EdgeInsets.zero,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => SelectedProduct(),
+            SizedBox(height: 30.h),
+
+            /// MOST DEMANDED PRODUCTS
+            Row(
+              children: [
+                CustomText(
+                  text: "Most Demanded Products",
+                  fontColor: AppColors.blackColor,
+                  fontSize: 20.sp,
+                  weight: FontWeight.bold,
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
+
+            SizedBox(
+              height: 195.h,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: data != null && data!.popularProducts!.isNotEmpty
+                    ? ListView.builder(
+                        itemCount: data?.popularProducts?.length ?? 0,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          final p = data!.popularProducts?[index];
+                          return Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 5.w),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => SelectedProduct(
+                                      productId: p?.sId,
+                                      productName: p?.productName,
+                                      ingredients: p?.ingredients,
+                                      description: p?.description,
+                                      effets: p?.effects,
+                                      price: p?.price,
+                                      afterDiscountPrice: p?.afterDiscountPrice,
+                                      inventoryStatus: p?.inventoryStatus,
+                                      hasDiscount:
+                                          p?.isDiscountAvailable ?? false,
+                                      isAvailable: p?.isAvailable ?? false,
+                                      quantity: p?.quantity,
+                                      productImages: p?.productImages,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Product(
+                                stockStatus: p?.inventoryStatus,
+                                isDiscountAvailable:
+                                    p?.isDiscountAvailable ?? false,
+                                productName: p?.productName,
+                                price: p?.price,
+                                afterDiscountPrice: p?.afterDiscountPrice,
+                              ),
                             ),
                           );
                         },
-                        child: Product(),
+                      )
+                    : Center(
+                        child: CustomText(text: "Products Not Available!"),
+                      ),
+              ),
+            ),
+
+            SizedBox(height: 30.h),
+
+            /// CATEGORIES
+            Row(
+              children: [
+                CustomText(
+                  text: "Categories",
+                  fontColor: AppColors.blackColor,
+                  fontSize: 20.sp,
+                  weight: FontWeight.bold,
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
+
+            if (data != null && data!.categories!.isNotEmpty)
+              SizedBox(
+                height: 150.h,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: ListView.builder(
+                    itemCount: data?.categories?.length ?? 0,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () => controller.getProductsByCategory(
+                          data?.categories?[index].sId,
+                          data?.categories?[index].categoryName,
+                          context,
+                          false,
+                        ),
+                        child: cat.Categories(
+                          image: data?.categories?[index].categoryImage,
+                        ),
                       );
                     },
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      mainAxisExtent: 210.h,
-                      mainAxisSpacing: 20.h,
-                      crossAxisSpacing: 10.w,
-                      crossAxisCount: 2,
-                    ),
                   ),
-                ],
+                ),
+              )
+            else
+              Center(child: CustomText(text: "Products Not Available!")),
+
+            /// PRODUCTS GRID
+            GridView.builder(
+              itemCount: data?.products?.length,
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                mainAxisExtent: 200.h,
+                mainAxisSpacing: 20.h,
+                crossAxisSpacing: 10.w,
+                crossAxisCount: 2,
               ),
+              itemBuilder: (context, index) {
+                final p = data!.products?[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SelectedProduct(
+                          productId: p?.sId,
+                          productName: p?.productName,
+                          ingredients: p?.ingredients,
+                          description: p?.description,
+                          effets: p?.effects,
+                          price: p?.price,
+                          afterDiscountPrice: p?.afterDiscountPrice,
+                          inventoryStatus: p?.inventoryStatus,
+                          hasDiscount: p?.isDiscountAvailable ?? false,
+                          isAvailable: p?.isAvailable ?? false,
+                          quantity: p?.quantity,
+                          productImages: p?.productImages,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Product(
+                    stockStatus: p?.inventoryStatus,
+                    isDiscountAvailable: p?.isDiscountAvailable ?? false,
+                    productName: p?.productName,
+                    price: p?.price,
+                    afterDiscountPrice: p?.afterDiscountPrice,
+                  ),
+                );
+              },
             ),
           ],
         ),

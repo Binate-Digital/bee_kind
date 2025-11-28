@@ -1,5 +1,10 @@
+import 'dart:developer';
+
+import 'package:bee_kind/controllers/base_view_controller.dart';
+import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // Import your existing widgets and utilities
@@ -10,6 +15,7 @@ import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_drop_down.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
+import 'package:get/get.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -26,10 +32,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String dateError = "";
   String genderError = "";
 
-  TextEditingController firstNameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
+  String profileImage = "";
+
+  final baseController = Get.find<BaseViewController>();
+
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   Future<void> selectDate(BuildContext context) async {
@@ -69,21 +79,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    final prefs = SharedPrefs();
+
+    firstNameController.text = prefs.getString("firstName") ?? "";
+    lastNameController.text = prefs.getString("lastName") ?? "";
+    emailController.text = prefs.getString("email") ?? "";
+    phoneController.text = prefs.getString("phone") ?? "";
+
+    // DOB
+    String dob = prefs.getString("dob") ?? "";
+    if (dob.isNotEmpty) {
+      selectedDate = DateTime.tryParse(dob);
+    }
+
+    // Gender
+    selectedGender = prefs.getString("gender");
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AppBarBaseView(
       title: "Edit Profile",
-      button: // Save Button
-      Padding(
-        padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 20.w),
-        child: CustomButton(
-          onTap: () => Navigator.pop(context),
-          text: "Save",
-          borderColor: AppColors.blackColor,
-          verticalPadding: 20.h,
-          horizontalPadding: 10.w,
-          fontSize: 18.sp,
-        ),
-      ),
+
+      // button: // Save Button
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Form(
@@ -93,19 +114,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                // Static Profile Picture
-                Container(
-                  width: 150.w,
-                  height: 150.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.yellow1.withValues(alpha: 0.05),
-                    border: Border.all(color: AppColors.yellow2, width: 2),
-                  ),
-                  margin: EdgeInsets.symmetric(vertical: 15.h),
-                  child: Transform.scale(
-                    scale: 0.4,
-                    child: Image.asset(AssetsPath.camera),
+                Obx(
+                  () => GestureDetector(
+                    onTap: () =>
+                        baseController.pickImage(context, isProfile: true),
+
+                    child: baseController.buildImageContainer(
+                      image: baseController.profileImage.value,
+                      networkImage: baseController.prefs.getString(
+                        "profileImage",
+                      ),
+
+                      isCircular: true,
+                      placeholderText: "Upload Profile Picture",
+                      isProfile: true,
+                    ),
                   ),
                 ),
                 CustomText(text: "Profile Picture", fontSize: 18.sp),
@@ -157,6 +180,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: CustomTextField(
                     hint: "Phone",
                     controller: phoneController,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      USPhoneNumberFormatter(),
+                      LengthLimitingTextInputFormatter(16),
+                    ],
                     validator: (value) => Validation.validatePhoneNumber(value),
                     prefxicon: AssetsPath.phone,
                   ),
@@ -215,7 +243,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     Padding(
                       padding: EdgeInsets.only(top: 15.h),
                       child: CustomDropdown(
-                        items: ["Male", "Female", "Other", "Prefer not to say"],
+                        items: ["male", "female", "other", "prefer not to say"],
                         initialValue: selectedGender,
                         onChanged: (value) {
                           setState(() {
@@ -243,6 +271,57 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                   ],
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 30.h,
+                    // horizontal: 20.w,
+                  ),
+                  child: SizedBox(
+                    height: 60.h,
+                    child: CustomButton(
+                      width: 400.w,
+                      onTap: () async {
+                        // Validations
+                        if (formKey.currentState!.validate()) {
+                          if (selectedDate == null) {
+                            setState(
+                              () => dateError = "Please select Date of Birth",
+                            );
+                            return;
+                          }
+                          if (selectedGender == null) {
+                            setState(
+                              () => genderError = "Please select Gender",
+                            );
+                            return;
+                          }
+
+                          final body = {
+                            "firstName": firstNameController.text.trim(),
+                            "lastName": lastNameController.text.trim(),
+                            "email": emailController.text.trim(),
+                            "phone": phoneController.text.trim(),
+                            "dateOfBirth": selectedDate!.toIso8601String(),
+                            "gender": selectedGender,
+                            "profileImage": baseController.profileImage.value,
+                          };
+
+                          log("body: $body");
+                          await baseController
+                              .updateProfile(context, body)
+                              .then((value) {
+                                setState(() {
+                                  baseController.profileImage.value = null;
+                                });
+                                Get.back();
+                              });
+                        }
+                      },
+                      text: "Save",
+                      borderColor: AppColors.blackColor,
+                    ),
+                  ),
                 ),
               ],
             ),

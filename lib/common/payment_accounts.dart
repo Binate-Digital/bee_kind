@@ -1,197 +1,157 @@
+// ignore_for_file: deprecated_member_use
+
+import 'package:bee_kind/controllers/store_controller.dart';
+import 'package:bee_kind/models/response_models/card_response_model.dart';
 import 'package:bee_kind/utils/app_colors.dart';
-import 'package:bee_kind/widgets/dialogs/add_new_account_dialog.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
+import 'package:bee_kind/widgets/dialogs/add_new_account_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
-class PaymentAccountsScreen extends StatefulWidget {
-  const PaymentAccountsScreen({super.key});
+class PaymentAccountsScreen extends StatelessWidget {
+  PaymentAccountsScreen({super.key});
 
-  @override
-  State<PaymentAccountsScreen> createState() => _PaymentAccountsScreenState();
-}
-
-class _PaymentAccountsScreenState extends State<PaymentAccountsScreen> {
-  // List of payment methods that can be dismissed
-  final List<Map<String, dynamic>> _paymentMethods = [
-    {
-      'id': '1',
-      'method': "PayPal",
-      'color': Colors.blue[900]!,
-      'name': 'Pay Pal',
-    },
-    {'id': '2', 'method': "G Pay", 'color': Colors.blue, 'name': 'Google Pay'},
-    {
-      'id': '3',
-      'method': "A Pay",
-      'color': AppColors.blackColor,
-      'name': 'Apple Pay',
-    },
-  ];
-
-  void _removePaymentMethod(String id) {
-    setState(() {
-      _paymentMethods.removeWhere((method) => method['id'] == id);
-    });
-    // Optional: Show undo snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Payment method removed'),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () {
-            // You would need to implement undo logic here
-          },
-        ),
-      ),
-    );
-  }
+  final StoreController controller = Get.find<StoreController>();
 
   @override
   Widget build(BuildContext context) {
+    controller.loadCards(context); // initial load
+
     return AppBarBaseView(
       title: "Payment Accounts",
-      button: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-        child: CustomButton(
-          borderColor: AppColors.blackColor,
-          onTap: () {
-            addNewAccountDialog(context);
-          },
-          text: "Add New Account",
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: _paymentMethods.isEmpty
-            ? Center(
-                child: CustomText(
-                  text: "No payment methods added",
-                  fontSize: 18.sp,
-                  fontColor: Colors.grey[600]!,
-                ),
-              )
-            : ListView.builder(
-                itemCount: _paymentMethods.length,
-                itemBuilder: (context, index) {
-                  final method = _paymentMethods[index];
-                  return Dismissible(
-                    key: Key(method['id']),
-                    direction: DismissDirection.endToStart,
-                    background: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.whiteColor,
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      alignment: Alignment.centerLeft,
-                      padding: EdgeInsets.only(right: 20.w),
-                      child: Icon(Icons.delete, color: Colors.red, size: 24.w),
-                    ),
-                    secondaryBackground: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.whiteColor,
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(right: 20.w),
-                      child: Icon(Icons.delete, color: Colors.red, size: 24.w),
-                    ),
-                    confirmDismiss: (direction) async {
-                      // Optional: Show confirmation dialog
-                      return await showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: CustomText(text: "Confirm Delete"),
-                            content: CustomText(
-                              text:
-                                  "Are you sure you want to remove this payment method?",
-                              fontSize: 14.sp,
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(false),
-                                child: CustomText(text: "Cancel"),
-                              ),
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(true),
-                                child: CustomText(
-                                  text: "Delete",
-                                  fontColor: Colors.red,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    onDismissed: (direction) {
-                      _removePaymentMethod(method['id']);
-                    },
-                    child: PaymentMethod(
-                      paymentMethod: method['method'],
-                      color: method['color'],
-                      paymentName: method['name'],
-                    ),
-                  );
-                },
-              ),
+      button: _buildAddNewCardButton(context),
+      body: Obx(() => _buildBody(context)),
+    );
+  }
+
+  // -------------------- ADD NEW CARD --------------------
+  Widget _buildAddNewCardButton(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+      child: CustomButton(
+        borderColor: AppColors.blackColor,
+        text: "Add New Account",
+        onTap: () async {
+          await addNewAccountDialog(context);
+          controller.loadCards(context); // Refresh immediately
+        },
       ),
     );
   }
-}
 
-class PaymentMethod extends StatelessWidget {
-  const PaymentMethod({
-    super.key,
-    required this.paymentMethod,
-    required this.color,
-    required this.paymentName,
-  });
-  final String paymentMethod;
-  final String paymentName;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 25.h),
-      margin: EdgeInsets.symmetric(vertical: 5.h),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.blackColor.withValues(alpha: 0.15),
-            blurRadius: 25.r,
-            offset: const Offset(0, 5),
-            spreadRadius: 0,
-          ),
-        ],
-        color: AppColors.whiteColor,
-      ),
-      child: Row(
-        children: [
-          SizedBox(width: 10.w),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.r),
-              color: color,
-            ),
-            child: CustomText(
-              text: paymentMethod,
-              fontSize: 16.sp,
-              fontColor: AppColors.whiteColor,
-            ),
-          ),
-          SizedBox(width: 10.w),
-          CustomText(text: paymentName, fontSize: 20.sp),
-        ],
-      ),
+  // -------------------- BODY --------------------
+  Widget _buildBody(BuildContext context) {
+    return RefreshIndicator(
+      color: AppColors.yellow2,
+      onRefresh: () async {
+        await controller.loadCards(context);
+      },
+      child: controller.isFetchingCards.value
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 250),
+                Center(child: CircularProgressIndicator(color: Colors.amber)),
+              ],
+            )
+          : _buildCardList(context),
     );
+  }
+
+  // -------------------- CARD LIST --------------------
+  Widget _buildCardList(BuildContext context) {
+    final cards = controller.cardList;
+
+    if (cards.isEmpty) {
+      return ListView(
+        physics: const BouncingScrollPhysics(),
+        children: [
+          SizedBox(height: 200.h),
+          Center(
+            child: CustomText(
+              text: "No payment methods added",
+              fontSize: 18.sp,
+              fontColor: Colors.grey,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.only(top: 20.h, bottom: 80.h),
+      itemCount: cards.length,
+      itemBuilder: (_, index) => _buildCardTile(cards[index]),
+    );
+  }
+
+  // -------------------- CARD TILE --------------------
+  Widget _buildCardTile(CardModel card) {
+    return Obx(() {
+      String selected = controller.selectedPaymentMethod.value;
+
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.r),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.blackColor.withValues(alpha: 0.15),
+              blurRadius: 25.r,
+              offset: const Offset(0, 5),
+            ),
+          ],
+          color: AppColors.whiteColor,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            /// Card Brand + Number
+            Row(
+              children: [
+                Container(
+                  width: 70.w,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 12.h,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.r),
+                    color: AppColors.yellow2,
+                  ),
+                  child: CustomText(
+                    text: card.brand?.toUpperCase() ?? "CARD",
+                    fontSize: 14.sp,
+                    fontColor: AppColors.whiteColor,
+                    weight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                CustomText(
+                  text: "**** **** **** ${card.last4}",
+                  fontSize: 18.sp,
+                  weight: FontWeight.w600,
+                ),
+              ],
+            ),
+
+            /// Radio Button
+            Radio(
+              value: card.id,
+              groupValue: selected,
+              onChanged: (value) {
+                controller.selectedPaymentMethod.value = value ?? "";
+              },
+              fillColor: WidgetStateProperty.all(AppColors.yellow2),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

@@ -1,4 +1,4 @@
-import 'package:bee_kind/core/vendor/payment_screen.dart';
+import 'package:bee_kind/core/user/store/choose_payment_method.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
@@ -51,7 +51,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const PaymentScreen()),
+              MaterialPageRoute(builder: (_) => const ChoosePaymentScreen()),
             );
           },
           text: "7 Day's Free Trial",
@@ -77,7 +77,9 @@ class _PackagesScreenState extends State<PackagesScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const PaymentScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const ChoosePaymentScreen(),
+                  ),
                 );
               },
             );

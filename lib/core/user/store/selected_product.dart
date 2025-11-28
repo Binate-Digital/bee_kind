@@ -1,5 +1,7 @@
+import 'dart:developer';
+import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/core/user/store/ratings_and_reviews.dart';
-import 'package:bee_kind/common/base_view.dart';
+import 'package:bee_kind/models/data_models/create_order_data_model.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/bottom_sheets/show_options_bottom_sheet.dart';
@@ -11,39 +13,56 @@ import 'package:bee_kind/widgets/sliding_toggle_button.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 class SelectedProduct extends StatefulWidget {
   const SelectedProduct({
     super.key,
     this.isVendor = false,
     this.hasDiscount = false,
+    this.productName,
+    this.ingredients,
+    this.effets,
+    this.dosage,
+    this.description,
+    this.inventoryStatus,
+    this.price,
+    this.quantity,
+    this.isAvailable = false,
+    this.afterDiscountPrice,
+    this.productImages,
+    this.productId,
   });
+
   final bool isVendor;
   final bool hasDiscount;
+  final bool isAvailable;
+
+  final String? productName;
+  final String? ingredients;
+  final String? effets;
+  final String? dosage;
+  final String? description;
+  final String? inventoryStatus;
+  final dynamic price;
+  final int? afterDiscountPrice;
+  final int? quantity;
+  final List<String>? productImages;
+  final String? productId;
 
   @override
   State<SelectedProduct> createState() => _SelectedProductState();
 }
 
 class _SelectedProductState extends State<SelectedProduct> {
-  int currentCarouselIndex = 0;
+  final controller = Get.find<StoreController>();
 
-  bool isToggled = false;
-
-  int _count = 0;
-
-  String selectedOption = "In Stock";
-  final List<String> options = ["In Stock", "Low Stock", "Out Of Stock"];
-
-  void increment() {
-    setState(() {
-      _count++;
-    });
-  }
-
-  void decrement() {
-    setState(() {
-      if (_count > 0) _count--;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((val) async {
+      log("product id: ${widget.productId}");
+      await controller.fetchProductReviews(widget.productId, context);
     });
   }
 
@@ -57,58 +76,78 @@ class _SelectedProductState extends State<SelectedProduct> {
           children: [
             Stack(
               children: [
+                /// ---------------- CAROUSEL ----------------
                 Column(
                   children: [
                     CarouselSlider(
-                      items: [1, 2, 3].map((i) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            image: const DecorationImage(
-                              image: AssetImage(AssetsPath.store),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                      items: (widget.productImages?.isNotEmpty ?? false)
+                          ? widget.productImages!.map((imgUrl) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: NetworkImage(imgUrl),
+                                    onError: (_, __) {},
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              );
+                            }).toList()
+                          : [
+                              // FALLBACK IF NO IMAGES
+                              Container(
+                                decoration: BoxDecoration(
+                                  image: const DecorationImage(
+                                    image: AssetImage(AssetsPath.product),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            ],
                       options: CarouselOptions(
                         height: 290.h,
                         autoPlay: true,
                         viewportFraction: 1,
-                        aspectRatio: 2.0,
-                        initialPage: 0,
-                        onPageChanged: (index, reason) {
-                          setState(() {
-                            currentCarouselIndex = index;
-                          });
-                        },
+                        onPageChanged: (index, reason) =>
+                            controller.updateCarouselIndex(index),
                       ),
                     ),
                   ],
                 ),
+
+                /// ---------------- OBX CAROUSEL INDICATORS ----------------
                 Positioned(
                   top: 270.h,
                   left: 170.w,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [1, 2, 3].asMap().entries.map((entry) {
-                      bool isSelected = currentCarouselIndex == entry.key;
-                      return AnimatedContainer(
-                        duration: Duration(milliseconds: 300),
-                        width: isSelected ? 50.w : 8.w,
-                        height: 8.h,
-                        margin: EdgeInsets.symmetric(horizontal: 4.w),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AppColors.blackColor,
-                            width: 2.w,
+                  child: Obx(() {
+                    final count = (widget.productImages?.isNotEmpty ?? false)
+                        ? widget.productImages!.length
+                        : 1;
+
+                    return Row(
+                      children: List.generate(count, (index) {
+                        bool isSelected =
+                            controller.currentCarouselIndex.value == index;
+
+                        return AnimatedContainer(
+                          duration: Duration(milliseconds: 300),
+                          width: isSelected ? 50.w : 8.w,
+                          height: 8.h,
+                          margin: EdgeInsets.symmetric(horizontal: 4.w),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: AppColors.blackColor,
+                              width: 2.w,
+                            ),
+                            borderRadius: BorderRadius.circular(4.r),
+                            color: AppColors.whiteColor,
                           ),
-                          borderRadius: BorderRadius.circular(4.r),
-                          color: AppColors.whiteColor,
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                        );
+                      }),
+                    );
+                  }),
                 ),
+
+                /// ---------------- BACK + OPTIONS ----------------
                 Padding(
                   padding: EdgeInsets.only(
                     left: 20.w,
@@ -129,14 +168,17 @@ class _SelectedProductState extends State<SelectedProduct> {
                             color: AppColors.whiteColor,
                           ),
                         ),
-                       widget.isVendor ? GestureDetector(
-                          onTap: () => showOptionsBottomSheet(context),
-                          child: Icon(
-                            Icons.more_vert,
-                            color: AppColors.whiteColor,
-                            size: 30.r,
-                          ),
-                        ) : Offstage(),
+
+                        widget.isVendor
+                            ? GestureDetector(
+                                onTap: () => showOptionsBottomSheet(context),
+                                child: Icon(
+                                  Icons.more_vert,
+                                  size: 30.r,
+                                  color: AppColors.whiteColor,
+                                ),
+                              )
+                            : SizedBox(),
                       ],
                     ),
                   ),
@@ -146,32 +188,34 @@ class _SelectedProductState extends State<SelectedProduct> {
           ],
         ),
       ),
+
+      /// ---------------- BODY ----------------
       body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 20.w),
           child: Column(
             children: [
+              /// ---------------- NAME + PRICE ----------------
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CustomText(
-                    text: "Lorem Ipsum",
+                    text: widget.productName ?? "Lorem Ipsum",
                     fontSize: 22.sp,
-                    fontColor: AppColors.blackColor,
                     weight: FontWeight.bold,
                   ),
                   widget.hasDiscount
                       ? Row(
                           children: [
                             CustomText(
-                              text: "\$10.00",
+                              text: "\$${widget.afterDiscountPrice ?? 10}",
                               fontSize: 20.sp,
-                              fontColor: AppColors.blackColor,
                               weight: FontWeight.bold,
                             ),
                             SizedBox(width: 10.w),
                             CustomText(
-                              text: "\$20.00",
+                              text: "\$${widget.price ?? 20}",
                               lineThrough: true,
                               fontSize: 20.sp,
                               fontColor: AppColors.yellow2,
@@ -180,336 +224,336 @@ class _SelectedProductState extends State<SelectedProduct> {
                           ],
                         )
                       : CustomText(
-                          text: "\$20.00",
+                          text: "\$${widget.price ?? 20}",
                           fontSize: 20.sp,
                           fontColor: AppColors.yellow2,
                           weight: FontWeight.bold,
                         ),
                 ],
               ),
+
               SizedBox(height: 10.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+              /// ---------------- STOCK & REVIEWS ----------------
+              Column(
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Image.asset(AssetsPath.star, width: 18.w),
-                      SizedBox(width: 10.w),
-                      CustomText(
-                        text: "4.8\t\t 52 Reviews",
-                        fontSize: 16.sp,
-                        fontColor: AppColors.blackColor,
+                      Row(
+                        children: [
+                          Image.asset(AssetsPath.star, width: 18.w),
+                          SizedBox(width: 10.w),
+                          CustomText(text: "4.8   52 Reviews"),
+                        ],
                       ),
+
+                      if (!widget.isVendor)
+                        CustomText(
+                          text: widget.inventoryStatus ?? "In Stock",
+                          weight: FontWeight.bold,
+                        ),
                     ],
                   ),
-                  if (!widget.isVendor)
-                    CustomText(
-                      text: "In Stock",
-                      fontSize: 18.sp,
-                      fontColor: AppColors.blackColor,
-                      weight: FontWeight.bold,
-                    ),
+                  SizedBox(height: 5.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(width: 10.h),
+                      if (!widget.isVendor)
+                        CustomText(text: "${widget.quantity} products left"),
+                    ],
+                  ),
                 ],
               ),
+
+              /// ---------------- VENDOR ONLY: STOCK DROPDOWN ----------------
               if (widget.isVendor) ...[
-                SizedBox(height: 10.h),
+                SizedBox(height: 20.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    SizedBox(width: 10.w),
                     CustomButton(
                       width: 230.w,
-                      verticalPadding: 15.h,
                       onTap: () async {
-                        selectedOption = await showStockBottomSheet(
-                          context,
-                          selectedOption,
-                          options,
-                        );
-                        debugPrint("option: $selectedOption");
+                        controller.selectedStockStatus.value =
+                            await showStockBottomSheet(
+                              context,
+                              controller.selectedStockStatus.value,
+                              controller.inventoryOptions,
+                            );
                       },
                       text: "Select Inventory Options",
-                      fontSize: 14.sp,
                     ),
                   ],
                 ),
               ],
-              SizedBox(height: 10.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(width: 5),
-                  CustomText(
-                    text: widget.isVendor
-                        ? "534 items left"
-                        : "5 Products Left",
-                    fontSize: 16.sp,
-                    fontColor: AppColors.blackColor,
-                  ),
-                ],
-              ),
-              SizedBox(height: 10.h),
+
+              SizedBox(height: 20.h),
+
+              /// ---------------- VENDOR ONLY: AVAILABILITY TOGGLE ----------------
               if (widget.isVendor)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    CustomText(
-                      text: isToggled == true ? "Available" : "Not Available",
-                      weight: FontWeight.bold,
-                      fontSize: 18.sp,
-                    ),
-                    SizedBox(width: 10.w),
-                    slidingToggleButton(
-                      value: isToggled,
-                      onChanged: (newValue) {
-                        setState(() {
-                          isToggled = newValue;
-                        });
-                      },
-                    ),
-                  ],
+                Obx(
+                  () => Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      CustomText(
+                        text: controller.isAvailable.value
+                            ? "Available"
+                            : "Not Available",
+                        weight: FontWeight.bold,
+                      ),
+                      SizedBox(width: 10.w),
+                      slidingToggleButton(
+                        value: controller.isAvailable.value,
+                        onChanged: (v) => controller.setAvailibility(v),
+                      ),
+                    ],
+                  ),
                 ),
-              Row(
-                children: [
-                  CustomText(
-                    text: "Description",
-                    fontSize: 22.sp,
-                    fontColor: AppColors.blackColor,
-                    weight: FontWeight.bold,
-                  ),
-                ],
-              ),
+
+              SizedBox(height: 20.h),
+
+              /// ---------------- DESCRIPTION ----------------
+              _sectionTitle("Description"),
               SizedBox(height: 10.h),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 390.w,
-                    child: CustomText(
-                      text:
-                          "Lorem ipsum dolor sit amet consectetur adipiscing elit porta, leo erat parturient arcu.",
-                      fontSize: 16.sp,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.start,
-                      maxLines: 2,
-                      fontColor: AppColors.blackColor,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 30.h),
-              Row(
-                children: [
-                  CustomText(
-                    text: "Effects",
-                    fontSize: 22.sp,
-                    fontColor: AppColors.blackColor,
-                    weight: FontWeight.bold,
-                  ),
-                ],
-              ),
+              _sectionText(widget.description),
+
+              SizedBox(height: 20.h),
+
+              _sectionTitle("Effects"),
               SizedBox(height: 10.h),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 390.w,
-                    child: CustomText(
-                      text:
-                          "Lorem ipsum dolor sit amet consectetur adipiscing elit porta, leo erat parturient arcu.",
-                      fontSize: 16.sp,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.start,
-                      maxLines: 2,
-                      fontColor: AppColors.blackColor,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 30.h),
-              Row(
-                children: [
-                  CustomText(
-                    text: "Ingredients",
-                    fontSize: 22.sp,
-                    fontColor: AppColors.blackColor,
-                    weight: FontWeight.bold,
-                  ),
-                ],
-              ),
+              _sectionText(widget.effets),
+
+              SizedBox(height: 20.h),
+
+              _sectionTitle("Ingredients"),
               SizedBox(height: 10.h),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 390.w,
-                    child: CustomText(
-                      text:
-                          "Lorem ipsum dolor sit amet consectetur adipiscing elit porta, leo erat parturient arcu.",
-                      fontSize: 16.sp,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.start,
-                      maxLines: 2,
-                      fontColor: AppColors.blackColor,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 30.h),
-              Row(
-                children: [
-                  CustomText(
-                    text: "Dosage",
-                    fontSize: 22.sp,
-                    fontColor: AppColors.blackColor,
-                    weight: FontWeight.bold,
-                  ),
-                ],
-              ),
+              _sectionText(widget.ingredients),
+
+              SizedBox(height: 20.h),
+
+              _sectionTitle("Dosage"),
               SizedBox(height: 10.h),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 390.w,
-                    child: CustomText(
-                      text:
-                          "Lorem ipsum dolor sit amet consectetur adipiscing elit porta, leo erat parturient arcu.",
-                      fontSize: 16.sp,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.start,
-                      maxLines: 2,
-                      fontColor: AppColors.blackColor,
-                    ),
-                  ),
-                ],
-              ),
+              _sectionText(widget.dosage),
+
               SizedBox(height: 30.h),
-              if (!widget.isVendor) ...[
-                Row(
+
+              /// ---------------- CUSTOMER ONLY: QUANTITY ----------------
+              if (!widget.isVendor)
+                Obx(
+                  () => Row(
+                    children: [
+                      CustomText(text: "Quantity", weight: FontWeight.bold),
+                      SizedBox(width: 20.w),
+
+                      /// MINUS
+                      GestureDetector(
+                        onTap: controller.decrementQuantity,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: controller.quantityCount > 0
+                                ? AppColors.blackColor
+                                : Colors.grey[300],
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(24.r),
+                              bottomLeft: Radius.circular(24.r),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.remove,
+                            color: controller.quantityCount > 0
+                                ? Colors.white
+                                : Colors.grey,
+                          ),
+                        ),
+                      ),
+
+                      /// COUNT
+                      Container(
+                        width: 50.w,
+                        alignment: Alignment.center,
+                        child: CustomText(
+                          text: '${controller.quantityCount}',
+                          fontSize: 22.sp,
+                          weight: FontWeight.bold,
+                        ),
+                      ),
+
+                      /// PLUS
+                      GestureDetector(
+                        onTap: controller.incrementQuantity,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.yellow2,
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(24.r),
+                              bottomRight: Radius.circular(24.r),
+                            ),
+                          ),
+                          child: Icon(Icons.add, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              SizedBox(height: 30.h),
+
+              if (!widget.isVendor)
+                Obx(() {
+                  return CustomButton(
+                    text: "Add To Cart",
+                    gradientColors:
+                        widget.isAvailable == true &&
+                            controller.quantityCount.value > 0
+                        ? [AppColors.yellow1, AppColors.yellow2]
+                        : [
+                            AppColors.whiteColor,
+                            AppColors.shimmerHighlightColor,
+                          ],
+                    onTap:
+                        widget.isAvailable && controller.quantityCount.value > 0
+                        ? () {
+                            double unitPrice =
+                                (widget.hasDiscount
+                                    ? double.tryParse(
+                                        widget.afterDiscountPrice.toString(),
+                                      )
+                                    : double.tryParse(
+                                        widget.price.toString(),
+                                      )) ??
+                                0;
+
+                            int qty = controller.quantityCount.value;
+
+                            controller
+                                .addItems(
+                                  OrderItem(
+                                    productId: widget.productId,
+                                    productName: widget.productName,
+                                    productImage: widget.productImages?.first,
+                                    unitPrice: unitPrice, // raw unit price
+                                    quantity: qty, // user-selected qty
+                                  ),
+                                )
+                                .then((value) {
+                                  Get.back();
+                                  Get.back();
+                                  controller.baseController.changeTab(1);
+                                });
+
+                            log(
+                              "Cart total now: ${controller.calculateTotalCartPrice()}",
+                            );
+                          }
+                        : null,
+                  );
+                }),
+
+              SizedBox(height: 30.h),
+
+              /// ---------------- REVIEWS ----------------
+              Obx(() {
+                if (controller.isLoading.value) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20.h),
+                      child: CircularProgressIndicator(
+                        color: AppColors.yellow2,
+                      ),
+                    ),
+                  );
+                }
+
+                // No reviews
+                if (controller.reviewsList != null &&
+                    controller.reviewsList!.isEmpty) {
+                  return Padding(
+                    padding: EdgeInsets.only(top: 20.h),
+                    child: CustomText(text: "Reviews Not Available!"),
+                  );
+                }
+
+                // Reviews available
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomText(
-                      text: "Quantity",
-                      fontSize: 18.sp,
-                      fontColor: AppColors.blackColor,
-                      weight: FontWeight.bold,
-                    ),
-                    SizedBox(width: 20.w),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Minus Button (Left side with left border radius)
-                        GestureDetector(
-                          onTap: decrement,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: _count > 0
-                                  ? AppColors.blackColor
-                                  : Colors.grey[300],
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(24.r),
-                                bottomLeft: Radius.circular(24.r),
-                              ),
-                            ),
-                            child: Center(
-                              child: Icon(
-                                Icons.remove,
-                                size: 30.w,
-                                color: _count > 0 ? Colors.white : Colors.grey,
-                              ),
-                            ),
-                          ),
+                        CustomText(
+                          text: "Rating & Reviews",
+                          fontSize: 18.sp,
+                          weight: FontWeight.bold,
                         ),
-
-                        // Count Display (Center)
-                        Container(
-                          width: 50.w,
-                          color: Colors.transparent,
-                          child: Center(
-                            child: CustomText(
-                              text: '$_count',
-                              fontSize: 22.sp,
-                              weight: FontWeight.bold,
-                              fontColor: AppColors.blackColor,
-                            ),
-                          ),
-                        ),
-
-                        // Plus Button (Right side with right border radius)
                         GestureDetector(
-                          onTap: increment,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.yellow2,
-                              borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(24.r),
-                                bottomRight: Radius.circular(24.r),
+                          onTap: () {
+                            final data = controller.productReviews.value?.data;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => RatingScreen(
+                                  isVendor: widget.isVendor,
+                                  avgRating: data?.averageRating ?? 0.0,
+                                  totalReviews: data?.totalReviews ?? 0.0,
+                                  reviews: data?.reviews ?? [],
+                                ),
                               ),
-                            ),
-                            child: Center(
-                              child: Icon(
-                                Icons.add,
-                                size: 30.w,
-                                color: Colors.white,
-                              ),
-                            ),
+                            );
+                          },
+                          child: CustomText(
+                            text: "View All",
+                            underlined: true,
+                            fontSize: 16.sp,
+                            weight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-                SizedBox(height: 30.h),
-                CustomButton(
-                  onTap: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => BaseView(currIndex: 1)),
-                      (route) => false,
-                    );
-                  },
-                  text: "Add To Cart",
-                ),
-                SizedBox(height: 30.h),
-              ],
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CustomText(
-                    text: "Rating & Reviews",
-                    fontSize: 18.sp,
-                    fontColor: AppColors.blackColor,
-                    weight: FontWeight.bold,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              RatingScreen(isVendor: widget.isVendor),
-                        ),
-                      );
-                    },
-                    child: CustomText(
-                      text: "View All",
-                      fontSize: 16.sp,
-                      underlined: true,
-                      fontColor: AppColors.blackColor,
-                      weight: FontWeight.bold,
+                    SizedBox(height: 10.h),
+
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: controller.reviewsList?.length,
+                      itemBuilder: (_, index) {
+                        final data = controller.reviewsList?[index];
+                        log("RATING: ${data?.rating}");
+                        return ReviewCard(
+                          review: data?.review ?? "",
+                          userImage: data?.user?.profileImage,
+                          userName: data?.user?.fullName,
+                          vendorResponse: data?.reply ?? "",
+                          ratingCount: data?.rating ?? 0,
+                        );
+                      },
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10.h),
-              ListView.builder(
-                itemCount: 4,
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return GestureDetector(onTap: () {}, child: ReviewCard());
-                },
-              ),
+                  ],
+                );
+              }),
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget _sectionTitle(String title) => Row(
+    children: [
+      CustomText(text: title, fontSize: 22.sp, weight: FontWeight.bold),
+    ],
+  );
+
+  Widget _sectionText(String? text) => Row(
+    children: [
+      SizedBox(
+        child: CustomText(
+          text: text ?? "No information found.",
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    ],
+  );
 }
