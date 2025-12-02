@@ -150,7 +150,7 @@ class ProfileController extends GetxController {
         await prefs.setVeriffSessionId(sessionId);
 
         // Navigate to WebView screen
-        final result = await Navigator.of(context).push(
+        await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => VeriffWebViewScreen(
               verificationUrl: verificationUrl,
@@ -160,18 +160,18 @@ class ProfileController extends GetxController {
         );
 
         // Handle the result when user returns from verification
-        if (result == true) {
-          // Verification was successful
-          AppDialogs.showToast("Verification completed successfully!");
-          isVerifyLoading.value = false;
+        // if (result == true) {
+        // Verification was successful
+        AppDialogs.showToast("Verification completed successfully!");
+        isVerifyLoading.value = false;
 
-          // Check verification status with your backend
-          await _checkVerificationStatus();
-        } else {
-          // User cancelled or verification failed
-          isVerifyLoading.value = false;
-          AppDialogs.showToast("Verification was not completed");
-        }
+        // Check verification status with your backend
+        await _checkVerificationStatus();
+        // } else {
+        //   // User cancelled or verification failed
+        //   isVerifyLoading.value = false;
+        //   // AppDialogs.showToast("Verification was not completed");
+        // }
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to start verification");
       }

@@ -433,14 +433,13 @@ class _SelectedProductState extends State<SelectedProduct> {
                                     productId: widget.productId,
                                     productName: widget.productName,
                                     productImage: widget.productImages?.first,
-                                    unitPrice: unitPrice, // raw unit price
-                                    quantity: qty, // user-selected qty
+                                    unitPrice: unitPrice,
+                                    quantity: qty,
                                   ),
                                 )
                                 .then((value) {
-                                  Get.back();
-                                  Get.back();
                                   controller.baseController.changeTab(1);
+                                  Get.until((route) => route.isFirst);
                                 });
 
                             log(

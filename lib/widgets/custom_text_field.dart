@@ -78,9 +78,11 @@ class CustomTextField extends StatelessWidget {
       cursorColor: textColor ?? AppColors.yellow2,
       maxLines: maxlines ?? 1,
       controller: controller,
-      onFieldSubmitted: onFieldSubmitted,
+      onFieldSubmitted:
+          onFieldSubmitted ?? (value) => FocusScope.of(context).unfocus(),
       autofocus: false,
-      onEditingComplete: onEditingComplete,
+      onEditingComplete:
+          onEditingComplete ?? () => FocusScope.of(context).unfocus(),
       inputFormatters: inputFormatters,
       // autovalidateMode: AutovalidateMode.onUserInteraction,
       style: TextStyle(

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:bee_kind/auth/pin_screen.dart';
 import 'package:bee_kind/auth/sign_in_screen.dart';
 import 'package:bee_kind/common/base_view.dart';
+import 'package:bee_kind/common/create_profile_screen.dart';
 import 'package:bee_kind/models/data_models/login_data_model.dart';
 import 'package:bee_kind/models/response_models/login_response_model.dart';
 import 'package:bee_kind/models/data_models/sign_up_data_model.dart';
@@ -89,7 +90,7 @@ class AuthController extends GetxController {
 
           isLoading.value = false;
 
-          Get.off(() => const PinScreen(isAccountCreate: true));
+          Get.offAll(() => const PinScreen(isAccountCreate: true));
         } else {
           isLoading.value = false;
           log(" Signup API returned status=false");
@@ -144,9 +145,11 @@ class AuthController extends GetxController {
           await prefs.isProfileComplete(
             loginResponse.data?.isProfileCompleted ?? false,
           );
+
+          log("Is Profile Complete Sign In: ${prefs.checkProfile()}");
           await prefs.setuserToken(loginResponse.data?.userAuthToken ?? "");
           log("token is during sign in: ${prefs.getUserToken()}");
-
+          log("user Id: ${prefs.getUserId()}");
           log(
             "Stored user data -> "
             "Email: ${loginResponse.data?.email}, "
@@ -157,7 +160,11 @@ class AuthController extends GetxController {
 
           isLoading.value = false;
 
-          Get.off(() => BaseView());
+          if (!prefs.checkProfile()) {
+            Get.to(() => CreateProfileScreen());
+          } else {
+            Get.offAll(() => BaseView());
+          }
         } else {
           isLoading.value = false;
           AppDialogs.showToast(

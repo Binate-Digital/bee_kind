@@ -10,29 +10,13 @@
     <uses-permission android:name="android.permission.VIDEO_CAPTURE" />
     <uses-permission android:name="android.permission.AUDIO_CAPTURE" />
 
-    <!-- Provide required visibility configuration for API level 30 and above -->
-<queries>
-  <!-- If your app checks for SMS support -->
-  <intent>
-    <action android:name="android.intent.action.VIEW" />
-    <data android:scheme="sms" />
-  </intent>
-  <!-- If your app checks for call support -->
-  <intent>
-    <action android:name="android.intent.action.VIEW" />
-    <data android:scheme="tel" />
-  </intent>
-  <!-- If your application checks for inAppBrowserView launch mode support -->
-  <intent>
-    <action android:name="android.support.customtabs.action.CustomTabsService" />
-  </intent>
-</queries>
     <application
         android:label="Bee Kind"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <activity
-            android:name=".MainActivity"
+            <activity
+    android:name="com.binatedigital.beekind.MainActivity"
+
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
@@ -58,8 +42,12 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+            <meta-data
+    android:name="stripeEnablePushProvisioning"
+    android:value="false"/>
+
         <meta-data android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBArFrcRCqfcd171dZv4WI7uLrNI6Mf4WM"/>
+            android:value="AIzaSyDI8Sp5MdnVOywTFhrU1TzNV_RJysAVFPc"/>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
@@ -71,5 +59,18 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <intent>
+    <action android:name="android.intent.action.VIEW" />
+    <data android:scheme="sms" />
+  </intent>
+  <!-- If your app checks for call support -->
+  <intent>
+    <action android:name="android.intent.action.VIEW" />
+    <data android:scheme="tel" />
+  </intent>
+  <!-- If your application checks for inAppBrowserView launch mode support -->
+  <intent>
+    <action android:name="android.support.customtabs.action.CustomTabsService" />
+  </intent>
     </queries>
 </manifest>

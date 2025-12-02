@@ -131,7 +131,6 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
 
       Navigator.pop(context); // close sheet
       Navigator.pop(context);
-      Navigator.pop(context); // go back
     } else {
       AppDialogs.showToast(response.data["message"] ?? "Failed");
     }

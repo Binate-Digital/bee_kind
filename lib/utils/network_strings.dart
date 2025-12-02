@@ -13,6 +13,8 @@ class NetworkStrings {
   ///Stripe key and Cards
   static const String ADD_NEW_CARD_ENDPOINT = "auth/add-card";
   static const String getAllCards = "auth/get-all-cards";
+  static const String deleteCard = "auth/delete-card";
+  static const String setDefaultCard = "auth/set-default-card";
   static const String STRIPE_KEY =
       "pk_test_51SD602EF5AumznfWxP9Rio1Fv3oo0LaoLHcBl64s1hJohMJeE1Qmqjg2ivwIqLrzY17bwj9ArJwLLVemgZbP0M3V007MdBvFrR";
 
@@ -28,6 +30,8 @@ class NetworkStrings {
   static const String updateProfile = "auth/update-profile";
   static const String deleteAccount = "auth/delete-account";
   static const String verifyVeriff = 'auth/create-veriff-session';
+  static const String USER_SUCCESS_URL =
+      'https://beekind-backend.deployment-uat.com/api/v1/veriff/callback';
 
   ///STATUS CODES
   static const int success = 200;
@@ -53,6 +57,7 @@ class NetworkStrings {
   static const String createOrder = "user/create-order";
   static const String fetchOrders = "user/orders";
   static const String getSingleOrder = "user/get-order";
+  static const String cancelOrder = "user/cancel-order";
   static const String getStoreDetail = "user/store-details";
   static const String getProductsByCategory = "user/products-by-category";
   static const String getSingleProduct = "user/product";

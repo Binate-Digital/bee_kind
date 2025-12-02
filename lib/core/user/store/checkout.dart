@@ -2,6 +2,7 @@ import 'package:bee_kind/common/new_address_screen.dart';
 import 'package:bee_kind/core/user/store/choose_payment_method.dart';
 import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/utils/app_colors.dart';
+import 'package:bee_kind/utils/app_dialogs.dart';
 import 'package:bee_kind/widgets/address_bar.dart';
 import 'package:bee_kind/widgets/address_type.dart';
 import 'package:bee_kind/widgets/cart_item.dart';
@@ -63,7 +64,7 @@ class CheckoutScreen extends GetView<StoreController> {
                   () => SizedBox(
                     height: 55.h,
                     child: CustomButton(
-                      isLoading: controller.isFetchingCards.value,
+                      // isLoading: controller.isFetchingCards.value,
                       gradientColors:
                           controller.orderItems != null &&
                               controller.orderItems!.isNotEmpty
@@ -73,24 +74,26 @@ class CheckoutScreen extends GetView<StoreController> {
                               AppColors.blackColor.withValues(alpha: 0.2),
                             ],
                       onTap: () async {
-                        if (controller.orderItems != null &&
-                            controller.orderItems!.isNotEmpty) {
-                          await controller.loadCards(context);
-
-                          // If still loading, do nothing
-                          if (controller.isFetchingCards.value) return;
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChoosePaymentScreen(
-                                totalPrice: overallTotal,
-                                cards: controller.cardList,
-                                selectedPaymentMethod:
-                                    controller.selectedPaymentMethod.value,
-                              ),
-                            ),
+                        if (controller.selectedAddress.value == null) {
+                          AppDialogs.showToast(
+                            "Please select a delivery address",
                           );
+                          return;
+                        } else {
+                          if (controller.orderItems != null &&
+                              controller.orderItems!.isNotEmpty) {
+                            // await controller.loadCards(context);
+                            // if (controller.isFetchingCards.value) return;
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChoosePaymentScreen(
+                                  totalPrice: overallTotal,
+                                ),
+                              ),
+                            );
+                          }
                         }
                       },
 
@@ -115,7 +118,6 @@ class CheckoutScreen extends GetView<StoreController> {
                 onTap: () {},
                 address:
                     controller.selectedAddress.value?.address ??
-                    controller.prefs.getString("address") ??
                     "No address selected",
               );
             }),
@@ -170,19 +172,20 @@ class CheckoutScreen extends GetView<StoreController> {
                                             return GestureDetector(
                                               onTap: () {
                                                 controller.selectAddress(index);
-                                                setModalState(
-                                                  () {},
-                                                ); // update bottomsheet
+
+                                                setModalState(() {});
+
+                                                Navigator.pop(context);
                                               },
                                               child: AddressType(
                                                 isChecked: isSelected,
                                                 type:
                                                     currentAddress
                                                         .addressName ??
-                                                    "N/A",
+                                                    "Not Specified",
                                                 address:
                                                     currentAddress.address ??
-                                                    "N/A",
+                                                    "Not Specified",
                                                 onChanged: (value) {
                                                   controller.selectAddress(
                                                     index,
@@ -282,7 +285,7 @@ class CheckoutScreen extends GetView<StoreController> {
                         );
                       },
                       child: CustomText(
-                        text: "Change Address",
+                        text: "Select Address",
                         underlined: true,
                         weight: FontWeight.bold,
                         fontSize: 18.sp,

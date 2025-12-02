@@ -1,83 +1,89 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class UserPermissions {
+  // -----------------------------
+  // LOCATION HANDLER
+  // -----------------------------
   static Future<bool> handleLocationPermission() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      debugPrint('Location services are disabled.');
-      await Geolocator.openLocationSettings();
-
-      await Future.delayed(const Duration(seconds: 2));
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return false;
+      if (Platform.isAndroid) {
+        await Geolocator.openLocationSettings();
+      }
+      return false;
     }
-    permission = await Geolocator.checkPermission();
+
+    LocationPermission permission = await Geolocator.checkPermission();
 
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        debugPrint('Location permission denied. Opening app settings...');
-        await Geolocator.openAppSettings();
-
-        await Future.delayed(const Duration(seconds: 2));
-        permission = await Geolocator.checkPermission();
-        if (permission == LocationPermission.denied ||
-            permission == LocationPermission.deniedForever) {
-          return false;
-        }
-      }
     }
 
-    // Denied forever
+    // 🔥 On iOS → DO NOT auto-open settings
+    if (permission == LocationPermission.denied) {
+      if (Platform.isAndroid) await openAppSettings();
+      return false;
+    }
+
     if (permission == LocationPermission.deniedForever) {
-      debugPrint(
-        ' Location permission permanently denied. Opening settings...',
-      );
-      await Geolocator.openAppSettings();
-      // Wait a bit and recheck
-      await Future.delayed(const Duration(seconds: 2));
-      permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.deniedForever ||
-          permission == LocationPermission.denied) {
-        return false;
-      }
+      if (Platform.isAndroid) await openAppSettings();
+      return false;
     }
 
     return true;
   }
 
-  static Future<Position?> getCurrentLocation() async {
-    final hasPermission = await handleLocationPermission();
+  // -----------------------------
+  // CAMERA + MICROPHONE HANDLER
+  // -----------------------------
+  static Future<bool> handleCameraAndMicPermission() async {
+    final cameraStatus = await Permission.camera.request();
+    final micStatus = await Permission.microphone.request();
 
-    if (!hasPermission) return null;
+    // iOS → NO settings redirection
+    if (Platform.isIOS) {
+      return cameraStatus.isGranted && micStatus.isGranted;
+    }
 
-    // Retrieve the current position
-    return await Geolocator.getCurrentPosition(
-      // ignore: deprecated_member_use
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    // Android → allow redirect to settings
+    if (cameraStatus.isDenied || micStatus.isDenied) {
+      await openAppSettings();
+      return false;
+    }
+
+    if (cameraStatus.isPermanentlyDenied || micStatus.isPermanentlyDenied) {
+      await openAppSettings();
+      return false;
+    }
+
+    return true;
   }
 
-  static Future<void> requestCameraAndMicrophonePermission() async {
-    final cameraStatus = await Permission.camera.request();
-    final microphoneStatus = await Permission.microphone.request();
+  // -----------------------------
+  // REQUEST ALL
+  // -----------------------------
+  static Future<bool> requestAllPermissions() async {
+    final loc = await handleLocationPermission();
+    if (!loc) return false;
 
-    if (cameraStatus.isGranted && microphoneStatus.isGranted) {
-      debugPrint('Camera and Microphone permissions granted');
-      // You can now access camera and microphone
-    } else if (cameraStatus.isDenied || microphoneStatus.isDenied) {
-      debugPrint('Camera or Microphone permissions denied');
-      // Handle denied permission (e.g., show a message, disable features)
-    } else if (cameraStatus.isPermanentlyDenied ||
-        microphoneStatus.isPermanentlyDenied) {
-      debugPrint('Camera or Microphone permissions permanently denied');
-      // Guide the user to app settings to grant permissions manually
-      openAppSettings();
-    }
+    final camMic = await handleCameraAndMicPermission();
+    if (!camMic) return false;
+
+    return true;
+  }
+
+  // -----------------------------
+  // GET LOCATION
+  // -----------------------------
+  static Future<Position?> getCurrentLocation() async {
+    final allowed = await handleLocationPermission();
+    if (!allowed) return null;
+
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
   }
 }

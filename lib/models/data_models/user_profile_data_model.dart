@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:dio/dio.dart';
 
@@ -70,7 +71,7 @@ class UserProfileDataModel {
         filename: profilePicture!.path.split('/').last,
       );
     } else {
-      print("No valid local image selected — ${profilePicture}");
+      log("No valid local image selected — $profilePicture");
     }
 
     return map;

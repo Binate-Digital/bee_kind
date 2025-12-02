@@ -1,20 +1,39 @@
+import 'dart:developer';
+
+import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/utils/app_colors.dart';
+import 'package:bee_kind/utils/app_dialogs.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
-Future<void> cancelOrderDialog(BuildContext context) async {
-  int? selectedReason;
+Future<void> cancelOrderDialog(BuildContext context, String orderId) async {
+  int selectedReason = 0;
   final TextEditingController descriptionController = TextEditingController();
+  final controller = Get.find<StoreController>();
+
+  // final List<String> reasonLabels = [
+  //   "Changed my mind",
+  //   "Got a better price",
+  //   "Other",
+  // ];
+
+  final List<String> reasonKeys = [
+    "changed-mind",
+    "found-better-price",
+    "other",
+  ];
 
   showDialog(
     context: context,
-    barrierDismissible: false,
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
+          final bool showDescription = selectedReason == 2; // "Other"
+
           return Dialog(
             backgroundColor: Colors.transparent,
             insetPadding: EdgeInsets.all(20.w),
@@ -24,137 +43,146 @@ Future<void> cancelOrderDialog(BuildContext context) async {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20.r),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header container with title
-                  Stack(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(vertical: 20.h),
-                        decoration: BoxDecoration(
-                          color: AppColors.yellow2,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20.r),
-                            topRight: Radius.circular(20.r),
-                          ),
-                        ),
-                        child: Center(
-                          child: CustomText(
-                            text: "Cancel Order",
-                            fontSize: 22.sp,
-                            fontColor: AppColors.blackColor,
-                            weight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        right: 10.w,
-                        top: 17.h,
-                        child: GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Icon(
-                            Icons.close,
-                            size: 25.r,
-                            color: AppColors.blackColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 15.h),
-
-                  // Radio buttons for cancellation reasons
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: Column(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // HEADER
+                    Stack(
                       children: [
-                        // Changed my mind
-                        _buildRadioOption(
-                          context: context,
-                          value: 0,
-                          selectedValue: selectedReason,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedReason = value;
-                            });
-                          },
-                          text: "Changed my mind",
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(vertical: 20.h),
+                          decoration: BoxDecoration(
+                            color: AppColors.yellow2,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20.r),
+                              topRight: Radius.circular(20.r),
+                            ),
+                          ),
+                          child: Center(
+                            child: CustomText(
+                              text: "Cancel Order",
+                              fontSize: 22.sp,
+                              fontColor: AppColors.blackColor,
+                              weight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        SizedBox(height: 12.h),
-
-                        // Got a better price
-                        _buildRadioOption(
-                          context: context,
-                          value: 1,
-                          selectedValue: selectedReason,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedReason = value;
-                            });
-                          },
-                          text: "Got a better price",
-                        ),
-                        SizedBox(height: 12.h),
-
-                        // Other
-                        _buildRadioOption(
-                          context: context,
-                          value: 2,
-                          selectedValue: selectedReason,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedReason = value;
-                            });
-                          },
-                          text: "Other",
+                        Positioned(
+                          right: 10.w,
+                          top: 17.h,
+                          child: GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Icon(Icons.close, size: 25.r),
+                          ),
                         ),
                       ],
                     ),
-                  ),
 
-                  SizedBox(height: 20.h),
+                    SizedBox(height: 15.h),
 
-                  // Description text field
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: CustomTextField(
-                      hint: "Description",
-                      radius: 10.r,
-                      controller: descriptionController,
-                      maxlines: 5,
+                    // REASONS
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Column(
+                        children: [
+                          _buildRadioOption(
+                            context: context,
+                            value: 0,
+                            selectedValue: selectedReason,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedReason = value!;
+                              });
+                            },
+                            text: "Changed my mind",
+                          ),
+                          SizedBox(height: 12.h),
+
+                          _buildRadioOption(
+                            context: context,
+                            value: 1,
+                            selectedValue: selectedReason,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedReason = value!;
+                              });
+                            },
+                            text: "Got a better price",
+                          ),
+                          SizedBox(height: 12.h),
+
+                          _buildRadioOption(
+                            context: context,
+                            value: 2,
+                            selectedValue: selectedReason,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedReason = value!;
+                              });
+                            },
+                            text: "Other",
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
 
-                  SizedBox(height: 25.h),
+                    SizedBox(height: 20.h),
 
-                  // Submit button
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20.w,
-                      vertical: 20.h,
+                    // DESCRIPTION — SHOW ONLY WHEN "Other"
+                    if (showDescription)
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: CustomTextField(
+                          hint: "Describe your reason",
+                          radius: 10.r,
+                          controller: descriptionController,
+                          maxlines: 5,
+                        ),
+                      ),
+
+                    if (showDescription) SizedBox(height: 25.h),
+
+                    // SUBMIT BUTTON
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 20.h,
+                      ),
+                      child: Obx(
+                        () => CustomButton(
+                          text: "Submit",
+                          fontSize: 18.sp,
+                          borderColor: AppColors.blackColor,
+                          verticalPadding: 20.h,
+                          isLoading: controller.isLoading.value,
+                          horizontalPadding: 10.w,
+                          onTap: () async {
+                            if (selectedReason == 2 &&
+                                descriptionController.text.trim().isEmpty) {
+                              AppDialogs.showToast(
+                                "Please describe your reason",
+                              );
+                              return;
+                            }
+
+                            log(
+                              "SELECTED REASON: ${reasonKeys[selectedReason]}",
+                            );
+
+                            await controller.cancelOrder(
+                              orderId: orderId,
+                              reason: reasonKeys[selectedReason],
+                              description: descriptionController.text.trim(),
+                              context: context,
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                    child: CustomButton(
-                      onTap: () {
-                        // Handle submit logic here
-                        if (selectedReason == null) {
-                          // Show error message
-                          return;
-                        }
-
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      },
-                      text: "Submit",
-                      borderColor: AppColors.blackColor,
-                      verticalPadding: 20.h,
-                      horizontalPadding: 10.w,
-                      fontSize: 18.sp,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

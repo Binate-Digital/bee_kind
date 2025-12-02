@@ -1,3 +1,3 @@
 class AppConstants {
-  static const String googleApiKey = "AIzaSyBArFrcRCqfcd171dZv4WI7uLrNI6Mf4WM";
+  static const String googleApiKey = "AIzaSyDI8Sp5MdnVOywTFhrU1TzNV_RJysAVFPc";
 }

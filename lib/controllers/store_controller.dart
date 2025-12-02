@@ -30,6 +30,8 @@ class StoreController extends GetxController {
 
   final baseController = Get.put(BaseViewController());
 
+  RxList<order.OrderData> completedOrdersList = <order.OrderData>[].obs;
+
   RxBool isLoading = false.obs;
 
   final prefs = SharedPrefs();
@@ -93,13 +95,133 @@ class StoreController extends GetxController {
   // CREATE ORDER LOADING STATE
   RxBool isCreatingOrder = false.obs;
 
-  RxBool isSelected = false.obs;
-
   Rxn<GetProductsByCategoriesResponseModel> productsByCategory =
       Rxn<GetProductsByCategoriesResponseModel>();
 
   RxInt selectedAddressIndex = (-1).obs;
   Rxn<AddressModel> selectedAddress = Rxn<AddressModel>();
+
+  Future<void> setDefaultCard(BuildContext context, String cardId) async {
+    try {
+      AppDialogs.progressAlertDialog(context: context);
+
+      final response = await network.postRequest(
+        endPoint: NetworkStrings.setDefaultCard,
+        data: {"paymentMethodId": cardId},
+        isHeaderRequire: true,
+      );
+
+      Navigator.pop(context);
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to set default card");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        AppDialogs.showToast("Default card updated");
+
+        for (var c in cardList) {
+          c.isDefault = false;
+        }
+
+        final selectedCard = cardList.firstWhereOrNull((c) => c.id == cardId);
+
+        if (selectedCard != null) {
+          selectedCard.isDefault = true;
+        }
+
+        selectedPaymentMethod.value = cardId;
+
+        prefs.setString("cardId", cardId);
+
+        // 🔄 reload cards from API to sync fully
+        await loadCards(context);
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to set default card");
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      AppDialogs.showToast("Something went wrong");
+    }
+  }
+
+  Future<void> deleteCard(BuildContext context, String cardId) async {
+    try {
+      AppDialogs.progressAlertDialog(context: context);
+
+      final response = await network.deleteRequest(
+        endPoint: "${NetworkStrings.deleteCard}/$cardId",
+        isHeaderRequire: true,
+      );
+
+      Navigator.pop(context); // Close loader
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to delete card");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        cardList.removeWhere((c) => c.id == cardId);
+        AppDialogs.showToast("Card deleted successfully");
+
+        // Refresh card list immediately
+        await loadCards(context);
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to delete card");
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      AppDialogs.showToast("Something went wrong deleting card");
+    }
+  }
+
+  Future<void> cancelOrder({
+    required dynamic orderId,
+    required dynamic reason,
+    required dynamic description,
+    required BuildContext context,
+  }) async {
+    isLoading.value = true;
+    try {
+      final Map<String, dynamic> body = {
+        "orderId": orderId.toString(),
+        "reason": reason.toString(),
+        "description": description.toString(),
+      };
+
+      log("BODY FOR ORDER CANCEL: $body");
+
+      final response = await network.patchRequest(
+        endPoint: NetworkStrings.cancelOrder,
+        data: body,
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      final data = response!.data;
+
+      if (data["status"] == true) {
+        AppDialogs.showToast("Order cancelled successfully");
+        isLoading.value = false;
+        Navigator.pop(context);
+        Navigator.pop(context);
+        fetchOrdersByStatus("pending");
+      } else {
+        log(data["message"] ?? "Cancellation failed");
+      }
+    } catch (e) {
+      isLoading.value = false;
+      Navigator.pop(context);
+      AppDialogs.showToast("Something went wrong while cancelling order.");
+      log("ERROR CANCEL ORDER: $e");
+    }
+  }
 
   Future<void> fetchOrdersByStatus(String status) async {
     try {
@@ -166,6 +288,8 @@ class StoreController extends GetxController {
           );
 
           selectedPaymentMethod.value = defaultCard.id ?? "";
+
+          prefs.setString("cardId", defaultCard.toString());
         },
       );
     } catch (e) {

@@ -76,7 +76,7 @@ class CartItem extends GetView<StoreController> {
                 }
 
                 final currentItem = controller.orderItems![index];
-                final qty = currentItem.quantity ?? 0;
+                final qty = currentItem.quantity ?? 1;
 
                 return Row(
                   children: [

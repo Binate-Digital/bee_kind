@@ -97,16 +97,9 @@ class PinController extends GetxController {
 
   Future<void> validateAndContinue() async {
     final currentOtp = otpPinFieldKey.currentState?.controller.text;
-    // final validationError = Validation.validateOtp(currentOtp);
-
-    // if (validationError != null) {
-    //   showError.value = true;
-    //   errorMessage.value = validationError;
-    //   return;
-    // }
 
     clearError();
-    _timer?.cancel();
+    // _timer?.cancel();
 
     try {
       final userId = prefs.getUserId() ?? "";
@@ -150,9 +143,9 @@ class PinController extends GetxController {
           );
 
           if (isAccountCreate) {
-            Get.to(() => const CreateProfileScreen());
+            Get.offAll(() => const CreateProfileScreen());
           } else {
-            Get.to(() => const ResetPasswordScreen());
+            Get.offAll(() => const ResetPasswordScreen());
           }
         } else {
           isLoading.value = false;

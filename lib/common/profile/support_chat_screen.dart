@@ -235,7 +235,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                       onTap: _sendMessage,
                       child: Image.asset(AssetsPath.send),
                     ),
-                    SizedBox(width: 10.w),
+                    // SizedBox(width: 10.w),
                   ],
                 ),
               ),
@@ -255,9 +255,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
         children: [
           // Chat messages
           Expanded(
-            child: _messages.isEmpty
-                ? Offstage()
-                : _buildMessagesList(),
+            child: _messages.isEmpty ? Offstage() : _buildMessagesList(),
           ),
         ],
       ),
@@ -335,9 +333,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.grey.shade300,
-                image: DecorationImage(
-                  image: AssetImage(AssetsPath.person),
-                ),
+                image: DecorationImage(image: AssetImage(AssetsPath.person)),
               ),
             ),
           ],

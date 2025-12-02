@@ -2,6 +2,7 @@
 
 import 'dart:developer' as dev;
 import 'dart:io';
+import 'package:bee_kind/utils/app_navigation.dart';
 import 'package:bee_kind/widgets/bottom_sheets/image_picker_bottom_sheet.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:dio/dio.dart' as dio;
@@ -22,6 +23,7 @@ import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/network_strings.dart';
 import 'package:bee_kind/services/network.dart';
 import 'package:bee_kind/widgets/dialogs/show_loading_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
@@ -34,6 +36,7 @@ import 'package:intl/intl.dart';
 class BaseViewController extends GetxController {
   final prefs = SharedPrefs();
   final network = Network();
+  final searchFocusNode = FocusNode();
 
   /// -------------------- BOTTOM NAV --------------------
   final RxInt currentIndex = 0.obs;
@@ -87,7 +90,7 @@ class BaseViewController extends GetxController {
       height: isCircular ? 150 : 180,
       margin: const EdgeInsets.symmetric(vertical: 15),
       decoration: BoxDecoration(
-        color: AppColors.yellow1.withOpacity(0.2),
+        color: AppColors.yellow1.withValues(alpha: 0.2),
         border: Border.all(color: AppColors.yellow2, width: 2),
         shape: isCircular ? BoxShape.circle : BoxShape.rectangle,
         borderRadius: isCircular ? null : borderRadius,
@@ -337,7 +340,9 @@ class BaseViewController extends GetxController {
 
       final data = response.data;
 
-      AppDialogs.showToast(data["message"]);
+      if (kDebugMode) {
+        AppDialogs.showToast(data["message"]);
+      }
 
       if (data["status"] == true && data["data"] != null) {
         storeDetail.value = StoreDetailResponseModel.fromJson(data);
@@ -496,6 +501,20 @@ class BaseViewController extends GetxController {
 
       prefs.setString("address", address.toString());
 
+      // ⭐ Add the default red Google Maps marker
+      markers.removeWhere((m) => m.markerId == const MarkerId("user_location"));
+
+      markers.add(
+        Marker(
+          markerId: const MarkerId("user_location"),
+          position: currentLatLng.value!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+      );
+
+      markers.refresh();
+
+      // Move map camera
       if (mapController != null) {
         mapController!.animateCamera(
           CameraUpdate.newLatLngZoom(currentLatLng.value!, 15),
@@ -645,9 +664,7 @@ class BaseViewController extends GetxController {
         isHeaderRequire: true,
       );
 
-      Navigator.pop(context); // CLOSE LOADING DIALOG
-
-      await _handleUpdateResponse(response, body);
+      await _handleUpdateResponse(response, body, context);
     } catch (e) {
       AppDialogs.showToast("Something went wrong while updating profile.");
       dev.log("updateProfile Exception: $e");
@@ -657,6 +674,7 @@ class BaseViewController extends GetxController {
   Future<void> _handleUpdateResponse(
     dio.Response? response,
     Map<String, dynamic> body,
+    BuildContext context,
   ) async {
     if (response == null) {
       AppDialogs.showToast("Failed to update profile.");
@@ -693,7 +711,7 @@ class BaseViewController extends GetxController {
       await getProfile();
 
       // GO BACK
-      Get.back();
+      AppNavigation.navigatorPop(context);
     } else {
       AppDialogs.showToast(data["message"] ?? "Update failed.");
     }

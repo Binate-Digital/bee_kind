@@ -16,7 +16,7 @@ class OrdersListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Fetch orders when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchOrdersByStatus("pending"); // ✅ already implemented
+      controller.fetchOrdersByStatus("pending");
     });
 
     return Obx(() {

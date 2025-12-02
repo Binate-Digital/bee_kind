@@ -153,7 +153,7 @@ class _LiveTrackingState extends State<LiveTracking> {
     if (pickupLatLng == null || dropoffLatLng == null) return;
 
     final BitmapDescriptor customIcon = await BitmapDescriptor.asset(
-      const ImageConfiguration(size: Size(50, 55)),
+      const ImageConfiguration(size: Size(30, 35)),
       AssetsPath.marker,
     );
 
@@ -309,11 +309,11 @@ class _LiveTrackingState extends State<LiveTracking> {
 
               /// CANCEL ORDER
               GestureDetector(
-                onTap: () => cancelOrderDialog(context),
+                onTap: () => cancelOrderDialog(context, widget.orderId),
                 child: CustomText(
                   text: "Cancel Order",
                   underlined: true,
-                  fontSize: 20.sp,
+                  fontSize: 23.sp,
                   weight: FontWeight.bold,
                 ),
               ),
@@ -329,15 +329,17 @@ class _LiveTrackingState extends State<LiveTracking> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CustomText(
-                        text: "Status: ${order.status ?? "N/A"}",
+                        text: "Delivery personnel name: N/A",
                         fontSize: 18.sp,
                       ),
+                      SizedBox(height: 10.h),
                       CustomText(
-                        text: "Order ID: ${order.sId ?? "N/A"}",
+                        text: "Car: Not available",
                         fontSize: 16.sp,
                       ),
+                      SizedBox(height: 10.h),
                       CustomText(
-                        text: "Total: \$${order.totalAmount ?? 0}",
+                        text: "Phone: Not available!",
                         fontSize: 16.sp,
                         fontColor: AppColors.yellow2,
                         weight: FontWeight.bold,

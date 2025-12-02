@@ -90,8 +90,8 @@ class _AddressScreenState extends State<AddressScreen> {
             isChecked: isSelected,
             isEdit: true,
             isDefault: addr.isDefault == true,
-            type: addr.addressName ?? "N/A",
-            address: addr.address ?? "N/A",
+            type: addr.addressName ?? "Not Specified",
+            address: addr.address ?? "Not Specified",
             onEditTap: () async {
               await Navigator.push(
                 context,

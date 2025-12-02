@@ -117,7 +117,7 @@ Future<void> logoutConfirmationDialog(BuildContext context) async {
                     onTap: () {
                       final prefs = SharedPrefs();
                       prefs.remove(SharedPrefs.userToken);
-                      prefs.clear();
+                      // prefs.clear();
                       AppDialogs.showToast("You've logged out!");
                       Get.offAll(() => RoleTypeScreen());
                     },

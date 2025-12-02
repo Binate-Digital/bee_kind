@@ -42,9 +42,7 @@ class RoleController extends GetxController {
       }
     }
 
-    UserPermissions.handleLocationPermission().then((value) {
-      UserPermissions.requestCameraAndMicrophonePermission();
-    });
+    UserPermissions.requestAllPermissions();
   }
 
   Future<void> selectRole(String role) async {

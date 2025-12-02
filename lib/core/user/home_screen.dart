@@ -10,6 +10,7 @@ import 'package:bee_kind/widgets/categories.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_drop_down.dart';
 import 'package:bee_kind/widgets/custom_google_maps.dart';
+import 'package:bee_kind/widgets/custom_keyboard_action_widget.dart';
 import 'package:bee_kind/widgets/custom_slider.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
@@ -25,6 +26,10 @@ class UserHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<BaseViewController>();
+
+    final searchFocusNode = FocusNode();
+    final maxFocusNode = FocusNode();
+    final minFocusNode = FocusNode();
 
     return Obx(
       () => CustomGoogleMap(
@@ -45,141 +50,168 @@ class UserHomeScreen extends StatelessWidget {
             // SEARCH FIELD
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: CustomTextField(
-                hint: "Search",
-                controller: controller.searchController,
-                bgColor: AppColors.whiteColor,
-                bdColor: AppColors.yellow2,
-                hintColor: AppColors.blackColor.withValues(alpha: 0.3),
-                prefxicon: AssetsPath.search,
-                isSuffixIcon: true,
-                onEditingComplete: controller.fetchStores,
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    showModalBottomSheet(
-                      isDismissible: false,
-                      context: context,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30.r),
-                          topRight: Radius.circular(30.r),
-                        ),
-                      ),
-                      builder: (BuildContext context) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 20.h,
-                            horizontal: 20.w,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.symmetric(vertical: 20.h),
-                                child: CustomDropdown(
-                                  items:
-                                      controller.categories.value?.data
-                                          ?.map(
-                                            (c) => c.categoryName ?? "Unknown",
-                                          )
-                                          .toList() ??
-                                      [],
-                                  hintText: "Product Category",
-
-                                  onChanged: (selectedName) {
-                                    final selectedCategory = controller
-                                        .categories
-                                        .value
-                                        ?.data
-                                        ?.firstWhere(
-                                          (c) => c.categoryName == selectedName,
-                                        );
-                                    log(
-                                      "selected category: ${selectedCategory?.sId}\n name: ${selectedCategory?.categoryName}",
-                                    );
-                                    controller.updateSelectedCategory(
-                                      selectedCategory?.sId,
-                                      selectedCategory?.categoryName,
-                                    );
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(bottom: 10.h),
-                                child: CustomText(
-                                  text: "Price Range",
-                                  fontFamily: "Raleway",
-                                  weight: FontWeight.bold,
-                                  fontSize: 18.sp,
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    width: 150.w,
-                                    child: CustomTextField(
-                                      hint: "Max Price",
-                                      controller: controller.maxPriceController,
-                                      keyboardType: TextInputType.number,
-                                      radius: 10.r,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 150.w,
-                                    child: CustomTextField(
-                                      hint: "Min Price",
-                                      controller: controller.minPriceController,
-                                      keyboardType: TextInputType.number,
-                                      radius: 10.r,
-                                    ),
-                                  ),
-                                  SizedBox(width: 50.w),
-                                ],
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: 10.h,
-                                  top: 20.h,
-                                ),
-                                child: CustomText(
-                                  text: "Delivery Radius",
-                                  fontFamily: "Raleway",
-                                  weight: FontWeight.bold,
-                                  fontSize: 18.sp,
-                                ),
-                              ),
-                              CustomSliderWidget(
-                                min: controller.minRadius.value,
-                                max: controller.maxRadius.value,
-                                initialValue: controller.currentRadius.value,
-                                unit: "miles",
-                                formatValue: (value) =>
-                                    controller.formatRadius(value),
-                                onChanged: controller.updateRadius,
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(top: 30.h),
-                                child: CustomButton(
-                                  onTap: () async => await controller
-                                      .fetchStores()
-                                      .then((value) {
-                                        Get.back();
-                                      }),
-                                  text: "Search",
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
+              child: CustomKeyboardActionWidget(
+                focusNode: searchFocusNode,
+                child: CustomTextField(
+                  hint: "Search",
+                  controller: controller.searchController,
+                  bgColor: AppColors.whiteColor,
+                  bdColor: AppColors.yellow2,
+                  hintColor: AppColors.blackColor.withValues(alpha: 0.3),
+                  prefxicon: AssetsPath.search,
+                  isSuffixIcon: true,
+                  focusNode: searchFocusNode,
+                  onEditingComplete: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    controller.fetchStores();
                   },
-                  child: Image.asset(
-                    AssetsPath.filter,
-                    color: AppColors.yellow2,
+                  suffixIcon: GestureDetector(
+                    onTap: () {
+                      showModalBottomSheet(
+                        isDismissible: false,
+                        context: context,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(30.r),
+                            topRight: Radius.circular(30.r),
+                          ),
+                        ),
+                        builder: (BuildContext context) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 20.h,
+                              horizontal: 20.w,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 20.h),
+                                  child: CustomDropdown(
+                                    items:
+                                        controller.categories.value?.data
+                                            ?.map(
+                                              (c) =>
+                                                  c.categoryName ?? "Unknown",
+                                            )
+                                            .toList() ??
+                                        [],
+                                    hintText: "Product Category",
+
+                                    onChanged: (selectedName) {
+                                      final selectedCategory = controller
+                                          .categories
+                                          .value
+                                          ?.data
+                                          ?.firstWhere(
+                                            (c) =>
+                                                c.categoryName == selectedName,
+                                          );
+                                      log(
+                                        "selected category: ${selectedCategory?.sId}\n name: ${selectedCategory?.categoryName}",
+                                      );
+                                      controller.updateSelectedCategory(
+                                        selectedCategory?.sId,
+                                        selectedCategory?.categoryName,
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 10.h),
+                                  child: CustomText(
+                                    text: "Price Range",
+                                    fontFamily: "Raleway",
+                                    weight: FontWeight.bold,
+                                    fontSize: 18.sp,
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SizedBox(
+                                      width: 150.w,
+                                      child: CustomKeyboardActionWidget(
+                                        focusNode: maxFocusNode,
+                                        child: CustomTextField(
+                                          hint: "Max Price",
+                                          focusNode: maxFocusNode,
+                                          controller:
+                                              controller.maxPriceController,
+                                          keyboardType: TextInputType.number,
+                                          radius: 10.r,
+                                          onEditingComplete: () {
+                                            FocusManager.instance.primaryFocus
+                                                ?.unfocus();
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 150.w,
+                                      child: CustomKeyboardActionWidget(
+                                        focusNode: minFocusNode,
+                                        child: CustomTextField(
+                                          focusNode: minFocusNode,
+                                          hint: "Min Price",
+                                          controller:
+                                              controller.minPriceController,
+                                          onEditingComplete: () {
+                                            FocusManager.instance.primaryFocus
+                                                ?.unfocus();
+                                          },
+                                          keyboardType: TextInputType.number,
+                                          radius: 10.r,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 50.w),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: 10.h,
+                                    top: 20.h,
+                                  ),
+                                  child: CustomText(
+                                    text: "Delivery Radius",
+                                    fontFamily: "Raleway",
+                                    weight: FontWeight.bold,
+                                    fontSize: 18.sp,
+                                  ),
+                                ),
+                                CustomSliderWidget(
+                                  min: controller.minRadius.value,
+                                  max: controller.maxRadius.value,
+                                  initialValue: controller.currentRadius.value,
+                                  unit: "miles",
+                                  formatValue: (value) =>
+                                      controller.formatRadius(value),
+                                  onChanged: controller.updateRadius,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 30.h),
+                                  child: CustomButton(
+                                    onTap: () async => await controller
+                                        .fetchStores()
+                                        .then((value) {
+                                          Get.back();
+                                        }),
+                                    text: "Search",
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: Image.asset(
+                      AssetsPath.filter,
+                      color: AppColors.yellow2,
+                    ),
                   ),
                 ),
               ),
@@ -203,7 +235,7 @@ class UserHomeScreen extends StatelessWidget {
 
             // CATEGORIES SECTION
             Container(
-              margin: EdgeInsets.only(top: 165.h),
+              margin: EdgeInsets.only(top: 155.h),
               padding: EdgeInsets.symmetric(vertical: 20.h),
               color: AppColors.whiteColor,
               child: Column(

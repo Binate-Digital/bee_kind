@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -38,19 +39,11 @@ class _VeriffWebViewScreenState extends State<VeriffWebViewScreen> {
               },
               onPageFinished: (String url) {
                 setState(() => isLoading = false);
+                log("onPageFinished: (String $url)");
                 _checkForCompletion(url);
               },
               onNavigationRequest: (NavigationRequest request) {
-                // 🔥 Intercept the success URL and STOP navigation
-                if (_isCompletionUrl(request.url)) {
-                  _handleVerificationSuccess();
-                  return NavigationDecision.prevent;
-                }
                 return NavigationDecision.navigate;
-              },
-              onUrlChange: (UrlChange change) {
-                final url = change.url ?? '';
-                _checkForCompletion(url);
               },
               onWebResourceError: (WebResourceError error) {
                 // don't mark as failed here, just hide loader
@@ -61,25 +54,32 @@ class _VeriffWebViewScreenState extends State<VeriffWebViewScreen> {
           ..loadRequest(Uri.parse(widget.verificationUrl));
   }
 
-  bool _isCompletionUrl(String url) {
-    // tweak this to match your actual redirect URL pattern
-    final lower = url.toLowerCase();
-    return lower.contains("success") ||
-        lower.contains("completed") ||
-        lower.contains("finished") ||
-        lower.contains("thank-you");
-  }
-
   void _checkForCompletion(String url) {
-    if (_isCompletionUrl(url)) {
-      _handleVerificationSuccess();
-    }
+    log("_checkForCompletion(String url)");
+
+    log("_isCompletionUrl(url)");
+    _handleVerificationSuccess(url);
   }
 
-  void _handleVerificationSuccess() {
-    if (!mounted) return;
-    // You might also want to call your backend here to confirm session status
-    Navigator.of(context).pop(true); // pass true back to previous screen
+  void _handleVerificationSuccess(String url) {
+    log("HANDLE VERIFICATION SUCCESS");
+    log('splitUrl $url');
+    log(
+      ' Succes url: https://beekind-backend.deployment-uat.com/api/v1/veriff/callback}',
+    );
+    try {
+      final splitUrl = url.split('?');
+      log('splitUrl $splitUrl');
+      log(
+        ' Succes url: https://beekind-backend.deployment-uat.com/api/v1/veriff/callback}',
+      );
+      if (splitUrl[0] ==
+          "https://beekind-backend.deployment-uat.com/api/v1/veriff/callback") {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override

@@ -54,20 +54,21 @@ class OrderItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           /// IMAGE
-          Container(
-            padding: EdgeInsets.symmetric(
-              vertical: verticalPadding ?? 45.h,
-              horizontal: horizontalPadding ?? 45.w,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: AppColors.yellow2, width: 1.w),
-              color: AppColors.whiteColor,
-              image: DecorationImage(
-                image: imageUrl != null
-                    ? NetworkImage(imageUrl!)
-                    : AssetImage(AssetsPath.product) as ImageProvider,
-                fit: BoxFit.cover,
+          /// IMAGE
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20.r),
+            child: Container(
+              width: 100.w,
+              height: 100.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: AppColors.yellow2, width: 1.w),
+                color: AppColors.whiteColor,
+                image: DecorationImage(
+                  image: imageUrl != null && imageUrl!.isNotEmpty
+                      ? NetworkImage(imageUrl!)
+                      : AssetImage(AssetsPath.product) as ImageProvider,
+                ),
               ),
             ),
           ),
@@ -116,9 +117,10 @@ class OrderItem extends StatelessWidget {
                       onTap: onTap,
                       text: "Track Order",
                       width: 100.w,
+                      height: 40.h,
                       fontSize: 13.sp,
                       horizontalPadding: 10.w,
-                      verticalPadding: 15.h,
+                      verticalPadding: 5.h,
                     ),
             ],
           ),

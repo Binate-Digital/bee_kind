@@ -86,6 +86,11 @@ Future<Map<String, dynamic>?> addNewAccountDialog(BuildContext context) async {
                       controller: numberController,
                       hint: "Card Number",
                       keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(16),
+                        CardNumberFormatter(),
+                      ],
                     ),
                   ),
 
@@ -178,8 +183,6 @@ Future<Map<String, dynamic>?> addNewAccountDialog(BuildContext context) async {
                         );
 
                         Navigator.pop(context);
-                        Navigator.pop(context);
-                        Navigator.pop(context);
                       },
                     ),
                   ),
@@ -217,6 +220,38 @@ class ExpiryDateFormatter extends TextInputFormatter {
     return TextEditingValue(
       text: text,
       selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+}
+
+/// ------------------------------------------------------------
+///  Formats card number: 4242-4242-4242-4242
+/// ------------------------------------------------------------
+class CardNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String text = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Limit max length to 16 digits
+    if (text.length > 16) text = text.substring(0, 16);
+
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < text.length; i++) {
+      buffer.write(text[i]);
+      if ((i + 1) % 4 == 0 && i + 1 != text.length) {
+        buffer.write('-');
+      }
+    }
+
+    final formatted = buffer.toString();
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }
