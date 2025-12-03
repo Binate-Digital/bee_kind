@@ -72,6 +72,10 @@ class _LiveTrackingState extends State<LiveTracking> {
     try {
       setState(() => isCalculatingEta = true);
 
+      log(
+        "ETA COORDINATES: ${pickupLatLng!.latitude},${pickupLatLng!.longitude}",
+      );
+
       final origin = "${pickupLatLng!.latitude},${pickupLatLng!.longitude}";
       final destination =
           "${dropoffLatLng!.latitude},${dropoffLatLng!.longitude}";

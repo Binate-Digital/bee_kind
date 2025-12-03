@@ -191,50 +191,50 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
 
                 // Date of Birth with error
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      onTap: () => selectDate(context),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 20.h,
-                          horizontal: 15.w,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.yellow1.withValues(alpha: 0.2),
-                          border: Border.all(
-                            color: AppColors.yellow2,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(30.r),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CustomText(
-                              text: formatDate(selectedDate),
-                              fontColor: AppColors.yellow2,
-                              fontSize: 18.sp,
-                            ),
-                            Image.asset(AssetsPath.calendar, width: 18.w),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Visibility(
-                      visible: dateError.isNotEmpty,
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 4.h, left: 15.w),
-                        child: CustomText(
-                          text: dateError,
-                          fontColor: AppColors.errorColor,
-                          fontSize: 14.sp,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                // Column(
+                //   crossAxisAlignment: CrossAxisAlignment.start,
+                //   children: [
+                //     GestureDetector(
+                //       onTap: () => selectDate(context),
+                //       child: Container(
+                //         padding: EdgeInsets.symmetric(
+                //           vertical: 20.h,
+                //           horizontal: 15.w,
+                //         ),
+                //         decoration: BoxDecoration(
+                //           color: AppColors.yellow1.withValues(alpha: 0.2),
+                //           border: Border.all(
+                //             color: AppColors.yellow2,
+                //             width: 1,
+                //           ),
+                //           borderRadius: BorderRadius.circular(30.r),
+                //         ),
+                //         child: Row(
+                //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //           children: [
+                //             CustomText(
+                //               text: formatDate(selectedDate),
+                //               fontColor: AppColors.yellow2,
+                //               fontSize: 18.sp,
+                //             ),
+                //             Image.asset(AssetsPath.calendar, width: 18.w),
+                //           ],
+                //         ),
+                //       ),
+                //     ),
+                //     Visibility(
+                //       visible: dateError.isNotEmpty,
+                //       child: Padding(
+                //         padding: EdgeInsets.only(top: 4.h, left: 15.w),
+                //         child: CustomText(
+                //           text: dateError,
+                //           fontColor: AppColors.errorColor,
+                //           fontSize: 14.sp,
+                //         ),
+                //       ),
+                //     ),
+                //   ],
+                // ),
 
                 // Gender with error
                 Column(
@@ -302,7 +302,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             "lastName": lastNameController.text.trim(),
                             "email": emailController.text.trim(),
                             "phone": phoneController.text.trim(),
-                            "dateOfBirth": selectedDate!.toIso8601String(),
+                            // "dateOfBirth": selectedDate!.toIso8601String(),
                             "gender": selectedGender,
                             "profileImage": baseController.profileImage.value,
                           };

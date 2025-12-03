@@ -144,7 +144,7 @@ class PinController extends GetxController {
           );
 
           if (isAccountCreate) {
-            Get.offAll(() => const CreateProfileScreen());
+            Get.offAll(() => CreateProfileScreen());
           } else {
             Get.offAll(() => const ResetPasswordScreen());
           }

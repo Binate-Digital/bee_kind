@@ -4,6 +4,7 @@ import 'package:bee_kind/utils/validation.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_drop_down.dart';
+import 'package:bee_kind/widgets/custom_keyboard_action_widget.dart';
 import 'package:bee_kind/widgets/custom_slider.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
@@ -14,8 +15,11 @@ import 'package:get/get.dart';
 import '../../controllers/profile_controller.dart';
 
 class CreateProfileScreen extends StatelessWidget {
-  const CreateProfileScreen({super.key, this.isEdit = false});
+  CreateProfileScreen({super.key, this.isEdit = false});
   final bool isEdit;
+
+  final focusNode = FocusNode();
+  final anotherFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -25,21 +29,21 @@ class CreateProfileScreen extends StatelessWidget {
       () => AppBarBaseView(
         title: "Create Profile",
         isLeading: false,
-        button: Container(
-          color: AppColors.whiteColor,
-          height: 100.h,
-          padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
-          child: CustomButton(
-            onTap: () =>
-                controller.handleCreateProfile(context, isEdit: isEdit),
-            text: isEdit ? "Edit Profile" : "Continue",
-            borderColor: AppColors.blackColor,
-            isLoading: controller.isLoading.value,
-            verticalPadding: 20.h,
-            horizontalPadding: 10.w,
-            fontSize: 18.sp,
-          ),
-        ),
+        // button: Container(
+        //   color: AppColors.whiteColor,
+        //   height: 100.h,
+        //   padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
+        //   child: CustomButton(
+        //     onTap: () =>
+        //         controller.handleCreateProfile(context, isEdit: isEdit),
+        //     text: isEdit ? "Edit Profile" : "Continue",
+        //     borderColor: AppColors.blackColor,
+        //     isLoading: controller.isLoading.value,
+        //     verticalPadding: 20.h,
+        //     horizontalPadding: 10.w,
+        //     fontSize: 18.sp,
+        //   ),
+        // ),
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Padding(
@@ -149,59 +153,59 @@ class CreateProfileScreen extends StatelessWidget {
                   /// -------------------- USER-SPECIFIC FIELDS --------------------
                   if (!controller.isVendor.value) ...[
                     /// DOB
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GestureDetector(
-                          onTap: () => controller.selectDate(context),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 20.h,
-                              horizontal: 15.w,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.yellow1.withValues(alpha: 0.2),
-                              border: Border.all(
-                                color: AppColors.yellow2,
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(30.r),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                CustomText(
-                                  text: controller.formatDate(
-                                    controller.selectedDate.value,
-                                  ),
-                                  fontColor: AppColors.yellow2,
-                                  fontSize: 18.sp,
-                                ),
-                                Image.asset(AssetsPath.calendar, width: 18.w),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Visibility(
-                          visible: controller.dateError.value.isNotEmpty,
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 4.h, left: 15.w),
-                            child: CustomText(
-                              text: controller.dateError.value,
-                              fontColor: AppColors.errorColor,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Column(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     GestureDetector(
+                    //       onTap: () => controller.selectDate(context),
+                    //       child: Container(
+                    //         padding: EdgeInsets.symmetric(
+                    //           vertical: 20.h,
+                    //           horizontal: 15.w,
+                    //         ),
+                    //         decoration: BoxDecoration(
+                    //           color: AppColors.yellow1.withValues(alpha: 0.2),
+                    //           border: Border.all(
+                    //             color: AppColors.yellow2,
+                    //             width: 1,
+                    //           ),
+                    //           borderRadius: BorderRadius.circular(30.r),
+                    //         ),
+                    //         child: Row(
+                    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //           children: [
+                    //             CustomText(
+                    //               text: controller.formatDate(
+                    //                 controller.selectedDate.value,
+                    //               ),
+                    //               fontColor: AppColors.yellow2,
+                    //               fontSize: 18.sp,
+                    //             ),
+                    //             Image.asset(AssetsPath.calendar, width: 18.w),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     Visibility(
+                    //       visible: controller.dateError.value.isNotEmpty,
+                    //       child: Padding(
+                    //         padding: EdgeInsets.only(top: 4.h, left: 15.w),
+                    //         child: CustomText(
+                    //           text: controller.dateError.value,
+                    //           fontColor: AppColors.errorColor,
+                    //           fontSize: 14.sp,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
 
                     /// Gender
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: EdgeInsets.only(top: 15.h),
+                          padding: EdgeInsets.only(top: 0.h),
                           child: CustomDropdown(
                             items: controller.genders,
                             initialValue: controller.selectedGender.value,
@@ -435,18 +439,30 @@ class CreateProfileScreen extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: CustomTextField(
-                            hint: "Apt/Suite/Unit",
-                            keyboardType: TextInputType.number,
-                            controller: controller.apartmentNumberController,
+                          child: CustomKeyboardActionWidget(
+                            focusNode: focusNode,
+                            child: CustomTextField(
+                              focusNode: focusNode,
+                              hint: "Apt/Suite/Unit",
+                              onEditingComplete: () =>
+                                  FocusManager.instance.primaryFocus?.unfocus(),
+                              keyboardType: TextInputType.number,
+                              controller: controller.apartmentNumberController,
+                            ),
                           ),
                         ),
                         SizedBox(width: 10.w),
                         Expanded(
-                          child: CustomTextField(
-                            hint: "Floor Number",
-                            keyboardType: TextInputType.number,
-                            controller: controller.floorNumberController,
+                          child: CustomKeyboardActionWidget(
+                            focusNode: anotherFocusNode,
+                            child: CustomTextField(
+                              hint: "Floor Number",
+                              focusNode: anotherFocusNode,
+                              onEditingComplete: () =>
+                                  FocusManager.instance.primaryFocus?.unfocus(),
+                              keyboardType: TextInputType.number,
+                              controller: controller.floorNumberController,
+                            ),
                           ),
                         ),
                       ],
@@ -600,7 +616,7 @@ class CreateProfileScreen extends StatelessWidget {
 
                     /// DELIVERY CONFIRMATION
                     Padding(
-                      padding: EdgeInsets.only(bottom: 80.h),
+                      padding: EdgeInsets.only(bottom: 0.h),
                       child: Row(
                         children: [
                           SizedBox(
@@ -631,6 +647,26 @@ class CreateProfileScreen extends StatelessWidget {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    Container(
+                      color: AppColors.whiteColor,
+                      height: 100.h,
+                      padding: EdgeInsets.symmetric(
+                        vertical: 20.h,
+                        // horizontal: 20.w,
+                      ),
+                      child: CustomButton(
+                        onTap: () => controller.handleCreateProfile(
+                          context,
+                          isEdit: isEdit,
+                        ),
+                        text: isEdit ? "Edit Profile" : "Continue",
+                        borderColor: AppColors.blackColor,
+                        isLoading: controller.isLoading.value,
+                        verticalPadding: 20.h,
+                        horizontalPadding: 10.w,
+                        fontSize: 18.sp,
                       ),
                     ),
                   ],

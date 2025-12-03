@@ -244,7 +244,7 @@ class ProfileController extends GetxController {
           lastName: lastNameController.text.trim(),
           phoneNumber: phoneController.text.trim(),
           gender: selectedGender.value?.toLowerCase(),
-          dateOfBirth: selectedDate.value?.toIso8601String(),
+          // dateOfBirth: selectedDate.value?.toIso8601String(),
           appartmentNumber: apartmentNumberController.text.trim(),
           floorNumber: floorNumberController.text.trim(),
 
@@ -502,11 +502,11 @@ class ProfileController extends GetxController {
     if (!isVendor.value) {
       log("Running USER validation...");
 
-      if (selectedDate.value == null) {
-        log(" Validation Failed: Date of birth is missing");
-        dateError.value = "Date of birth is required";
-        isValid = false;
-      }
+      // if (selectedDate.value == null) {
+      //   log(" Validation Failed: Date of birth is missing");
+      //   dateError.value = "Date of birth is required";
+      //   isValid = false;
+      // }
 
       if (selectedGender.value?.isEmpty ?? true) {
         log(" Validation Failed: Gender is missing");
