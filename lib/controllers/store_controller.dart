@@ -102,6 +102,7 @@ class StoreController extends GetxController {
   Rxn<AddressModel> selectedAddress = Rxn<AddressModel>();
 
   Future<void> setDefaultCard(BuildContext context, String cardId) async {
+    log("card id default card: $cardId");
     try {
       AppDialogs.progressAlertDialog(context: context);
 
@@ -291,7 +292,7 @@ class StoreController extends GetxController {
 
           selectedPaymentMethod.value = defaultCard.id ?? "";
 
-          prefs.setString("cardId", defaultCard.toString());
+          prefs.setString("cardId", defaultCard.id.toString());
         },
       );
     } catch (e) {
