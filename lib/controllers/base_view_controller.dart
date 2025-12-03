@@ -155,9 +155,9 @@ class BaseViewController extends GetxController {
       isVendor.value = prefs.getString("role") == "vendor";
 
       await getProfile();
+      await loadUserLocation();
       await getCategories();
       await fetchStores();
-      await loadUserLocation();
       await showStoreMarkers();
     });
   }
@@ -476,16 +476,22 @@ class BaseViewController extends GetxController {
   Future<String> getAddressFromLatLng(double lat, double lng) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
-
       final place = placemarks.first;
 
-      String address =
-          "${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
-
-      return address;
+      return "${place.street}, ${place.locality}, ${place.country}";
     } catch (e) {
-      dev.log("Error in reverse geocoding: $e");
-      return "Unknown location";
+      dev.log("Reverse Geocode failed, retrying once... $e");
+
+      try {
+        await Future.delayed(const Duration(seconds: 1));
+        List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+        final place = placemarks.first;
+
+        return "${place.street}, ${place.locality}, ${place.country}";
+      } catch (e) {
+        dev.log("Reverse Geocode failed again: $e");
+        return "Unknown location";
+      }
     }
   }
 

@@ -213,7 +213,9 @@ class AuthController extends GetxController {
         if (responseData['status'] == true) {
           isLoading.value = false;
           AppDialogs.showToast(responseData['message'] ?? "");
-          Get.to(() => const PinScreen());
+          prefs.setuserId(responseData["data"]["userId"]);
+          log("USER ID FORGOT PASSWORD: ${prefs.getUserId()}");
+          Get.to(() => const PinScreen(isAccountCreate: false));
         } else {
           isLoading.value = false;
           AppDialogs.showToast(responseData['message'] ?? "Failed to send OTP");

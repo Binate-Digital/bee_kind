@@ -36,40 +36,46 @@ class OrdersListScreen extends StatelessWidget {
       }
 
       return SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: ListView.builder(
-          shrinkWrap: true,
-          reverse: true,
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          itemCount: controller.ordersList.length,
-          itemBuilder: (_, index) {
-            final order = controller.ordersList[index];
-
-            // Safely extract first product
-            final firstItem = order.items != null && order.items!.isNotEmpty
-                ? order.items!.first
-                : null;
-
-            return GestureDetector(
-              onTap: () {}, // If you want whole tile tap as well
-              child: OrderItem(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => LiveTracking(orderId: order.sId ?? ""),
+        child: Column(
+          children: [
+            
+            ListView.builder(
+              shrinkWrap: true,
+              reverse: true,
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              itemCount: controller.ordersList.length,
+              itemBuilder: (_, index) {
+                final order = controller.ordersList[index];
+      
+                // Safely extract first product
+                final firstItem =
+                    order.items != null && order.items!.isNotEmpty
+                    ? order.items!.first
+                    : null;
+      
+                return GestureDetector(
+                  onTap: () {}, // If you want whole tile tap as well
+                  child: OrderItem(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            LiveTracking(orderId: order.sId ?? ""),
+                      ),
+                    ),
+      
+                    /// Pass real data to OrderItem
+                    productName: firstItem?.productName,
+                    quantity: firstItem?.quantity,
+                    price: firstItem?.price,
+                    status: order.status,
+                    imageUrl: firstItem?.productImage,
                   ),
-                ),
-
-                /// Pass real data to OrderItem
-                productName: firstItem?.productName,
-                quantity: firstItem?.quantity,
-                price: firstItem?.price,
-                status: order.status,
-                imageUrl: firstItem?.productImage,
-              ),
-            );
-          },
+                );
+              },
+            ),
+          ],
         ),
       );
     });

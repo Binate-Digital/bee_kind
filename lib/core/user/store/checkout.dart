@@ -285,7 +285,7 @@ class CheckoutScreen extends GetView<StoreController> {
                         );
                       },
                       child: CustomText(
-                        text: "Select Address",
+                        text: "Change Address",
                         underlined: true,
                         weight: FontWeight.bold,
                         fontSize: 18.sp,

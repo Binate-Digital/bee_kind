@@ -103,6 +103,7 @@ class PinController extends GetxController {
 
     try {
       final userId = prefs.getUserId() ?? "";
+      log("USER ID PIN SCREEN: $userId");
       if (userId.isEmpty) {
         AppDialogs.showToast("User ID not found. Please try signing up again.");
         return;

@@ -22,8 +22,8 @@ class _AddressScreenState extends State<AddressScreen> {
   @override
   void initState() {
     super.initState();
-    controller.fetchUserAddresses().then((_) {
-      setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await controller.fetchUserAddresses();
     });
   }
 
@@ -44,81 +44,77 @@ class _AddressScreenState extends State<AddressScreen> {
                   builder: (_) => AddNewAddressScreen(isEdit: false),
                 ),
               );
-
               await controller.fetchUserAddresses();
-              setState(() {});
             },
             text: "Add New Address",
           ),
         ),
       ),
 
-      body: controller.isLoading.value
-          ? const Center(child: CircularProgressIndicator(color: Colors.amber))
-          : buildAddressList(),
-    );
-  }
+      // 🔥 FIX: Wrap body in Obx so loader updates correctly
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.amber),
+          );
+        }
 
-  Widget buildAddressList() {
-    final addresses = controller.userAddresses.value?.data;
+        final addresses = controller.userAddresses.value?.data;
 
-    if (addresses == null || addresses.isEmpty) {
-      return Center(
-        child: CustomText(
-          text: "No addresses found.\nAdd one to continue.",
-          fontSize: 18.sp,
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
+        if (addresses == null || addresses.isEmpty) {
+          return Center(
+            child: CustomText(
+              text: "No addresses found.\nAdd one to continue.",
+              fontSize: 18.sp,
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
 
-    return ListView.builder(
-      padding: EdgeInsets.only(top: 20.h, bottom: 80.h),
-      shrinkWrap: true,
-      physics: BouncingScrollPhysics(),
-      itemCount: addresses.length,
-      itemBuilder: (_, index) {
-        final addr = addresses[index];
-        final isSelected = controller.selectedAddressIndex.value == index;
+        return ListView.builder(
+          padding: EdgeInsets.only(top: 20.h, bottom: 80.h),
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: addresses.length,
+          itemBuilder: (_, index) {
+            final addr = addresses[index];
+            final isSelected = controller.selectedAddressIndex.value == index;
 
-        return GestureDetector(
-          onTap: () {
-            controller.selectAddress(index);
-            setState(() {});
+            return GestureDetector(
+              onTap: () => controller.selectAddress(index),
+              child: AddressType(
+                isChecked: isSelected,
+                isEdit: true,
+                isDefault: addr.isDefault == true,
+                type: addr.addressName ?? "Not Specified",
+                address: addr.address ?? "Not Specified",
+
+                onEditTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AddNewAddressScreen(
+                        isEdit: true,
+                        address: AddressDataModel(
+                          addressId: addr.id,
+                          addressName: addr.addressName,
+                          apartmentNumber: addr.apartmentNumber,
+                          floorNumber: addr.floorNumber,
+                          isDefault: addr.isDefault,
+                        ),
+                      ),
+                    ),
+                  );
+
+                  await controller.fetchUserAddresses();
+                },
+
+                onChanged: (_) => controller.selectAddress(index),
+              ),
+            );
           },
-          child: AddressType(
-            isChecked: isSelected,
-            isEdit: true,
-            isDefault: addr.isDefault == true,
-            type: addr.addressName ?? "Not Specified",
-            address: addr.address ?? "Not Specified",
-            onEditTap: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AddNewAddressScreen(
-                    isEdit: true,
-                    address: AddressDataModel(
-                      addressId: addr.id,
-                      addressName: addr.addressName,
-                      apartmentNumber: addr.apartmentNumber,
-                      floorNumber: addr.floorNumber,
-                      isDefault: addr.isDefault,
-                    ), // <---- SEND THE SELECTED ADDRESS HERE
-                  ),
-                ),
-              );
-
-              await controller.fetchUserAddresses();
-              setState(() {});
-            },
-            onChanged: (_) {
-              controller.selectAddress(index);
-              setState(() {});
-            },
-          ),
         );
-      },
+      }),
     );
   }
 }

@@ -45,6 +45,7 @@ class BaseView extends StatelessWidget {
         return Scaffold(
           key: controller.scaffoldKey,
           extendBody: true,
+
           drawer: CustomDrawer(
             scaffoldKey: controller.scaffoldKey,
             isVendor: isVendor,

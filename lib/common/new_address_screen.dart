@@ -5,10 +5,12 @@ import 'package:bee_kind/models/data_models/address_data_model.dart';
 import 'package:bee_kind/services/network.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/app_constants.dart';
+import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/network_strings.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_drop_down.dart';
 import 'package:bee_kind/widgets/custom_google_maps.dart';
+import 'package:bee_kind/widgets/custom_keyboard_action_widget.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:bee_kind/utils/app_dialogs.dart';
@@ -28,6 +30,12 @@ class AddNewAddressScreen extends StatefulWidget {
 
 class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
   GoogleMapController? mapController;
+
+  final focusNode = FocusNode();
+  final anotherFocusNode = FocusNode();
+
+  Set<Marker> pickedMarkers = {};
+  BitmapDescriptor? userMarkerIcon;
 
   /// -------------------------------
   /// UI & INPUT CONTROLLERS
@@ -70,18 +78,21 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
 
       log("RESULT: ${result.formattedAddress}");
 
+      if (result.latLng == null) return;
+
       pickedLocationModel = LocationModel(
         addressName: selectedAddressType,
         type: "Point",
         address: result.formattedAddress ?? "",
-        coordinates: result.latLng != null
-            ? [result.latLng!.latitude, result.latLng!.longitude]
-            : [],
+        coordinates: [result.latLng!.latitude, result.latLng!.longitude],
       );
 
+      // Update UI inside bottom sheet
       setSheetState(() {
         locationAddress = pickedLocationModel?.address ?? "";
       });
+
+      _updateMarker(result.latLng!.latitude, result.latLng!.longitude);
     } catch (e) {
       log("Error picking location: $e");
     }
@@ -187,18 +198,56 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
   void initState() {
     super.initState();
 
-    /// Prefill for edit mode
+    _loadCustomMarker();
+
+    /// Prefill edit mode
     if (widget.isEdit && widget.address != null) {
       selectedAddressType = widget.address!.addressName ?? "home";
       apartmentNumberController.text = widget.address!.apartmentNumber ?? "";
       floorNumberController.text = widget.address!.floorNumber ?? "";
       locationAddress = widget.address!.location?.address ?? "";
       pickedLocationModel = widget.address!.location;
+
+      /// If editing, show existing marker
+      if (pickedLocationModel?.coordinates != null &&
+          pickedLocationModel!.coordinates!.length == 2) {
+        _updateMarker(
+          pickedLocationModel!.coordinates![0],
+          pickedLocationModel!.coordinates![1],
+        );
+      }
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showAddAddressBottomSheet();
     });
+  }
+
+  void _updateMarker(double lat, double lng) {
+    if (mapController == null) return;
+
+    setState(() {
+      pickedMarkers.clear(); // remove old marker
+
+      pickedMarkers.add(
+        Marker(
+          markerId: const MarkerId("picked_location"),
+          position: LatLng(lat, lng),
+          icon: userMarkerIcon ?? BitmapDescriptor.defaultMarker,
+        ),
+      );
+    });
+
+    // Move camera to new position
+    mapController!.animateCamera(CameraUpdate.newLatLng(LatLng(lat, lng)));
+  }
+
+  /// LOAD marker icon
+  Future<void> _loadCustomMarker() async {
+    userMarkerIcon = await BitmapDescriptor.asset(
+      const ImageConfiguration(size: Size(50, 50)),
+      AssetsPath.marker,
+    );
   }
 
   void showAddAddressBottomSheet() {
@@ -305,18 +354,34 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: CustomTextField(
-                            hint: "Apt/Suite/Unit",
-                            keyboardType: TextInputType.number,
-                            controller: apartmentNumberController,
+                          child: CustomKeyboardActionWidget(
+                            focusNode: focusNode,
+                            child: CustomTextField(
+                              hint: "Apt/Suite/Unit",
+                              focusNode: focusNode,
+                              onEditingComplete: () {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                setSheetState(() {});
+                              },
+                              keyboardType: TextInputType.number,
+                              controller: apartmentNumberController,
+                            ),
                           ),
                         ),
                         SizedBox(width: 10.w),
                         Expanded(
-                          child: CustomTextField(
-                            hint: "Floor Number",
-                            keyboardType: TextInputType.number,
-                            controller: floorNumberController,
+                          child: CustomKeyboardActionWidget(
+                            focusNode: anotherFocusNode,
+                            child: CustomTextField(
+                              focusNode: anotherFocusNode,
+                              hint: "Floor Number",
+                              onEditingComplete: () {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                setSheetState(() {});
+                              },
+                              keyboardType: TextInputType.number,
+                              controller: floorNumberController,
+                            ),
                           ),
                         ),
                       ],
@@ -380,6 +445,7 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
   Widget build(BuildContext context) {
     return CustomGoogleMap(
       onMapCreated: (controller) => mapController = controller,
+      markers: pickedMarkers,
       initialCameraPosition: const CameraPosition(
         target: LatLng(24.861714457432807, 67.07000228675905),
         zoom: 15,

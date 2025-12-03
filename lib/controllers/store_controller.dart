@@ -259,14 +259,16 @@ class StoreController extends GetxController {
     }
   }
 
-  void selectAddress(int index) {
+  void selectAddress(int index) async {
     selectedAddressIndex.value = index;
 
     final selected = userAddresses.value?.data?[index];
     selectedAddress.value = selected;
 
-    // Save to prefs
     prefs.setString("address", selected?.address ?? "");
+    if (selected?.id != null) {
+      await setDefaultAddress(selected!.id.toString());
+    }
   }
 
   Future<void> loadCards(BuildContext context) async {
@@ -391,7 +393,6 @@ class StoreController extends GetxController {
 
   Future<void> fetchUserAddresses() async {
     try {
-      // Show loader
       isLoading.value = true;
 
       final response = await network.getRequest(
@@ -409,18 +410,57 @@ class StoreController extends GetxController {
 
       final data = response.data;
 
-      // API Success
       if (data["status"] == true && data["data"] != null) {
         userAddresses.value = AddressResponseModel.fromJson(data);
 
-        log("Addresses Loaded: ${userAddresses.value?.data?.length}");
+        final list = userAddresses.value?.data ?? [];
+
+        int defaultIndex = list.indexWhere((a) => a.isDefault == true);
+
+        if (defaultIndex != -1) {
+          selectAddress(defaultIndex);
+        } else if (list.isNotEmpty) {
+          // if none is default → set first as default via API
+          await setDefaultAddress(list.first.id.toString());
+        }
+
+        log("Addresses Loaded: ${list.length}");
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to load addresses.");
       }
     } catch (e) {
       isLoading.value = false;
       log("fetchUserAddresses Exception: $e");
-      AppDialogs.showToast("An error occurred while fetching addresses");
+      AppDialogs.showToast("Error while loading addresses");
+    }
+  }
+
+  Future<void> setDefaultAddress(String addressId) async {
+    try {
+      final response = await network.postRequest(
+        endPoint: NetworkStrings.setDefaultAddress,
+        data: {"addressId": addressId},
+        isHeaderRequire: true,
+      );
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to update default address");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        log("Default address updated");
+
+        // update UI
+        // await fetchUserAddresses();
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to set default");
+      }
+    } catch (e) {
+      AppDialogs.showToast("Something went wrong updating default address");
+      log("setDefaultAddress Error: $e");
     }
   }
 

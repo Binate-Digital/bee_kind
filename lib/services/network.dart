@@ -54,6 +54,17 @@ class Network {
     return _cancelRequestToken ??= CancelToken();
   }
 
+  // inside Network class
+  Future<Response?> getDirect(String url) async {
+    try {
+      final dio = Dio();
+      return await dio.get(url);
+    } catch (e) {
+      log("DIRECTIONS API ERROR: $e");
+      return null;
+    }
+  }
+
   ////////////////// Get Request /////////////////////////
   Future<Response?> getRequest({
     //  required BuildContext context,
@@ -111,59 +122,58 @@ class Network {
   }
 
   ////////////////// Patch Request /////////////////////////
-Future<Response?> patchRequest({
-  required String endPoint,
-  dynamic data,
-  Map<String, dynamic>? queryParameters,
-  VoidCallback? onFailure,
-  bool isToast = true,
-  int connectTimeOut = 50000,
-  bool isErrorToast = true,
-  bool isHeaderRequire = false,
-  Function(int, int)? progress,
-}) async {
-  Response? response;
+  Future<Response?> patchRequest({
+    required String endPoint,
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    VoidCallback? onFailure,
+    bool isToast = true,
+    int connectTimeOut = 50000,
+    bool isErrorToast = true,
+    bool isHeaderRequire = false,
+    Function(int, int)? progress,
+  }) async {
+    Response? response;
 
-  if (await _connectivityManager!.isInternetConnected()) {
-    try {
-      _dio?.options.connectTimeout = Duration(milliseconds: connectTimeOut);
+    if (await _connectivityManager!.isInternetConnected()) {
+      try {
+        _dio?.options.connectTimeout = Duration(milliseconds: connectTimeOut);
 
-      final temp = await _dio!.patch(
-        NetworkStrings.baseUrl + endPoint,
-        data: data,
-        queryParameters: queryParameters,
-        cancelToken: _cancelRequestToken,
-        onSendProgress: progress,
-        options: Options(
-          headers: await _setHeader(isHeaderRequire: isHeaderRequire),
-          sendTimeout: Duration(milliseconds: connectTimeOut),
-          receiveTimeout: Duration(milliseconds: connectTimeOut),
-        ),
-      );
+        final temp = await _dio!.patch(
+          NetworkStrings.baseUrl + endPoint,
+          data: data,
+          queryParameters: queryParameters,
+          cancelToken: _cancelRequestToken,
+          onSendProgress: progress,
+          options: Options(
+            headers: await _setHeader(isHeaderRequire: isHeaderRequire),
+            sendTimeout: Duration(milliseconds: connectTimeOut),
+            receiveTimeout: Duration(milliseconds: connectTimeOut),
+          ),
+        );
 
-      if (temp.data['message'] != null) {
-        final msg = temp.data['message'].toString();
-        temp.data['message'] = msg;
+        if (temp.data['message'] != null) {
+          final msg = temp.data['message'].toString();
+          temp.data['message'] = msg;
+        }
+
+        response = temp;
+      } on DioException catch (e) {
+        _validateException(
+          response: e.response,
+          message: e.message,
+          onFailure: onFailure,
+          isToast: isToast,
+          isErrorToast: isErrorToast,
+        );
+        debugPrint("$endPoint PATCH Dio: ${e.message}");
       }
-
-      response = temp;
-    } on DioException catch (e) {
-      _validateException(
-        response: e.response,
-        message: e.message,
-        onFailure: onFailure,
-        isToast: isToast,
-        isErrorToast: isErrorToast,
-      );
-      debugPrint("$endPoint PATCH Dio: ${e.message}");
+    } else {
+      _noInternetConnection(onFailure: onFailure, isErrorToast: isErrorToast);
     }
-  } else {
-    _noInternetConnection(onFailure: onFailure, isErrorToast: isErrorToast);
+
+    return response;
   }
-
-  return response;
-}
-
 
   ////////////////// Post Request /////////////////////////
   Future<Response?> postRequest({

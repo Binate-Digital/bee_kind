@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:bee_kind/models/response_models/single_order_response_model.dart';
 import 'package:bee_kind/services/network.dart';
 import 'package:bee_kind/utils/app_colors.dart';
+import 'package:bee_kind/utils/app_constants.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/network_strings.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
@@ -56,12 +57,58 @@ class _LiveTrackingState extends State<LiveTracking> {
   @override
   void initState() {
     super.initState();
-    _fetchOrderDetails();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _fetchOrderDetails();
+      await _calculateETA();
+    });
   }
 
-  /// ---------------------------------------------------
-  /// API CALL: user/get-order/{orderId}
-  /// ---------------------------------------------------
+  String? estimatedTimeText;
+  bool isCalculatingEta = false;
+
+  Future<void> _calculateETA() async {
+    if (pickupLatLng == null || dropoffLatLng == null) return;
+
+    try {
+      setState(() => isCalculatingEta = true);
+
+      final origin = "${pickupLatLng!.latitude},${pickupLatLng!.longitude}";
+      final destination =
+          "${dropoffLatLng!.latitude},${dropoffLatLng!.longitude}";
+
+      final url =
+          "https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&key=${AppConstants.googleApiKey}";
+
+      final response = await network.getDirect(url); // ⬅️ ADD helper below
+
+      if (response == null) {
+        estimatedTimeText = "ETA unavailable";
+        setState(() => isCalculatingEta = false);
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["routes"] != null &&
+          data["routes"].length > 0 &&
+          data["routes"][0]["legs"] != null &&
+          data["routes"][0]["legs"].length > 0) {
+        final leg = data["routes"][0]["legs"][0];
+
+        final duration = leg["duration"]["text"]; // e.g. "18 mins"
+        estimatedTimeText = "ETA: $duration";
+      } else {
+        estimatedTimeText = "ETA unavailable";
+      }
+
+      setState(() => isCalculatingEta = false);
+    } catch (e) {
+      log("ETA error: $e");
+      estimatedTimeText = "ETA unavailable";
+      setState(() => isCalculatingEta = false);
+    }
+  }
+
   Future<void> _fetchOrderDetails() async {
     try {
       setState(() {
@@ -261,7 +308,7 @@ class _LiveTrackingState extends State<LiveTracking> {
       );
     }
 
-    // At this point, _order is guaranteed non-null
+    // At this point, _order is guaranteed non-nullx
     final order = _order!;
     final userAddress = order.userAddress;
     final storeAddress = order.storeAddress;
@@ -273,7 +320,7 @@ class _LiveTrackingState extends State<LiveTracking> {
     final currentStep = _stepFromStatus(order.status);
 
     return AppBarBaseView(
-      title: "Track Order",
+      title: estimatedTimeText ?? "Calculating ETA...",
       button: _buildTopContent(context, order, currentStep),
       body: _buildMapAndBottomContent(
         order,
@@ -333,10 +380,7 @@ class _LiveTrackingState extends State<LiveTracking> {
                         fontSize: 18.sp,
                       ),
                       SizedBox(height: 10.h),
-                      CustomText(
-                        text: "Car: Not available",
-                        fontSize: 16.sp,
-                      ),
+                      CustomText(text: "Car: Not available", fontSize: 16.sp),
                       SizedBox(height: 10.h),
                       CustomText(
                         text: "Phone: Not available!",
@@ -428,23 +472,23 @@ class _LiveTrackingState extends State<LiveTracking> {
             SizedBox(height: 10.h),
 
             /// PICKUP (store)
-            LocationBar(onTap: () {}, address: pickupAddress, isPickup: true),
+            // LocationBar(onTap: () {}, address: pickupAddress, isPickup: true),
 
-            Container(
-              margin: EdgeInsets.only(left: 330.w),
-              width: 2.w,
-              height: 30.h,
-              child: VerticalDottedLine(
-                color: AppColors.yellow2,
-                strokeWidth: 2,
-                dashWidth: 2,
-                dashSpace: 3,
-                roundedDots: true,
-              ),
-            ),
+            // Container(
+            //   margin: EdgeInsets.only(left: 330.w),
+            //   width: 2.w,
+            //   height: 30.h,
+            //   child: VerticalDottedLine(
+            //     color: AppColors.yellow2,
+            //     strokeWidth: 2,
+            //     dashWidth: 2,
+            //     dashSpace: 3,
+            //     roundedDots: true,
+            //   ),
+            // ),
 
             /// DROPOFF (user)
-            LocationBar(onTap: () {}, address: dropoffAddress, isPickup: false),
+            // LocationBar(onTap: () {}, address: dropoffAddress, isPickup: false),
 
             /// ORDER SUMMARY CARD
             OrderItem(

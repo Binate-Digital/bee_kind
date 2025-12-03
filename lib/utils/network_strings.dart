@@ -50,6 +50,7 @@ class NetworkStrings {
   static const String getAddresses = "user/get-user-addresses";
   static const String addAddress = "user/add-address";
   static const String updateUserAddress = "user/update-user-address";
+  static const String setDefaultAddress = "user/select-default-address";
 
   ///STORE
   static const String getCategories = "user/categories";
