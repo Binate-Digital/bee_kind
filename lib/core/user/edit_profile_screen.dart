@@ -169,6 +169,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: CustomTextField(
                     hint: "Email",
                     controller: emailController,
+                    isEditable: false,
                     validator: (value) => Validation.validateEmail(value),
                     prefxicon: AssetsPath.email,
                   ),
