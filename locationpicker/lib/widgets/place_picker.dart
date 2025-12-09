@@ -27,18 +27,15 @@ class PlacePicker extends StatefulWidget {
   /// Location to be displayed when screen is showed. If this is set or not null, the
   /// map does not pan to the user's current location.
   final LatLng? displayLocation;
-  LocalizationItem? localizationItem;
-  LatLng defaultLocation = LatLng(10.5381264, 73.8827201);
+  final LocalizationItem localizationItem;
+  final LatLng defaultLocation;
 
   PlacePicker(this.apiKey,
-      {this.displayLocation, this.localizationItem, LatLng? defaultLocation}) {
-    if (this.localizationItem == null) {
-      this.localizationItem = new LocalizationItem();
-    }
-    if (defaultLocation != null) {
-      this.defaultLocation = defaultLocation;
-    }
-  }
+      {this.displayLocation,
+      LocalizationItem? localizationItem,
+      LatLng? defaultLocation})
+      : localizationItem = localizationItem ?? LocalizationItem(),
+        defaultLocation = defaultLocation ?? LatLng(10.5381264, 73.8827201);
 
   @override
   State<StatefulWidget> createState() => PlacePickerState();
@@ -90,15 +87,8 @@ class PlacePickerState extends State<PlacePicker> {
     super.initState();
     if (widget.displayLocation == null) {
       _getCurrentLocation().then((value) {
-        if (value != null) {
-          setState(() {
-            _currentLocation = value;
-          });
-        } else {
-          //Navigator.of(context).pop(null);
-          print("getting current location null");
-        }
         setState(() {
+          _currentLocation = value;
           _loadMap = true;
         });
       }).catchError((e) {
@@ -248,9 +238,7 @@ class PlacePickerState extends State<PlacePicker> {
 
     previousSearchTerm = place;
 
-    if (context == null) {
-      return;
-    }
+    // `context` in State is non-null; no runtime null check needed
 
     clearOverlay();
 
@@ -295,7 +283,7 @@ class PlacePickerState extends State<PlacePicker> {
       ),
     );
 
-    Overlay.of(context)?.insert(this.overlayEntry!);
+    Overlay.of(context).insert(this.overlayEntry!);
 
     autoCompleteSearch(place);
   }
@@ -533,9 +521,6 @@ class PlacePickerState extends State<PlacePicker> {
             var tmp = result['address_components'][i];
             var types = tmp["types"] as List<dynamic>;
             var shortName = tmp['short_name'];
-            if (types == null) {
-              continue;
-            }
             if (i == 0) {
               // [street_number]
               name = shortName;
@@ -664,7 +649,7 @@ class PlacePickerState extends State<PlacePicker> {
       //moveToLocation(target);
       print('target:$target');
       return target;
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       final locationData = await Geolocator.getLastKnownPosition();
       if (locationData != null) {
         return LatLng(locationData.latitude, locationData.longitude);

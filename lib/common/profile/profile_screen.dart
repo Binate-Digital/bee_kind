@@ -86,12 +86,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             if (isVendor) ...[
               SizedBox(height: 20.h),
-              ProfileOption(
-                onTap: () {},
-                isNotification: true,
-                image: AssetsPath.notifications,
-                text: "Hide Profile",
-              ),
+              Obx(() {
+                final hide =
+                    baseController.profile.value?.data?.hideProfile ?? false;
+                return ProfileOption(
+                  onTap: () {},
+                  isNotification: true,
+                  image: AssetsPath.notifications,
+                  text: "Hide Profile",
+                  initialToggleValue: hide,
+                  onToggleChanged: (newVal) async {
+                    await baseController.toggleHideProfile(context);
+                  },
+                );
+              }),
             ],
             SizedBox(height: 30.h),
             ProfileOption(

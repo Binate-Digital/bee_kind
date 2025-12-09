@@ -83,16 +83,28 @@ class Network {
     if (await _connectivityManager!.isInternetConnected()) {
       try {
         _dio?.options.connectTimeout = Duration(milliseconds: connectTimeOut);
+        final url = isCustomUrl ?? (NetworkStrings.baseUrl + endPoint);
+        final headers = await _setHeader(isHeaderRequire: isHeaderRequire);
+        log('Network GET -> URL: $url');
+        log('Network GET -> queryParameters: $queryParameters');
+        log('Network GET -> headers: $headers');
         final temp = await _dio!.get(
-          isCustomUrl ?? (NetworkStrings.baseUrl + endPoint),
+          url,
           queryParameters: queryParameters,
           cancelToken: _cancelRequestToken,
           options: Options(
-            headers: await _setHeader(isHeaderRequire: isHeaderRequire),
+            headers: headers,
             sendTimeout: Duration(milliseconds: connectTimeOut),
             receiveTimeout: Duration(milliseconds: connectTimeOut),
           ),
         );
+        log('Network GET response -> status: ${temp.statusCode}');
+        try {
+          log('Network GET response -> headers: ${temp.headers.map}');
+        } catch (_) {}
+        try {
+          log('Network GET response -> data: ${temp.data}');
+        } catch (_) {}
         if (temp.data['message'] != null) {
           final msg = temp.data['message'].toString();
           temp.data['message'] = msg;

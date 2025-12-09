@@ -1,3 +1,4 @@
+import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
@@ -6,6 +7,7 @@ import 'package:bee_kind/widgets/user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 class ReviewCard extends StatefulWidget {
   const ReviewCard({
@@ -17,6 +19,7 @@ class ReviewCard extends StatefulWidget {
     this.ratingCount,
     this.userImage,
     this.userName,
+    this.reviewId,
   });
 
   final bool enabled;
@@ -26,6 +29,7 @@ class ReviewCard extends StatefulWidget {
   final int? ratingCount;
   final String? userImage;
   final String? userName;
+  final String? reviewId;
 
   @override
   State<ReviewCard> createState() => _ReviewCardState();
@@ -56,22 +60,26 @@ class _ReviewCardState extends State<ReviewCard> {
 
                 Column(
                   children: [
-                    // Name + Respond button (if vendor)
+                    // Name + Action buttons (if vendor)
                     CustomText(
                       text: widget.userName ?? "John Smith",
                       fontSize: 18.sp,
                       fontColor: AppColors.blackColor,
                       weight: FontWeight.bold,
                     ),
-                    widget.isVendor
-                        ? GestureDetector(
-                            onTap: () => showRespondDialog(context),
+                    if (widget.isVendor)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: () =>
+                                showRespondDialog(context, widget.reviewId),
                             child: Container(
                               padding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 8.h,
+                                horizontal: 12.w,
+                                vertical: 6.h,
                               ),
-                              margin: EdgeInsets.only(top: 10.h),
+                              margin: EdgeInsets.only(top: 10.h, right: 8.w),
                               decoration: BoxDecoration(
                                 color: AppColors.yellow2,
                                 borderRadius: BorderRadius.circular(20.r),
@@ -79,11 +87,119 @@ class _ReviewCardState extends State<ReviewCard> {
                               child: CustomText(
                                 text: "Respond",
                                 fontColor: Colors.black,
-                                fontSize: 16.sp,
+                                fontSize: 14.sp,
                               ),
                             ),
-                          )
-                        : Offstage(),
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              final TextEditingController editController =
+                                  TextEditingController(
+                                    text: widget.review ?? "",
+                                  );
+                              await showDialog(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text("Edit Review"),
+                                  content: TextField(
+                                    controller: editController,
+                                    maxLines: 3,
+                                    decoration: InputDecoration(
+                                      hintText: "Edit your review",
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: const Text("Cancel"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        Navigator.pop(ctx);
+                                        final storeController =
+                                            Get.find<StoreController>();
+                                        await storeController.updateReview(
+                                          widget.reviewId,
+                                          editController.text,
+                                          context,
+                                        );
+                                      },
+                                      child: const Text("Save"),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 6.h,
+                              ),
+                              margin: EdgeInsets.only(top: 10.h, right: 8.w),
+                              decoration: BoxDecoration(
+                                color: AppColors.yellow1,
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: CustomText(
+                                text: "Edit",
+                                fontColor: Colors.black,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              // Show confirmation dialog
+                              showDialog(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text("Delete Review"),
+                                  content: const Text(
+                                    "Are you sure you want to delete this review?",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: const Text("Cancel"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        Navigator.pop(ctx);
+                                        final storeController =
+                                            Get.find<StoreController>();
+                                        await storeController.deleteReview(
+                                          widget.reviewId,
+                                          context,
+                                        );
+                                      },
+                                      child: const Text(
+                                        "Delete",
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 6.h,
+                              ),
+                              margin: EdgeInsets.only(top: 10.h),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: CustomText(
+                                text: "Delete",
+                                fontColor: Colors.white,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ],

@@ -8,15 +8,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 
 class DottedBorderImagePicker extends StatefulWidget {
-  final Function(List<File>)? onImagesSelected;
+  final Function(List<File>, List<String>)? onImagesSelected;
   final String? hintText;
   final int maxImages;
+  final List<String>? initialNetworkImages;
 
   const DottedBorderImagePicker({
     super.key,
     this.onImagesSelected,
     this.hintText = "Upload pictures",
     this.maxImages = 3,
+    this.initialNetworkImages,
   });
 
   @override
@@ -26,14 +28,15 @@ class DottedBorderImagePicker extends StatefulWidget {
 
 class _DottedBorderImagePickerState extends State<DottedBorderImagePicker> {
   final List<File> _selectedImages = [];
+  final List<String> _networkImages = [];
   final ImagePicker _imagePicker = ImagePicker();
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      // Check if user can select more images
-      if (_selectedImages.length >= widget.maxImages) {
+      // Check if user can select more images (total: local + network)
+      if (_selectedImages.length + _networkImages.length >= widget.maxImages) {
         _showErrorDialog(
-          "You can only select up to ${widget.maxImages} images",
+          "You can only select up to \\${widget.maxImages} images",
         );
         return;
       }
@@ -49,11 +52,11 @@ class _DottedBorderImagePickerState extends State<DottedBorderImagePicker> {
         setState(() {
           _selectedImages.add(File(image.path));
         });
-        widget.onImagesSelected?.call(_selectedImages);
+        widget.onImagesSelected?.call(_selectedImages, _networkImages);
       }
     } catch (e) {
       _showErrorDialog(
-        "Failed to ${source == ImageSource.camera ? 'capture' : 'select'} image",
+        "Failed to \\${source == ImageSource.camera ? 'capture' : 'select'} image",
       );
     }
   }
@@ -106,11 +109,15 @@ class _DottedBorderImagePickerState extends State<DottedBorderImagePicker> {
     );
   }
 
-  void _removeImage(int index) {
+  void _removeImage(int index, {bool isNetwork = false}) {
     setState(() {
-      _selectedImages.removeAt(index);
+      if (isNetwork) {
+        _networkImages.removeAt(index);
+      } else {
+        _selectedImages.removeAt(index);
+      }
     });
-    widget.onImagesSelected?.call(_selectedImages);
+    widget.onImagesSelected?.call(_selectedImages, _networkImages);
   }
 
   void _showErrorDialog(String message) {
@@ -127,6 +134,14 @@ class _DottedBorderImagePickerState extends State<DottedBorderImagePicker> {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialNetworkImages != null) {
+      _networkImages.addAll(widget.initialNetworkImages!);
+    }
   }
 
   @override
@@ -176,7 +191,18 @@ class _DottedBorderImagePickerState extends State<DottedBorderImagePicker> {
 
         SizedBox(height: 20.h),
 
-        // Selected Images List
+        // Network Images List
+        if (_networkImages.isNotEmpty) ...[
+          Wrap(
+            spacing: 12.w,
+            runSpacing: 12.h,
+            children: List.generate(_networkImages.length, (index) {
+              return _buildNetworkImageItem(_networkImages[index], index);
+            }),
+          ),
+        ],
+
+        // Selected Local Images List
         if (_selectedImages.isNotEmpty) ...[
           Wrap(
             spacing: 12.w,
@@ -186,6 +212,48 @@ class _DottedBorderImagePickerState extends State<DottedBorderImagePicker> {
             }),
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildNetworkImageItem(String imageUrl, int index) {
+    return Stack(
+      children: [
+        Container(
+          width: 80.w,
+          height: 80.h,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: AppColors.blackColor),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.r),
+            child: Image.network(
+              imageUrl,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        // Remove button
+        Positioned(
+          top: -4.w,
+          right: -4.w,
+          child: GestureDetector(
+            onTap: () => _removeImage(index, isNetwork: true),
+            child: Container(
+              width: 20.w,
+              height: 20.h,
+              decoration: BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              child: Icon(Icons.close, color: Colors.white, size: 12.w),
+            ),
+          ),
+        ),
       ],
     );
   }

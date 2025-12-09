@@ -8,17 +8,24 @@ import 'package:bee_kind/widgets/dialogs/delivery_info_dialog.dart';
 import 'package:bee_kind/widgets/dialogs/order_complete_confirmation_dialog.dart';
 import 'package:bee_kind/widgets/stepper_widget.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:bee_kind/models/response_models/vendor_orders_response_model.dart'
+    as vorder;
+import 'package:bee_kind/controllers/store_controller.dart';
+// app_dialogs already imported above; avoid duplicate import
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SelectedOrder extends StatefulWidget {
-  const SelectedOrder({
+  SelectedOrder({
     super.key,
+    this.vendorOrder,
     this.isCancelled = false,
     this.isCurrent = false,
     this.isAccepted = false,
     this.isComplete = false,
   });
+  final vorder.VendorOrder? vendorOrder;
   final bool isCancelled;
   final bool isCurrent;
   final bool isAccepted;
@@ -47,13 +54,20 @@ class _SelectedOrderState extends State<SelectedOrder> {
   void initState() {
     super.initState();
     currentStep = widget.isCurrent ? 0 : 2;
-    isAccepted = widget.isAccepted;
-    isCurrent = widget.isCurrent;
-    isComplete = widget.isComplete;
+    isAccepted =
+        widget.isAccepted ||
+        (widget.vendorOrder?.status?.toLowerCase() == 'accepted');
+    isCurrent =
+        widget.isCurrent ||
+        (widget.vendorOrder?.status?.toLowerCase() == 'pending');
+    isComplete =
+        widget.isComplete ||
+        (widget.vendorOrder?.status?.toLowerCase() == 'completed');
   }
 
   @override
   Widget build(BuildContext context) {
+    final storeController = Get.find<StoreController>();
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size(30.w, 350.h),
@@ -227,6 +241,57 @@ class _SelectedOrderState extends State<SelectedOrder> {
                 fontColor: AppColors.blackColor,
               ),
               SizedBox(height: 20.h),
+              // Status action buttons for vendor orders
+              if (widget.vendorOrder != null)
+                Column(
+                  children: [
+                    SizedBox(height: 10.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        if ((widget.vendorOrder?.status ?? '').toLowerCase() ==
+                            'pending')
+                          ElevatedButton(
+                            onPressed: () async {
+                              await storeController.changeVendorOrderStatus(
+                                widget.vendorOrder!.orderId ?? '',
+                                'accepted',
+                                context,
+                              );
+                            },
+                            child: const Text('Accept'),
+                          ),
+                        if ((widget.vendorOrder?.status ?? '').toLowerCase() !=
+                            'completed')
+                          ElevatedButton(
+                            onPressed: () async {
+                              await storeController.changeVendorOrderStatus(
+                                widget.vendorOrder!.orderId ?? '',
+                                'completed',
+                                context,
+                              );
+                            },
+                            child: const Text('Mark Complete'),
+                          ),
+                        if ((widget.vendorOrder?.status ?? '').toLowerCase() !=
+                            'cancelled')
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.yellow2,
+                            ),
+                            onPressed: () async {
+                              await storeController.changeVendorOrderStatus(
+                                widget.vendorOrder!.orderId ?? '',
+                                'cancelled',
+                                context,
+                              );
+                            },
+                            child: const Text('Cancel'),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

@@ -1,9 +1,11 @@
+import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/popular_products.dart';
 import 'package:bee_kind/widgets/sales_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -18,10 +20,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   DateTime _selectedMonth = DateTime.now();
   late List<SalesData> weeklySalesData;
 
+  final storeController = Get.find<StoreController>();
+
   @override
   void initState() {
     super.initState();
     _generateWeeklyData();
+    _fetchVendorStats();
+  }
+
+  Future<void> _fetchVendorStats() async {
+    await storeController.getVendorStats(
+      month: DateFormat('yyyy-MM').format(_selectedMonth),
+    );
   }
 
   // ================== Month Navigation ==================
@@ -29,6 +40,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
       _generateWeeklyData();
+      _fetchVendorStats();
     });
   }
 
@@ -36,6 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
       _generateWeeklyData();
+      _fetchVendorStats();
     });
   }
 
@@ -199,137 +212,240 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // ================== Build Chart UI ==================
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          0,
-          20,
-          0,
-          MediaQuery.of(context).viewInsets.bottom +
-              20, // 👈 keeps clear of nav bar
-        ),
-        child: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
-          child: Column(
-            children: [
-              // Month Navigation Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Scaffold(
+      body: Column(
+        children: [
+          // Vendor Stats Section (observes controller.vendorStatsModel)
+          Obx(() {
+            final stats = storeController.vendorStatsModel.value;
+
+            // Consider data empty if model is null or all main metrics are zero/empty
+            final bool hasNoNumericData =
+                (stats == null) ||
+                ((stats.totalSales ?? 0) == 0 &&
+                    (stats.totalRevenue ?? 0) == 0 &&
+                    (stats.completedOrders ?? 0) == 0 &&
+                    (stats.pendingOrders ?? 0) == 0 &&
+                    (stats.weeklySales == null ||
+                        stats.weeklySales!.isEmpty ||
+                        stats.weeklySales!.every(
+                          (w) => (w.amount ?? 0) == 0,
+                        )) &&
+                    (stats.dailySales == null || stats.dailySales!.isEmpty));
+
+            if (hasNoNumericData) {
+              return Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  child: CustomText(
+                    text:
+                        "No sales data for selected month — try a different month or check backend.",
+                  ),
+                ),
+              );
+            }
+
+            return Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  IconButton(
-                    onPressed: goToPreviousMonth,
-                    icon: const Icon(
-                      Icons.arrow_back_ios,
-                      size: 25,
-                      color: AppColors.yellow2,
-                    ),
+                  _buildStatCard('Sales', stats.totalSales?.toString() ?? '-'),
+                  _buildStatCard(
+                    'Orders',
+                    stats.completedOrders?.toString() ?? '-',
                   ),
-                  Text(
-                    DateFormat('MMMM yyyy').format(_selectedMonth),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: goToNextMonth,
-                    icon: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 25,
-                      color: AppColors.yellow2,
-                    ),
+                  _buildStatCard(
+                    'Revenue',
+                    stats.totalRevenue?.toString() ?? '-',
                   ),
                 ],
               ),
+            );
+          }),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                0,
+                20,
+                0,
+                MediaQuery.of(context).viewInsets.bottom +
+                    20, // 👈 keeps clear of nav bar
+              ),
+              child: SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    // Month Navigation Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          onPressed: goToPreviousMonth,
+                          icon: const Icon(
+                            Icons.arrow_back_ios,
+                            size: 25,
+                            color: AppColors.yellow2,
+                          ),
+                        ),
+                        Text(
+                          DateFormat('MMMM yyyy').format(_selectedMonth),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: goToNextMonth,
+                          icon: const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 25,
+                            color: AppColors.yellow2,
+                          ),
+                        ),
+                      ],
+                    ),
 
-              const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-              // Weekly Sales Chart
-              SfCartesianChart(
-                plotAreaBorderWidth: 0,
-                primaryXAxis: CategoryAxis(
-                  labelRotation: -35,
-                  labelStyle: const TextStyle(fontSize: 12),
-                  majorGridLines: const MajorGridLines(width: 0.5),
-                  axisLine: const AxisLine(width: 1),
-                  majorTickLines: const MajorTickLines(size: 4),
-                ),
-                primaryYAxis: NumericAxis(
-                  isVisible: true,
-                  labelFormat: '\${value}',
-                  majorGridLines: const MajorGridLines(width: 0.4),
-                  axisLine: const AxisLine(width: 1),
-                  maximum: getChartMaxY(weeklySalesData),
-                ),
-                tooltipBehavior: TooltipBehavior(enable: true),
+                    // Weekly Sales Chart
+                    SfCartesianChart(
+                      plotAreaBorderWidth: 0,
+                      primaryXAxis: CategoryAxis(
+                        labelRotation: -35,
+                        labelStyle: const TextStyle(fontSize: 12),
+                        majorGridLines: const MajorGridLines(width: 0.5),
+                        axisLine: const AxisLine(width: 1),
+                        majorTickLines: const MajorTickLines(size: 4),
+                      ),
+                      primaryYAxis: NumericAxis(
+                        isVisible: true,
+                        labelFormat: '\${value}',
+                        majorGridLines: const MajorGridLines(width: 0.4),
+                        axisLine: const AxisLine(width: 1),
+                        maximum: getChartMaxY(weeklySalesData),
+                      ),
+                      tooltipBehavior: TooltipBehavior(enable: true),
 
-                series: <CartesianSeries<SalesData, String>>[
-                  ColumnSeries<SalesData, String>(
-                    dataSource: weeklySalesData,
-                    xValueMapper: (SalesData data, _) => data.label,
-                    yValueMapper: (SalesData data, _) => data.sales,
-                    borderRadius: BorderRadius.circular(8),
-                    spacing: 0.3,
-                    pointColorMapper: (_, __) => AppColors.yellow2,
-                    dataLabelSettings: const DataLabelSettings(
-                      isVisible: true,
-                      labelAlignment: ChartDataLabelAlignment.outer,
-                      textStyle: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
+                      series: <CartesianSeries<SalesData, String>>[
+                        ColumnSeries<SalesData, String>(
+                          dataSource: weeklySalesData,
+                          xValueMapper: (SalesData data, _) => data.label,
+                          yValueMapper: (SalesData data, _) => data.sales,
+                          borderRadius: BorderRadius.circular(8),
+                          spacing: 0.3,
+                          pointColorMapper: (_, __) => AppColors.yellow2,
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                            labelAlignment: ChartDataLabelAlignment.outer,
+                            textStyle: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onPointTap: (ChartPointDetails details) {
+                            final selectedWeek =
+                                weeklySalesData[details.pointIndex!];
+                            _showDailySales(context, selectedWeek);
+                          },
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 20.h),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Obx(() {
+                          final s = storeController.vendorStatsModel.value;
+                          return SalesInfo(
+                            heading: "Total Sales",
+                            text: s != null
+                                ? "\$${s.totalSales ?? "-"}"
+                                : "\$1250.00",
+                          );
+                        }),
+                        Obx(() {
+                          final s = storeController.vendorStatsModel.value;
+                          return SalesInfo(
+                            heading: "Revenue",
+                            text: s != null
+                                ? "\$${s.totalRevenue ?? "-"}"
+                                : "\$1250.00",
+                          );
+                        }),
+                      ],
+                    ),
+                    SizedBox(height: 10.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Obx(() {
+                          final s = storeController.vendorStatsModel.value;
+                          return SalesInfo(
+                            heading: "Pending Orders",
+                            text: s != null
+                                ? "${s.pendingOrders ?? "-"}"
+                                : "145",
+                          );
+                        }),
+                        Obx(() {
+                          final s = storeController.vendorStatsModel.value;
+                          return SalesInfo(
+                            heading: "Completed Orders",
+                            text: s != null
+                                ? "${s.completedOrders ?? "-"}"
+                                : "523",
+                          );
+                        }),
+                      ],
+                    ),
+                    SizedBox(height: 30.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Row(
+                        children: [
+                          CustomText(
+                            text: "Popular Products",
+                            fontSize: 18.sp,
+                            weight: FontWeight.bold,
+                          ),
+                        ],
                       ),
                     ),
-                    onPointTap: (ChartPointDetails details) {
-                      final selectedWeek = weeklySalesData[details.pointIndex!];
-                      _showDailySales(context, selectedWeek);
-                    },
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 20.h),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  SalesInfo(heading: "Total Sales", text: "\$1250.00"),
-                  SalesInfo(heading: "Revenue", text: "\$1250.00"),
-                ],
-              ),
-              SizedBox(height: 10.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  SalesInfo(heading: "Pending Orders", text: "145"),
-                  SalesInfo(heading: "Completed Orders", text: "523"),
-                ],
-              ),
-              SizedBox(height: 30.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Row(
-                  children: [
-                    CustomText(
-                      text: "Popular Products",
-                      fontSize: 18.sp,
-                      weight: FontWeight.bold,
+                    SizedBox(height: 10.h),
+                    ListView.builder(
+                      itemCount: 3,
+                      physics: NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        return Products();
+                      },
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 10.h),
-              ListView.builder(
-                itemCount: 3,
-                physics: NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return Products();
-                },
-              ),
-            ],
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String title, String value) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
+        child: Column(
+          children: [
+            Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Text(value, style: TextStyle(fontSize: 18)),
+          ],
         ),
       ),
     );

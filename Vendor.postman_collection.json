@@ -1,0 +1,787 @@
+{
+	"info": {
+		"_postman_id": "00f81eac-0e6b-4f00-a5d0-a0cc5498eb79",
+		"name": "Vendor",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50557377",
+		"_collection_link": "https://hashim-chohan-5540779.postman.co/workspace/1188a59d-bf81-4c09-8fc1-ee3087edb2e9/collection/48266454-00f81eac-0e6b-4f00-a5d0-a0cc5498eb79?action=share&source=collection_link&creator=50557377"
+	},
+	"item": [
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "add-product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI5YzI2M2JhMmMxN2RhM2IwZjMyZGEiLCJpYXQiOjE3NjUwMzE4MDUsImV4cCI6MTc2NzYyMzgwNX0.xXaX01nuFzLEE3L3v8_eyKqaVtzKk91IXa2er1A1GRo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "productName",
+									"value": "Canola Oil",
+									"type": "text"
+								},
+								{
+									"key": "categoryId",
+									"value": "691744f2e4a0c08d45d54cc1",
+									"type": "text"
+								},
+								{
+									"key": "quantity",
+									"value": "50",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "3000",
+									"type": "text"
+								},
+								{
+									"key": "afterDiscountPrice",
+									"value": "1500",
+									"type": "text"
+								},
+								{
+									"key": "effects",
+									"value": "Glowing skin, reduces pigmentation",
+									"type": "text"
+								},
+								{
+									"key": "ingredients",
+									"value": "Vitamin C, Hyaluronic Acid",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Best for daily use.",
+									"type": "text"
+								},
+								{
+									"key": "productImages",
+									"type": "file",
+									"src": "/Users/muhammadhassan/Downloads/boyy.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{localUrl}}vendor/add-product",
+							"host": [
+								"{{localUrl}}vendor"
+							],
+							"path": [
+								"add-product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-products",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI5YzI2M2JhMmMxN2RhM2IwZjMyZGEiLCJpYXQiOjE3NjUwMzE4MDUsImV4cCI6MTc2NzYyMzgwNX0.xXaX01nuFzLEE3L3v8_eyKqaVtzKk91IXa2er1A1GRo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "productName",
+									"value": "Vitamin C Serum",
+									"type": "text"
+								},
+								{
+									"key": "categoryId",
+									"value": "673f94b2c924f4c384adf4e0",
+									"type": "text"
+								},
+								{
+									"key": "quantity",
+									"value": "30",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "1200",
+									"type": "text"
+								},
+								{
+									"key": "afterDiscountPrice",
+									"value": "999",
+									"type": "text"
+								},
+								{
+									"key": "effects",
+									"value": "Glowing skin, reduces pigmentation",
+									"type": "text"
+								},
+								{
+									"key": "ingredients",
+									"value": "Vitamin C, Hyaluronic Acid",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Best for daily use.",
+									"type": "text"
+								},
+								{
+									"key": "productImages",
+									"type": "file",
+									"src": [
+										"/Users/muhammadhassan/Downloads/office.jpg",
+										"/Users/muhammadhassan/Downloads/boyy.jpg"
+									]
+								}
+							]
+						},
+						"url": {
+							"raw": "{{localUrl}}vendor/get-products",
+							"host": [
+								"{{localUrl}}vendor"
+							],
+							"path": [
+								"get-products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{localUrl}}vendor/get-product/69175ce483629699ad80d0d7",
+							"host": [
+								"{{localUrl}}vendor"
+							],
+							"path": [
+								"get-product",
+								"69175ce483629699ad80d0d7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-product/:productId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "productName",
+									"value": "Herbal C Serum",
+									"type": "text"
+								},
+								{
+									"key": "categoryId",
+									"value": "673f94b2c924f4c384adf455",
+									"type": "text"
+								},
+								{
+									"key": "quantity",
+									"value": "50",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "2000",
+									"type": "text"
+								},
+								{
+									"key": "afterDiscountPrice",
+									"value": "1000",
+									"type": "text"
+								},
+								{
+									"key": "effects",
+									"value": "Glowing skin, reduces pigmentationnn",
+									"type": "text"
+								},
+								{
+									"key": "ingredients",
+									"value": "Vitamin C, Hyaluronic Aciddd",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Best for daily useee.",
+									"type": "text"
+								},
+								{
+									"key": "productImages",
+									"type": "file",
+									"src": "/Users/muhammadhassan/Downloads/boyy.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{localUrl}}vendor/update-product/69175ce483629699ad80d0d7",
+							"host": [
+								"{{localUrl}}vendor"
+							],
+							"path": [
+								"update-product",
+								"69175ce483629699ad80d0d7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete-product/:productId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vendor/delete-product/69175dcb83629699ad80d0e0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vendor",
+								"delete-product",
+								"69175dcb83629699ad80d0e0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "toggle-product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{localUrl}}vendor/toggle-product/69175dcb83629699ad80d0e0",
+							"host": [
+								"{{localUrl}}vendor"
+							],
+							"path": [
+								"toggle-product",
+								"69175dcb83629699ad80d0e0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-inventory-status/:id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"inventoryStatus\":\"low-stock\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vendor/update-inventory-status/69175dcb83629699ad80d0e0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vendor",
+								"update-inventory-status",
+								"69175dcb83629699ad80d0e0"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order",
+			"item": [
+				{
+					"name": "change-order-status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{vendorToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"691375918e3cec01a769475f\",\n  \"status\": \"completed\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localUrl}}vendor/change-order-status",
+							"host": [
+								"{{localUrl}}vendor"
+							],
+							"path": [
+								"change-order-status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-order/:orderId",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{vendorToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"hashim@g.com\",\n    \"password\":\"1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{localUrl}}vendor/get-order/691375918e3cec01a769475f",
+							"host": [
+								"{{localUrl}}vendor"
+							],
+							"path": [
+								"get-order",
+								"691375918e3cec01a769475f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "order?status=accepted",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{vendorToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\n  \"rating\": 4,\n  \"review\": \"Excellent quality!\"\n}\n"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vendor/order?status=accepted",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vendor",
+								"order"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "accepted"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Review",
+			"item": [
+				{
+					"name": "add-reply/:reviewId",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{vendorToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reply\":\"abcddddddd\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localUrl}}vendor/add-reply/6914d89a9ca3aec837357d16",
+							"host": [
+								"{{localUrl}}vendor"
+							],
+							"path": [
+								"add-reply",
+								"6914d89a9ca3aec837357d16"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-reviews/:productId",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "categoryName",
+									"value": "Food",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "abcd",
+									"type": "text"
+								},
+								{
+									"key": "categoryImage",
+									"type": "file",
+									"src": "/Users/muhammadhassan/Downloads/boyy.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vendor/get-reviews/690df387be66130badeb2a81",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vendor",
+								"get-reviews",
+								"690df387be66130badeb2a81"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete-review/:id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"691375918e3cec01a769475f\",\n  \"productId\": \"690df387be66130badeb2a81\",\n  \"rating\": 5,\n  \"review\": \"Excellent quality!\"\n}\n"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vendor/delete-review/6914d89a9ca3aec837357d16",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vendor",
+								"delete-review",
+								"6914d89a9ca3aec837357d16"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-review/:id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\n  \"rating\": 4,\n  \"review\": \"Excellent quality!\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/vendor/update-review/6914d89a9ca3aec837357d16",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"vendor",
+								"update-review",
+								"6914d89a9ca3aec837357d16"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Profile",
+			"item": [
+				{
+					"name": "toggle-hide-profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{localUrl}}vendor/toggle-hide-profile",
+							"host": [
+								"{{localUrl}}vendor"
+							],
+							"path": [
+								"toggle-hide-profile"
+							],
+							"query": [
+								{
+									"key": "location",
+									"value": "{\"type\":\"Point\",\"coordinates\":[67.0152705,24.8109828],\"address\":\"Dolmen Mall, Block 4 Clifton, Karachi, 75600\"}",
+									"disabled": true
+								},
+								{
+									"key": "floorNumber",
+									"value": "1st Floor",
+									"disabled": true
+								},
+								{
+									"key": "apartmentNumber",
+									"value": "A5",
+									"disabled": true
+								},
+								{
+									"key": "isDefault",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "get-vendor-stats",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/v1/vendor/get-vendor-stats?month=2025-09&start=2025-11-03&end=2025-11-10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"vendor",
+						"get-vendor-stats"
+					],
+					"query": [
+						{
+							"key": "month",
+							"value": "2025-09"
+						},
+						{
+							"key": "start",
+							"value": "2025-11-03"
+						},
+						{
+							"key": "end",
+							"value": "2025-11-10"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

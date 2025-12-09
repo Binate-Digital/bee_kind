@@ -1,9 +1,11 @@
+import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/core/vendor/store/selected_past_product.dart';
 import 'package:bee_kind/widgets/past_products.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
+import 'package:get/get.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
@@ -14,6 +16,16 @@ class MyOrdersScreen extends StatefulWidget {
 
 class _MyOrdersScreenState extends State<MyOrdersScreen> {
   int selectedIndex = 1; // 0 = Current, 1 = Past
+  final storeController = Get.find<StoreController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch current (accepted) orders when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      storeController.fetchVendorOrders(status: 'accepted', context: context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,29 +92,48 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
   /// === Current Orders Tab ===
   Widget _buildCurrentOrders() {
-    return ListView.builder(
-      physics: BouncingScrollPhysics(),
-      itemCount: 5,
-      shrinkWrap: true,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => SelectedOrder(
-                  isCurrent: true, // shows stepper
-                  isAccepted: true,
-                  isComplete: false,
-                  isCancelled: false,
-                ),
-              ),
-            );
-          },
-          child: PastProducts(isCurrent: true),
+    return Obx(() {
+      if (storeController.isLoading.value) {
+        return Center(child: CircularProgressIndicator());
+      }
+
+      if (storeController.vendorOrders.isEmpty) {
+        return Center(
+          child: CustomText(text: 'No current orders', fontSize: 16.sp),
         );
-      },
-    );
+      }
+
+      return ListView.builder(
+        physics: BouncingScrollPhysics(),
+        itemCount: storeController.vendorOrders.length,
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          final order = storeController.vendorOrders[index];
+          return GestureDetector(
+            onTap: () async {
+              // Fetch full order details
+              await storeController.fetchVendorOrder(
+                order.orderId ?? '',
+                context,
+              );
+              // Navigate to details screen with the fetched order
+              if (!context.mounted) return;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SelectedOrder(
+                    vendorOrder: storeController.selectedVendorOrder.value,
+                    isCurrent: true,
+                    isAccepted: true,
+                  ),
+                ),
+              );
+            },
+            child: PastProducts(isCurrent: true),
+          );
+        },
+      );
+    });
   }
 
   /// === Past Orders Tab ===

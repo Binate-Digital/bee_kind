@@ -33,6 +33,7 @@ class ProductDetail {
   int? afterDiscountPrice;
   String? effects;
   String? ingredients;
+  String? dosage;
   String? description;
   String? user;
   int? iV;
@@ -66,17 +67,34 @@ class ProductDetail {
   ProductDetail.fromJson(Map<String, dynamic> json) {
     isDiscountAvailable = json['isDiscountAvailable'];
     sId = json['_id'];
-    productImages = json['productImages'].cast<String>();
+    productImages = json['productImages'] != null
+        ? List<String>.from(json['productImages'])
+        : [];
     productName = json['productName'];
     categoryId = json['categoryId'];
-    quantity = json['quantity'];
-    price = json['price'];
-    afterDiscountPrice = json['afterDiscountPrice'];
+    quantity = json['quantity'] != null
+        ? (json['quantity'] is int
+              ? json['quantity']
+              : (json['quantity'] as num).toInt())
+        : null;
+    price = json['price'] != null
+        ? (json['price'] is int
+              ? json['price']
+              : (json['price'] as num).toInt())
+        : null;
+    afterDiscountPrice = json['afterDiscountPrice'] != null
+        ? (json['afterDiscountPrice'] is int
+              ? json['afterDiscountPrice']
+              : (json['afterDiscountPrice'] as num).toInt())
+        : null;
     effects = json['effects'];
     ingredients = json['ingredients'];
+    dosage = json['dosage'];
     description = json['description'];
     user = json['user'];
-    iV = json['__v'];
+    iV = json['__v'] != null
+        ? (json['__v'] is int ? json['__v'] : (json['__v'] as num).toInt())
+        : null;
     isDeleted = json['isDeleted'];
     updatedAt = json['updatedAt'];
     isAvailable = json['isAvailable'];
@@ -98,6 +116,7 @@ class ProductDetail {
     data['afterDiscountPrice'] = afterDiscountPrice;
     data['effects'] = effects;
     data['ingredients'] = ingredients;
+    data['dosage'] = dosage;
     data['description'] = description;
     data['user'] = user;
     data['__v'] = iV;

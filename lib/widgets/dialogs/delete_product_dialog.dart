@@ -1,20 +1,25 @@
+import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
-Future<void> deleteProductDialog(BuildContext context) async {
+Future<void> deleteProductDialog(
+  BuildContext context, {
+  String? productId,
+}) async {
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (context) {
+    builder: (dialogContext) {
       return Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: EdgeInsets.all(20.w),
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.85,
+          width: MediaQuery.of(dialogContext).size.width * 0.85,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20.r),
@@ -48,7 +53,7 @@ Future<void> deleteProductDialog(BuildContext context) async {
                     right: 20.w,
                     top: 22.h,
                     child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => Get.back(),
                       child: Icon(
                         Icons.close,
                         size: 25.r,
@@ -102,7 +107,7 @@ Future<void> deleteProductDialog(BuildContext context) async {
                   CustomButton(
                     width: 160.w,
                     onTap: () {
-                      Navigator.pop(context);
+                      Get.back();
                     },
                     text: "Cancel",
                     gradientColors: [
@@ -114,7 +119,12 @@ Future<void> deleteProductDialog(BuildContext context) async {
                   CustomButton(
                     width: 160.w,
                     onTap: () {
-                      Navigator.pop(context);
+                      if (productId != null) {
+                        final controller = Get.find<StoreController>();
+                        // Close dialog first with Get.back(), then call controller
+                        Get.back();
+                        controller.deleteVendorProduct(productId, null);
+                      }
                     },
                     text: "Delete",
                   ),

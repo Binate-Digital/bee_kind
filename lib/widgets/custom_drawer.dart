@@ -94,8 +94,9 @@ class CustomDrawer extends StatelessWidget {
                 SizedBox(height: 16.h),
                 // Name and Phone Number
                 CustomText(
-                  text:
-                      "${controller.prefs.getString("firstName")}\t${controller.prefs.getString("lastName")}",
+                  text: isVendor
+                      ? controller.prefs.getString("businessName") ?? "N/A"
+                      : "${controller.prefs.getString("firstName")}\t${controller.prefs.getString("lastName")}",
                   fontSize: 18.sp,
                   weight: FontWeight.bold,
                   fontColor: AppColors.blackColor,

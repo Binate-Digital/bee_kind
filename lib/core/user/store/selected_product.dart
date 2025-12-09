@@ -62,7 +62,25 @@ class _SelectedProductState extends State<SelectedProduct> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((val) async {
       log("product id: ${widget.productId}");
-      await controller.fetchProductReviews(widget.productId, context);
+
+      if (widget.productId != null) {
+        if (widget.isVendor) {
+          await controller.fetchVendorProduct(
+            widget.productId,
+            context,
+            navigate: false,
+          );
+          // Fetch vendor-specific reviews
+          await controller.fetchVendorProductReviews(widget.productId, context);
+        } else {
+          await controller.fetchSingleProduct(
+            widget.productId,
+            context,
+            navigate: false,
+          );
+          await controller.fetchProductReviews(widget.productId, context);
+        }
+      }
     });
   }
 
@@ -79,38 +97,47 @@ class _SelectedProductState extends State<SelectedProduct> {
                 /// ---------------- CAROUSEL ----------------
                 Column(
                   children: [
-                    CarouselSlider(
-                      items: (widget.productImages?.isNotEmpty ?? false)
-                          ? widget.productImages!.map((imgUrl) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    image: NetworkImage(imgUrl),
-                                    onError: (_, __) {},
-                                    fit: BoxFit.cover,
+                    Obx(() {
+                      final sp = controller.singleProduct.value?.data;
+                      final images =
+                          (sp?.productImages != null &&
+                              sp!.productImages!.isNotEmpty)
+                          ? sp.productImages!
+                          : (widget.productImages ?? []);
+
+                      return CarouselSlider(
+                        items: (images.isNotEmpty)
+                            ? images.map((imgUrl) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: NetworkImage(imgUrl),
+                                      onError: (_, __) {},
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                );
+                              }).toList()
+                            : [
+                                // FALLBACK IF NO IMAGES
+                                Container(
+                                  decoration: BoxDecoration(
+                                    image: const DecorationImage(
+                                      image: AssetImage(AssetsPath.product),
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
-                              );
-                            }).toList()
-                          : [
-                              // FALLBACK IF NO IMAGES
-                              Container(
-                                decoration: BoxDecoration(
-                                  image: const DecorationImage(
-                                    image: AssetImage(AssetsPath.product),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ],
-                      options: CarouselOptions(
-                        height: 290.h,
-                        autoPlay: true,
-                        viewportFraction: 1,
-                        onPageChanged: (index, reason) =>
-                            controller.updateCarouselIndex(index),
-                      ),
-                    ),
+                              ],
+                        options: CarouselOptions(
+                          height: 290.h,
+                          autoPlay: true,
+                          viewportFraction: 1,
+                          onPageChanged: (index, reason) =>
+                              controller.updateCarouselIndex(index),
+                        ),
+                      );
+                    }),
                   ],
                 ),
 
@@ -119,9 +146,12 @@ class _SelectedProductState extends State<SelectedProduct> {
                   top: 270.h,
                   left: 170.w,
                   child: Obx(() {
-                    final count = (widget.productImages?.isNotEmpty ?? false)
-                        ? widget.productImages!.length
-                        : 1;
+                    final sp = controller.singleProduct.value?.data;
+                    final count =
+                        (sp?.productImages != null &&
+                            sp!.productImages!.isNotEmpty)
+                        ? sp.productImages!.length
+                        : (widget.productImages?.length ?? 1);
 
                     return Row(
                       children: List.generate(count, (index) {
@@ -171,7 +201,10 @@ class _SelectedProductState extends State<SelectedProduct> {
 
                         widget.isVendor
                             ? GestureDetector(
-                                onTap: () => showOptionsBottomSheet(context),
+                                onTap: () => showOptionsBottomSheet(
+                                  context,
+                                  productId: widget.productId,
+                                ),
                                 child: Icon(
                                   Icons.more_vert,
                                   size: 30.r,
@@ -200,35 +233,51 @@ class _SelectedProductState extends State<SelectedProduct> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CustomText(
-                    text: widget.productName ?? "Lorem Ipsum",
-                    fontSize: 22.sp,
-                    weight: FontWeight.bold,
-                  ),
-                  widget.hasDiscount
-                      ? Row(
-                          children: [
-                            CustomText(
-                              text: "\$${widget.afterDiscountPrice ?? 10}",
-                              fontSize: 20.sp,
-                              weight: FontWeight.bold,
-                            ),
-                            SizedBox(width: 10.w),
-                            CustomText(
-                              text: "\$${widget.price ?? 20}",
-                              lineThrough: true,
-                              fontSize: 20.sp,
-                              fontColor: AppColors.yellow2,
-                              weight: FontWeight.bold,
-                            ),
-                          ],
-                        )
-                      : CustomText(
-                          text: "\$${widget.price ?? 20}",
-                          fontSize: 20.sp,
-                          fontColor: AppColors.yellow2,
+                  Obx(() {
+                    final sp = controller.singleProduct.value?.data;
+                    final name =
+                        sp?.productName ?? widget.productName ?? "Lorem Ipsum";
+                    final hasDiscount =
+                        sp?.isDiscountAvailable ?? widget.hasDiscount;
+                    final afterPrice =
+                        sp?.afterDiscountPrice ?? widget.afterDiscountPrice;
+                    final price = sp?.price ?? widget.price ?? 0;
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        CustomText(
+                          text: name,
+                          fontSize: 22.sp,
                           weight: FontWeight.bold,
                         ),
+                        hasDiscount
+                            ? Row(
+                                children: [
+                                  CustomText(
+                                    text: "\$${afterPrice ?? 0}",
+                                    fontSize: 20.sp,
+                                    weight: FontWeight.bold,
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  CustomText(
+                                    text: "\$${price}",
+                                    lineThrough: true,
+                                    fontSize: 20.sp,
+                                    fontColor: AppColors.yellow2,
+                                    weight: FontWeight.bold,
+                                  ),
+                                ],
+                              )
+                            : CustomText(
+                                text: "\$${price}",
+                                fontSize: 20.sp,
+                                fontColor: AppColors.yellow2,
+                                weight: FontWeight.bold,
+                              ),
+                      ],
+                    );
+                  }),
                 ],
               ),
 
@@ -249,10 +298,16 @@ class _SelectedProductState extends State<SelectedProduct> {
                       ),
 
                       if (!widget.isVendor)
-                        CustomText(
-                          text: widget.inventoryStatus ?? "In Stock",
-                          weight: FontWeight.bold,
-                        ),
+                        Obx(() {
+                          final sp = controller.singleProduct.value?.data;
+                          return CustomText(
+                            text:
+                                sp?.inventoryStatus ??
+                                widget.inventoryStatus ??
+                                "In Stock",
+                            weight: FontWeight.bold,
+                          );
+                        }),
                     ],
                   ),
                   SizedBox(height: 5.h),
@@ -261,7 +316,13 @@ class _SelectedProductState extends State<SelectedProduct> {
                     children: [
                       SizedBox(width: 10.h),
                       if (!widget.isVendor)
-                        CustomText(text: "${widget.quantity} products left"),
+                        Obx(() {
+                          final sp = controller.singleProduct.value?.data;
+                          return CustomText(
+                            text:
+                                "${sp?.quantity ?? widget.quantity ?? 0} products left",
+                          );
+                        }),
                     ],
                   ),
                 ],
@@ -276,12 +337,23 @@ class _SelectedProductState extends State<SelectedProduct> {
                     CustomButton(
                       width: 230.w,
                       onTap: () async {
-                        controller.selectedStockStatus.value =
-                            await showStockBottomSheet(
-                              context,
-                              controller.selectedStockStatus.value,
-                              controller.inventoryOptions,
-                            );
+                        final selected = await showStockBottomSheet(
+                          context,
+                          controller.selectedStockStatus.value,
+                          controller.inventoryOptions,
+                        );
+
+                        // Call API to update inventory status if selection changed
+                        if (selected != controller.selectedStockStatus.value &&
+                            widget.productId != null) {
+                          controller.selectedStockStatus.value = selected;
+                          await controller.updateVendorInventoryStatus(
+                            widget.productId!,
+                            selected,
+                          );
+                        } else {
+                          controller.selectedStockStatus.value = selected;
+                        }
                       },
                       text: "Select Inventory Options",
                     ),
@@ -317,25 +389,37 @@ class _SelectedProductState extends State<SelectedProduct> {
               /// ---------------- DESCRIPTION ----------------
               _sectionTitle("Description"),
               SizedBox(height: 10.h),
-              _sectionText(widget.description),
+              Obx(() {
+                final sp = controller.singleProduct.value?.data;
+                return _sectionText(sp?.description ?? widget.description);
+              }),
 
               SizedBox(height: 20.h),
 
               _sectionTitle("Effects"),
               SizedBox(height: 10.h),
-              _sectionText(widget.effets),
+              Obx(() {
+                final sp = controller.singleProduct.value?.data;
+                return _sectionText(sp?.effects ?? widget.effets);
+              }),
 
               SizedBox(height: 20.h),
 
               _sectionTitle("Ingredients"),
               SizedBox(height: 10.h),
-              _sectionText(widget.ingredients),
+              Obx(() {
+                final sp = controller.singleProduct.value?.data;
+                return _sectionText(sp?.ingredients ?? widget.ingredients);
+              }),
 
               SizedBox(height: 20.h),
 
               _sectionTitle("Dosage"),
               SizedBox(height: 10.h),
-              _sectionText(widget.dosage),
+              Obx(() {
+                final sp = controller.singleProduct.value?.data;
+                return _sectionText(sp?.dosage ?? widget.dosage);
+              }),
 
               SizedBox(height: 30.h),
 
@@ -520,11 +604,13 @@ class _SelectedProductState extends State<SelectedProduct> {
                         final data = controller.reviewsList?[index];
                         log("RATING: ${data?.rating}");
                         return ReviewCard(
+                          isVendor: widget.isVendor,
                           review: data?.review ?? "",
                           userImage: data?.user?.profileImage,
                           userName: data?.user?.fullName,
                           vendorResponse: data?.reply ?? "",
                           ratingCount: data?.rating ?? 0,
+                          reviewId: data?.sId,
                         );
                       },
                     ),

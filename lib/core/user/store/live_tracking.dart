@@ -13,7 +13,6 @@ import 'package:bee_kind/widgets/dialogs/cancel_order_dialog.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/custom_google_maps.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
-import 'package:bee_kind/widgets/location_bar.dart';
 import 'package:bee_kind/widgets/order_item.dart';
 import 'package:bee_kind/widgets/stepper_widget.dart';
 import 'package:bee_kind/widgets/vertical_stepper.dart';
@@ -447,10 +446,7 @@ class _LiveTrackingState extends State<LiveTracking> {
     StoreAddress? storeAddress,
     Items? firstItem,
   ) {
-    final pickupAddress =
-        storeAddress?.address ?? "Store address not available";
-    final dropoffAddress =
-        userAddress?.address ?? "Delivery address not available";
+    // Address strings are available via order data when needed.
 
     return CustomGoogleMap(
       onMapCreated: (controller) => mapController = controller,

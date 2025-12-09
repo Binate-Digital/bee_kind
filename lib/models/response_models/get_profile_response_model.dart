@@ -37,7 +37,7 @@ class ProfileData {
   dynamic closeTime;
   List<dynamic>? offDays;
 
-  int? deliveryRadius;
+  double? deliveryRadius;
   List<dynamic>? documents;
 
   bool? isDeleted;
@@ -122,7 +122,17 @@ class ProfileData {
     closeTime = json['closeTime'];
 
     offDays = json['offDays']?.cast<dynamic>();
-    deliveryRadius = json['deliveryRadius'];
+    // deliveryRadius may come as int or double
+    if (json['deliveryRadius'] != null) {
+      final dr = json['deliveryRadius'];
+      if (dr is num) {
+        deliveryRadius = dr.toDouble();
+      } else {
+        deliveryRadius = double.tryParse(dr.toString());
+      }
+    } else {
+      deliveryRadius = null;
+    }
     documents = json['documents']?.cast<dynamic>();
     isDeleted = json['isDeleted'];
 
@@ -136,7 +146,17 @@ class ProfileData {
 
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
-    v = json['__v'];
+    // __v may be int or double; ensure int
+    if (json['__v'] != null) {
+      final vv = json['__v'];
+      if (vv is num) {
+        v = vv.toInt();
+      } else {
+        v = int.tryParse(vv.toString());
+      }
+    } else {
+      v = null;
+    }
 
     /// Newly included backend fields
     deviceType = json['deviceType'];

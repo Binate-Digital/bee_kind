@@ -17,10 +17,7 @@ class OrderRequestsScreen extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    SelectedOrder(),
-              ),
+              MaterialPageRoute(builder: (_) => SelectedOrder()),
             );
           },
           child: OrderRequest(),
