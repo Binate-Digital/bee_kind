@@ -126,6 +126,7 @@ class VendorOrder {
 class OrderItem {
   String? productId;
   String? productName;
+  String? productImage;
   int? quantity;
   double? price;
   double? totalPrice;
@@ -133,6 +134,7 @@ class OrderItem {
   OrderItem({
     this.productId,
     this.productName,
+    this.productImage,
     this.quantity,
     this.price,
     this.totalPrice,
@@ -141,6 +143,7 @@ class OrderItem {
   OrderItem.fromJson(Map<String, dynamic> json) {
     productId = json['productId'];
     productName = json['productName'];
+    productImage = json['productImage'];
     quantity = json['quantity'];
     price = json['price'] != null
         ? (json['price'] is num
@@ -158,6 +161,7 @@ class OrderItem {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['productId'] = productId;
     data['productName'] = productName;
+    data['productImage'] = productImage;
     data['quantity'] = quantity;
     data['price'] = price;
     data['totalPrice'] = totalPrice;

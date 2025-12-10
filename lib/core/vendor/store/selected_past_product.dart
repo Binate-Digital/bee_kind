@@ -15,6 +15,7 @@ import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 
 class SelectedOrder extends StatefulWidget {
   SelectedOrder({
@@ -50,6 +51,35 @@ class _SelectedOrderState extends State<SelectedOrder> {
 
   String text = "Ready for Pickup";
 
+  List<String> _getCarouselImages() {
+    // Get product images from order items
+    if (widget.vendorOrder?.items != null &&
+        widget.vendorOrder!.items!.isNotEmpty) {
+      return widget.vendorOrder!.items!
+          .map((item) => item.productImage ?? AssetsPath.store)
+          .toList();
+    }
+    // Fallback to default store images if no items
+    return [AssetsPath.store, AssetsPath.store, AssetsPath.store];
+  }
+
+  ImageProvider _getImageProvider(String imageUrl) {
+    if (imageUrl.isEmpty || imageUrl == AssetsPath.store) {
+      return AssetImage(AssetsPath.store);
+    }
+    return NetworkImage(imageUrl);
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return 'N/A';
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('dd-MM-yyyy').format(date);
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -79,11 +109,11 @@ class _SelectedOrderState extends State<SelectedOrder> {
                 Column(
                   children: [
                     CarouselSlider(
-                      items: [1, 2, 3].map((i) {
+                      items: _getCarouselImages().map((imageUrl) {
                         return Container(
                           decoration: BoxDecoration(
-                            image: const DecorationImage(
-                              image: AssetImage(AssetsPath.store),
+                            image: DecorationImage(
+                              image: _getImageProvider(imageUrl),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -196,7 +226,14 @@ class _SelectedOrderState extends State<SelectedOrder> {
                     ),
                   ),
                   SizedBox(width: 10.w),
-                  CustomText(text: "John Smith", fontSize: 18.sp),
+                  Expanded(
+                    child: CustomText(
+                      text: widget.vendorOrder?.user?.name ?? "John Smith",
+                      fontSize: 18.sp,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
               CustomText(
@@ -207,36 +244,68 @@ class _SelectedOrderState extends State<SelectedOrder> {
               ),
               SizedBox(height: 10.h),
 
+              // Display each item from the order
+              if (widget.vendorOrder?.items != null &&
+                  widget.vendorOrder!.items!.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: widget.vendorOrder!.items!.map((item) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          text:
+                              "Product: ${item.productName ?? 'Unknown Product'}",
+                          fontSize: 16.sp,
+                          fontColor: AppColors.blackColor,
+                        ),
+                        CustomText(
+                          text: "Qty: ${item.quantity ?? 0}",
+                          fontSize: 16.sp,
+                          fontColor: AppColors.blackColor,
+                        ),
+                        CustomText(
+                          text:
+                              "Price: \$${item.price?.toStringAsFixed(2) ?? '0.00'}",
+                          fontSize: 16.sp,
+                          fontColor: AppColors.blackColor,
+                        ),
+                        SizedBox(height: 12.h),
+                      ],
+                    );
+                  }).toList(),
+                )
+              else
+                CustomText(
+                  text: "No items in order",
+                  fontSize: 16.sp,
+                  fontColor: AppColors.blackColor,
+                ),
               CustomText(
-                text: "Product: Lorem Ipsum",
+                text: "Order Number: ${widget.vendorOrder?.sId ?? 'N/A'}",
                 fontSize: 16.sp,
                 fontColor: AppColors.blackColor,
               ),
               CustomText(
-                text: "Qty: 2",
-                fontSize: 16.sp,
-                fontColor: AppColors.blackColor,
-              ),
-              CustomText(
-                text: "Order Number: 123456789",
-                fontSize: 16.sp,
-                fontColor: AppColors.blackColor,
-              ),
-              CustomText(
-                text: "Placed on: 01-06-2025",
+                text:
+                    "Placed on: ${_formatDate(widget.vendorOrder?.createdAt)}",
                 fontSize: 16.sp,
                 fontColor: AppColors.blackColor,
               ),
               SizedBox(height: 30.h),
               CustomText(
-                text: "Address",
+                text: "Delivery Address",
                 fontSize: 18.sp,
                 weight: FontWeight.bold,
                 fontColor: AppColors.blackColor,
               ),
               SizedBox(height: 10.h),
               CustomText(
-                text: "Lorem Ipsum road street 21 California USA",
+                text:
+                    widget.vendorOrder?.deliveryAddress ??
+                    (widget.vendorOrder?.user?.phoneNumber != null
+                        ? "Address: ${widget.vendorOrder!.user!.phoneNumber}"
+                        : "No address provided"),
                 fontSize: 16.sp,
                 fontColor: AppColors.blackColor,
               ),
@@ -252,9 +321,13 @@ class _SelectedOrderState extends State<SelectedOrder> {
                         if ((widget.vendorOrder?.status ?? '').toLowerCase() ==
                             'pending')
                           ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.yellow2,
+                              foregroundColor: AppColors.blackColor,
+                            ),
                             onPressed: () async {
                               await storeController.changeVendorOrderStatus(
-                                widget.vendorOrder!.orderId ?? '',
+                                widget.vendorOrder!.sId ?? '',
                                 'accepted',
                                 context,
                               );
@@ -264,24 +337,32 @@ class _SelectedOrderState extends State<SelectedOrder> {
                         if ((widget.vendorOrder?.status ?? '').toLowerCase() !=
                             'completed')
                           ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.yellow2,
+                              foregroundColor: AppColors.blackColor,
+                            ),
                             onPressed: () async {
                               await storeController.changeVendorOrderStatus(
-                                widget.vendorOrder!.orderId ?? '',
+                                widget.vendorOrder!.sId ?? '',
                                 'completed',
                                 context,
                               );
                             },
-                            child: const Text('Mark Complete'),
+                            child: Text(
+                              isCurrent ? 'Ready for Pickup' : 'Mark Complete',
+                            ),
                           ),
                         if ((widget.vendorOrder?.status ?? '').toLowerCase() !=
-                            'cancelled')
+                                'cancelled' &&
+                            isCurrent)
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.yellow2,
+                              foregroundColor: AppColors.blackColor,
                             ),
                             onPressed: () async {
                               await storeController.changeVendorOrderStatus(
-                                widget.vendorOrder!.orderId ?? '',
+                                widget.vendorOrder!.sId ?? '',
                                 'cancelled',
                                 context,
                               );
@@ -296,13 +377,14 @@ class _SelectedOrderState extends State<SelectedOrder> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CustomText(
-                    text: "Payment Method",
+                    text: "Delivery Charges",
                     fontSize: 18.sp,
                     weight: FontWeight.bold,
                     fontColor: AppColors.blackColor,
                   ),
                   CustomText(
-                    text: "Master Card *****4544",
+                    text:
+                        "\$${widget.vendorOrder?.totalAmount != null ? ((widget.vendorOrder!.totalAmount! - 10).toStringAsFixed(2)) : '0.00'}",
                     fontSize: 18.sp,
                     fontColor: AppColors.blackColor,
                   ),
@@ -319,12 +401,14 @@ class _SelectedOrderState extends State<SelectedOrder> {
                     fontColor: AppColors.blackColor,
                   ),
                   CustomText(
-                    text: "\$20.00",
+                    text:
+                        "\$${widget.vendorOrder?.totalAmount?.toStringAsFixed(2) ?? '0.00'}",
                     fontSize: 18.sp,
                     fontColor: AppColors.yellow2,
                   ),
                 ],
               ),
+
               SizedBox(height: 60.h),
 
               // === ORDER STATE LOGIC ===
@@ -393,7 +477,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                 ),
               ]
               // 🟩 Current Orders (Active Step Flow)
-              else if (isCurrent && !isComplete) ...[
+              else if (isCurrent) ...[
                 HorizontalStepper(currentStep: currentStep, steps: steps),
                 SizedBox(height: 20.h),
                 CustomText(
@@ -411,12 +495,36 @@ class _SelectedOrderState extends State<SelectedOrder> {
                         context,
                       );
                       if (result == true) {
+                        // Call API for "ready-for-pickup" with driver details
+                        await storeController.changeVendorOrderStatus(
+                          widget.vendorOrder!.sId ?? '',
+                          'ready-for-pickup',
+                          context,
+                          driverDetail: {
+                            "driverName":
+                                "Muneer Ahmed", // This should come from the dialog
+                            "phoneNumber":
+                                "03219205554", // This should come from the dialog
+                            "color":
+                                "white", // This should come from the dialog
+                            "make":
+                                "toyota", // This should come from the dialog
+                            "numberPlate":
+                                "BDE-358", // This should come from the dialog
+                          },
+                        );
                         setState(() {
                           currentStep = 1;
                           text = "Order Handed to Delivery Personnel";
                         });
                       }
                     } else if (currentStep == 1) {
+                      // Call API for "dispatched"
+                      await storeController.changeVendorOrderStatus(
+                        widget.vendorOrder!.sId ?? '',
+                        'dispatched',
+                        context,
+                      );
                       setState(() {
                         currentStep = 2;
                         text = "Order Completed";
@@ -425,6 +533,12 @@ class _SelectedOrderState extends State<SelectedOrder> {
                       final confirmResult =
                           await orderCompleteConfirmationDialog(context);
                       if (confirmResult == true) {
+                        // Call API for "completed"
+                        await storeController.changeVendorOrderStatus(
+                          widget.vendorOrder!.sId ?? '',
+                          'completed',
+                          context,
+                        );
                         setState(() {
                           currentStep = 3;
                           isComplete = true;

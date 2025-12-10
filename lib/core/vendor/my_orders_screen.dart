@@ -24,7 +24,17 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
     // Fetch current (accepted) orders when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       storeController.fetchVendorOrders(status: 'accepted', context: context);
+      // Also fetch completed orders for Past tab
+      _fetchPastOrders();
     });
+  }
+
+  Future<void> _fetchPastOrders() async {
+    // Fetch completed orders
+    await storeController.fetchVendorOrders(
+      status: 'completed',
+      context: context,
+    );
   }
 
   @override
@@ -111,11 +121,8 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
           final order = storeController.vendorOrders[index];
           return GestureDetector(
             onTap: () async {
-              // Fetch full order details
-              await storeController.fetchVendorOrder(
-                order.orderId ?? '',
-                context,
-              );
+              // Fetch full order details (use sId which is the MongoDB ID)
+              await storeController.fetchVendorOrder(order.sId ?? '', context);
               // Navigate to details screen with the fetched order
               if (!context.mounted) return;
               Navigator.push(
@@ -129,7 +136,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                 ),
               );
             },
-            child: PastProducts(isCurrent: true),
+            child: PastProducts(isCurrent: true, vendorOrder: order),
           );
         },
       );
@@ -138,29 +145,57 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
   /// === Past Orders Tab ===
   Widget _buildPastOrders() {
-    List<bool> cancelled = [true, false, true, false, true];
-    return ListView.builder(
-      physics: BouncingScrollPhysics(),
-      itemCount: cancelled.length,
-      shrinkWrap: true,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => SelectedOrder(
-                  isComplete: true, // shows completed stepper only
-                  isCancelled: cancelled[index],
-                  isCurrent: false,
-                  isAccepted: true,
-                ),
-              ),
-            );
-          },
-          child: PastProducts(isCancelled: cancelled[index]),
+    return Obx(() {
+      if (storeController.isLoading.value) {
+        return Center(child: CircularProgressIndicator());
+      }
+
+      // Filter completed and cancelled orders
+      final pastOrders = storeController.vendorOrders
+          .where(
+            (order) =>
+                (order.status?.toLowerCase() == 'completed') ||
+                (order.status?.toLowerCase() == 'cancelled'),
+          )
+          .toList();
+
+      if (pastOrders.isEmpty) {
+        return Center(
+          child: CustomText(text: 'No past orders', fontSize: 16.sp),
         );
-      },
-    );
+      }
+
+      return ListView.builder(
+        physics: BouncingScrollPhysics(),
+        itemCount: pastOrders.length,
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          final order = pastOrders[index];
+          final isCancelled = order.status?.toLowerCase() == 'cancelled';
+          return GestureDetector(
+            onTap: () async {
+              // Fetch full order details
+              if (order.sId != null) {
+                await storeController.fetchVendorOrder(order.sId!, context);
+                if (!context.mounted) return;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SelectedOrder(
+                      vendorOrder: storeController.selectedVendorOrder.value,
+                      isComplete: true,
+                      isCancelled: isCancelled,
+                      isCurrent: false,
+                      isAccepted: true,
+                    ),
+                  ),
+                );
+              }
+            },
+            child: PastProducts(isCancelled: isCancelled, vendorOrder: order),
+          );
+        },
+      );
+    });
   }
 }

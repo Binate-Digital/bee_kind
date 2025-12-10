@@ -403,28 +403,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
                     SizedBox(height: 30.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: Row(
-                        children: [
-                          CustomText(
-                            text: "Popular Products",
-                            fontSize: 18.sp,
-                            weight: FontWeight.bold,
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 10.h),
-                    ListView.builder(
-                      itemCount: 3,
-                      physics: NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        return Products();
-                      },
-                    ),
+                    // Padding(
+                    //   padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    //   child: Row(
+                    //     children: [
+                    //       CustomText(
+                    //         text: "Popular Products",
+                    //         fontSize: 18.sp,
+                    //         weight: FontWeight.bold,
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // SizedBox(height: 10.h),
+                    // ListView.builder(
+                    //   itemCount: 3,
+                    //   physics: NeverScrollableScrollPhysics(),
+                    //   padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    //   shrinkWrap: true,
+                    //   itemBuilder: (context, index) {
+                    //     return Products();
+                    //   },
+                    // ),
                   ],
                 ),
               ),

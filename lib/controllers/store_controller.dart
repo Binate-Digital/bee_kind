@@ -16,6 +16,8 @@ import 'package:bee_kind/models/response_models/product_reviews_response_model.d
 import 'package:bee_kind/models/response_models/vendor_stats_response_model.dart';
 import 'package:bee_kind/models/response_models/vendor_orders_response_model.dart'
     as vendorOrder;
+import 'package:bee_kind/models/response_models/vendor_pending_orders_response_model.dart'
+    as pendingOrder;
 import 'package:bee_kind/models/data_models/search_result_model.dart';
 import 'package:bee_kind/models/response_models/single_product_response_model.dart'
     hide Reviews;
@@ -68,6 +70,11 @@ class StoreController extends GetxController {
       <vendorOrder.VendorOrder>[].obs;
   Rxn<vendorOrder.VendorOrder> selectedVendorOrder =
       Rxn<vendorOrder.VendorOrder>();
+  // PENDING ORDERS (different response model)
+  RxList<pendingOrder.PendingOrder> pendingOrders =
+      <pendingOrder.PendingOrder>[].obs;
+  Rxn<pendingOrder.PendingOrder> selectedPendingOrder =
+      Rxn<pendingOrder.PendingOrder>();
 
   // DIRECT ACCESS TO LIST OF REVIEWS
   RxList<Reviews>? reviewsList = <Reviews>[].obs;
@@ -1578,18 +1585,28 @@ class StoreController extends GetxController {
     }
   }
 
-  /// Change vendor order status
+  /// Change vendor order status with optional driver details
   Future<void> changeVendorOrderStatus(
     String orderId,
     String newStatus,
-    BuildContext context,
-  ) async {
+    BuildContext context, {
+    Map<String, dynamic>? driverDetail,
+  }) async {
     try {
       showLoadingDialog(context);
 
+      final Map<String, dynamic> body = {
+        "orderId": orderId,
+        "status": newStatus,
+      };
+
+      if (driverDetail != null) {
+        body["driverDetail"] = driverDetail;
+      }
+
       final response = await network.patchRequest(
         endPoint: NetworkStrings.vendorChangeOrderStatus,
-        data: {"orderId": orderId, "status": newStatus},
+        data: body,
         isHeaderRequire: true,
         isToast: false,
       );
@@ -1607,6 +1624,8 @@ class StoreController extends GetxController {
         AppDialogs.showToast("Order status updated successfully");
         // Refresh orders list
         await fetchVendorOrders(context: context);
+        // also refresh pending orders
+        await fetchPendingOrders(context: context);
       } else {
         AppDialogs.showToast(
           data["message"] ?? "Failed to update order status",
@@ -1616,6 +1635,47 @@ class StoreController extends GetxController {
       Navigator.pop(context);
       log("changeVendorOrderStatus Exception: $e");
       AppDialogs.showToast("Error updating order status");
+    }
+  }
+
+  /// Fetch vendor pending orders (uses a different response shape)
+  Future<void> fetchPendingOrders({BuildContext? context}) async {
+    try {
+      isLoading.value = true;
+
+      final response = await network.getRequest(
+        endPoint: NetworkStrings.vendorGetOrders,
+        queryParameters: {'status': 'pending'},
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      isLoading.value = false;
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to fetch pending orders");
+        return;
+      }
+
+      final data = response.data;
+      log('fetchPendingOrders response: $data');
+
+      if (data["status"] == true && data["data"] != null) {
+        try {
+          final model = pendingOrder.PendingOrdersResponseModel.fromJson(data);
+          pendingOrders.value = model.data ?? [];
+          log('Pending orders fetched: ${pendingOrders.length}');
+        } catch (e) {
+          log('Failed to parse pending orders: $e');
+          AppDialogs.showToast(data["message"] ?? "Failed to load orders");
+        }
+      } else {
+        AppDialogs.showToast(data["message"] ?? "No orders found");
+      }
+    } catch (e) {
+      isLoading.value = false;
+      log("fetchPendingOrders Exception: $e");
+      AppDialogs.showToast("Error fetching pending orders");
     }
   }
 }
