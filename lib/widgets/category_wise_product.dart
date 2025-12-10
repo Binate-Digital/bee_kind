@@ -29,40 +29,37 @@ class CategoryWiseProduct extends StatelessWidget {
         color: AppColors.whiteColor,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 1,
-            child: Container(
-              height: 110.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: AppColors.yellow2, width: 1.w),
-                color: AppColors.whiteColor,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.r),
-                child: CustomExtendedImageWidget(
-                  imagePath:
-                      (product?.productImages != null &&
-                          product!.productImages!.isNotEmpty)
-                      ? product!.productImages!.first
-                      : AssetsPath.product,
-                  imageType:
-                      (product?.productImages != null &&
-                          product!.productImages!.isNotEmpty)
-                      ? MediaPathType.NETWORK.name
-                      : MediaPathType.ASSETS.name,
-                  imagePlaceholder: AssetsPath.product,
-                  fit: BoxFit.cover,
-                ),
+          Container(
+            height: 110.h,
+            width: 110.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: AppColors.yellow2, width: 1.w),
+              color: AppColors.whiteColor,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20.r),
+              child: CustomExtendedImageWidget(
+                imagePath:
+                    (product?.productImages != null &&
+                        product!.productImages!.isNotEmpty)
+                    ? product!.productImages!.first
+                    : AssetsPath.product,
+                imageType:
+                    (product?.productImages != null &&
+                        product!.productImages!.isNotEmpty)
+                    ? MediaPathType.NETWORK.name
+                    : MediaPathType.ASSETS.name,
+                imagePlaceholder: AssetsPath.product,
+                fit: BoxFit.cover,
               ),
             ),
           ),
 
           Container(
-            width: 160.w,
+            width: 140.w,
             padding: EdgeInsets.only(left: 10.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,6 +68,8 @@ class CategoryWiseProduct extends StatelessWidget {
                 CustomText(
                   text: product?.productName ?? "Lorem Ipsum",
                   fontSize: 20.sp,
+                  maxLines: 3,
+                  textAlign: TextAlign.left,
                   weight: FontWeight.bold,
                 ),
                 SizedBox(height: 10.h),
@@ -85,6 +84,7 @@ class CategoryWiseProduct extends StatelessWidget {
               ],
             ),
           ),
+          Spacer(),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:bee_kind/common/base_view.dart';
+import 'package:bee_kind/models/response_models/vendor_single_order_response_model.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/app_dialogs.dart';
 import 'package:bee_kind/utils/assets_path.dart';
@@ -7,9 +10,8 @@ import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/dialogs/delivery_info_dialog.dart';
 import 'package:bee_kind/widgets/dialogs/order_complete_confirmation_dialog.dart';
 import 'package:bee_kind/widgets/stepper_widget.dart';
+import 'package:bee_kind/widgets/user_avatar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:bee_kind/models/response_models/vendor_orders_response_model.dart'
-    as vorder;
 import 'package:bee_kind/controllers/store_controller.dart';
 // app_dialogs already imported above; avoid duplicate import
 import 'package:get/get.dart';
@@ -18,7 +20,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 class SelectedOrder extends StatefulWidget {
-  SelectedOrder({
+  const SelectedOrder({
     super.key,
     this.vendorOrder,
     this.isCancelled = false,
@@ -26,7 +28,7 @@ class SelectedOrder extends StatefulWidget {
     this.isAccepted = false,
     this.isComplete = false,
   });
-  final vorder.VendorOrder? vendorOrder;
+  final VendorSingleOrderResponseModel? vendorOrder;
   final bool isCancelled;
   final bool isCurrent;
   final bool isAccepted;
@@ -53,9 +55,9 @@ class _SelectedOrderState extends State<SelectedOrder> {
 
   List<String> _getCarouselImages() {
     // Get product images from order items
-    if (widget.vendorOrder?.items != null &&
-        widget.vendorOrder!.items!.isNotEmpty) {
-      return widget.vendorOrder!.items!
+    if (widget.vendorOrder?.data?.order?.items != null &&
+        widget.vendorOrder!.data!.order!.items!.isNotEmpty) {
+      return widget.vendorOrder!.data!.order!.items!
           .map((item) => item.productImage ?? AssetsPath.store)
           .toList();
     }
@@ -86,13 +88,13 @@ class _SelectedOrderState extends State<SelectedOrder> {
     currentStep = widget.isCurrent ? 0 : 2;
     isAccepted =
         widget.isAccepted ||
-        (widget.vendorOrder?.status?.toLowerCase() == 'accepted');
+        (widget.vendorOrder?.data?.order?.status?.toLowerCase() == 'accepted');
     isCurrent =
         widget.isCurrent ||
-        (widget.vendorOrder?.status?.toLowerCase() == 'pending');
+        (widget.vendorOrder?.data?.order?.status?.toLowerCase() == 'pending');
     isComplete =
         widget.isComplete ||
-        (widget.vendorOrder?.status?.toLowerCase() == 'completed');
+        (widget.vendorOrder?.data?.order?.status?.toLowerCase() == 'completed');
   }
 
   @override
@@ -208,31 +210,39 @@ class _SelectedOrderState extends State<SelectedOrder> {
               ),
               Row(
                 children: [
+                  // Padding(
+                  //   padding: EdgeInsets.symmetric(vertical: 10.w),
+                  //   child: Container(
+                  //     width: 50.w,
+                  //     height: 50.h,
+                  //     decoration: BoxDecoration(
+                  //       shape: BoxShape.circle,
+                  //       border: Border.all(
+                  //         color: AppColors.yellow2,
+                  //         width: 2.w,
+                  //       ),
+                  //       image: DecorationImage(
+                  //         image: AssetImage(AssetsPath.dummy),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 10.w),
-                    child: Container(
-                      width: 50.w,
-                      height: 50.h,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.yellow2,
-                          width: 2.w,
-                        ),
-                        image: DecorationImage(
-                          image: AssetImage(AssetsPath.dummy),
-                        ),
-                      ),
+                    child: UserAvatarWidget(
+                      selectedImgPath:
+                          widget.vendorOrder?.data?.user?.profilePicture,
+                      radius: 50.r,
+                      isViewOnly: true,
                     ),
                   ),
                   SizedBox(width: 10.w),
-                  Expanded(
-                    child: CustomText(
-                      text: widget.vendorOrder?.user?.name ?? "John Smith",
-                      fontSize: 18.sp,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  CustomText(
+                    text:
+                        "${widget.vendorOrder?.data?.user?.firstName ?? 'unkown'} ${widget.vendorOrder?.data?.user?.lastName ?? ''}",
+                    fontSize: 18.sp,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -245,11 +255,12 @@ class _SelectedOrderState extends State<SelectedOrder> {
               SizedBox(height: 10.h),
 
               // Display each item from the order
-              if (widget.vendorOrder?.items != null &&
-                  widget.vendorOrder!.items!.isNotEmpty)
+              if (widget.vendorOrder?.data?.order?.items != null &&
+                  widget.vendorOrder!.data!.order!.items!.isNotEmpty)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: widget.vendorOrder!.items!.map((item) {
+                  children: widget.vendorOrder!.data!.order!.items!.map((item) {
+                    log("ITEM DATA: ${item.toJson()}");
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -282,13 +293,14 @@ class _SelectedOrderState extends State<SelectedOrder> {
                   fontColor: AppColors.blackColor,
                 ),
               CustomText(
-                text: "Order Number: ${widget.vendorOrder?.sId ?? 'N/A'}",
+                text:
+                    "Order Number: ${widget.vendorOrder?.data?.order?.id ?? 'N/A'}",
                 fontSize: 16.sp,
                 fontColor: AppColors.blackColor,
               ),
               CustomText(
                 text:
-                    "Placed on: ${_formatDate(widget.vendorOrder?.createdAt)}",
+                    "Placed on: ${_formatDate(widget.vendorOrder?.data?.order?.createdAt)}",
                 fontSize: 16.sp,
                 fontColor: AppColors.blackColor,
               ),
@@ -302,11 +314,13 @@ class _SelectedOrderState extends State<SelectedOrder> {
               SizedBox(height: 10.h),
               CustomText(
                 text:
-                    widget.vendorOrder?.deliveryAddress ??
-                    (widget.vendorOrder?.user?.phoneNumber != null
-                        ? "Address: ${widget.vendorOrder!.user!.phoneNumber}"
+                    widget.vendorOrder?.data?.order?.userAddress?.address ??
+                    (widget.vendorOrder?.data?.user?.phoneNumber != null
+                        ? "Address: ${widget.vendorOrder!.data!.user!.phoneNumber}"
                         : "No address provided"),
                 fontSize: 16.sp,
+                textAlign: TextAlign.left,
+                maxLines: 3,
                 fontColor: AppColors.blackColor,
               ),
               SizedBox(height: 20.h),
@@ -318,7 +332,8 @@ class _SelectedOrderState extends State<SelectedOrder> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        if ((widget.vendorOrder?.status ?? '').toLowerCase() ==
+                        if ((widget.vendorOrder?.data?.order?.status ?? '')
+                                .toLowerCase() ==
                             'pending')
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -327,14 +342,15 @@ class _SelectedOrderState extends State<SelectedOrder> {
                             ),
                             onPressed: () async {
                               await storeController.changeVendorOrderStatus(
-                                widget.vendorOrder!.sId ?? '',
+                                widget.vendorOrder!.data!.order!.id ?? '',
                                 'accepted',
                                 context,
                               );
                             },
                             child: const Text('Accept'),
                           ),
-                        if ((widget.vendorOrder?.status ?? '').toLowerCase() !=
+                        if ((widget.vendorOrder?.data?.order?.status ?? '')
+                                .toLowerCase() !=
                             'completed')
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -343,7 +359,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                             ),
                             onPressed: () async {
                               await storeController.changeVendorOrderStatus(
-                                widget.vendorOrder!.sId ?? '',
+                                widget.vendorOrder!.data!.order!.id ?? '',
                                 'completed',
                                 context,
                               );
@@ -352,7 +368,8 @@ class _SelectedOrderState extends State<SelectedOrder> {
                               isCurrent ? 'Ready for Pickup' : 'Mark Complete',
                             ),
                           ),
-                        if ((widget.vendorOrder?.status ?? '').toLowerCase() !=
+                        if ((widget.vendorOrder?.data?.order?.status ?? '')
+                                    .toLowerCase() !=
                                 'cancelled' &&
                             isCurrent)
                           ElevatedButton(
@@ -362,7 +379,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                             ),
                             onPressed: () async {
                               await storeController.changeVendorOrderStatus(
-                                widget.vendorOrder!.sId ?? '',
+                                widget.vendorOrder!.data!.order!.id ?? '',
                                 'cancelled',
                                 context,
                               );
@@ -383,11 +400,16 @@ class _SelectedOrderState extends State<SelectedOrder> {
                     fontColor: AppColors.blackColor,
                   ),
                   CustomText(
-                    text:
-                        "\$${widget.vendorOrder?.totalAmount != null ? ((widget.vendorOrder!.totalAmount! - 10).toStringAsFixed(2)) : '0.00'}",
+                    text: "\$20",
                     fontSize: 18.sp,
                     fontColor: AppColors.blackColor,
                   ),
+                  // CustomText(
+                  //   text:
+                  //       "\$${widget.vendorOrder?.data?.order?.totalAmount != null ? ((widget.vendorOrder!.data!.order!.totalAmount! - 10).toStringAsFixed(2)) : '0.00'}",
+                  //   fontSize: 18.sp,
+                  //   fontColor: AppColors.blackColor,
+                  // ),
                 ],
               ),
               SizedBox(height: 10.h),
@@ -402,7 +424,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                   ),
                   CustomText(
                     text:
-                        "\$${widget.vendorOrder?.totalAmount?.toStringAsFixed(2) ?? '0.00'}",
+                        "\$${widget.vendorOrder?.data?.order?.totalAmount?.toStringAsFixed(2) ?? '0.00'}",
                     fontSize: 18.sp,
                     fontColor: AppColors.yellow2,
                   ),
@@ -497,7 +519,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                       if (result == true) {
                         // Call API for "ready-for-pickup" with driver details
                         await storeController.changeVendorOrderStatus(
-                          widget.vendorOrder!.sId ?? '',
+                          widget.vendorOrder!.data!.order!.id ?? '',
                           'ready-for-pickup',
                           context,
                           driverDetail: {
@@ -521,7 +543,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                     } else if (currentStep == 1) {
                       // Call API for "dispatched"
                       await storeController.changeVendorOrderStatus(
-                        widget.vendorOrder!.sId ?? '',
+                        widget.vendorOrder!.data!.order!.id ?? '',
                         'dispatched',
                         context,
                       );
@@ -535,7 +557,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                       if (confirmResult == true) {
                         // Call API for "completed"
                         await storeController.changeVendorOrderStatus(
-                          widget.vendorOrder!.sId ?? '',
+                          widget.vendorOrder!.data!.order!.id ?? '',
                           'completed',
                           context,
                         );

@@ -5,7 +5,7 @@ import 'dart:developer';
 import 'package:bee_kind/models/response_models/single_order_response_model.dart';
 import 'package:bee_kind/services/network.dart';
 import 'package:bee_kind/utils/app_colors.dart';
-import 'package:bee_kind/utils/app_constants.dart';
+// import 'package:bee_kind/utils/app_constants.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/network_strings.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
@@ -13,6 +13,7 @@ import 'package:bee_kind/widgets/dialogs/cancel_order_dialog.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/custom_google_maps.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
+// import 'package:bee_kind/widgets/location_bar.dart';
 import 'package:bee_kind/widgets/order_item.dart';
 import 'package:bee_kind/widgets/stepper_widget.dart';
 import 'package:bee_kind/widgets/vertical_stepper.dart';
@@ -58,58 +59,7 @@ class _LiveTrackingState extends State<LiveTracking> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _fetchOrderDetails();
-      await _calculateETA();
     });
-  }
-
-  String? estimatedTimeText;
-  bool isCalculatingEta = false;
-
-  Future<void> _calculateETA() async {
-    if (pickupLatLng == null || dropoffLatLng == null) return;
-
-    try {
-      setState(() => isCalculatingEta = true);
-
-      log(
-        "ETA COORDINATES: ${pickupLatLng!.latitude},${pickupLatLng!.longitude}",
-      );
-
-      final origin = "${pickupLatLng!.latitude},${pickupLatLng!.longitude}";
-      final destination =
-          "${dropoffLatLng!.latitude},${dropoffLatLng!.longitude}";
-
-      final url =
-          "https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&key=${AppConstants.googleApiKey}";
-
-      final response = await network.getDirect(url); // ⬅️ ADD helper below
-
-      if (response == null) {
-        estimatedTimeText = "ETA unavailable";
-        setState(() => isCalculatingEta = false);
-        return;
-      }
-
-      final data = response.data;
-
-      if (data["routes"] != null &&
-          data["routes"].length > 0 &&
-          data["routes"][0]["legs"] != null &&
-          data["routes"][0]["legs"].length > 0) {
-        final leg = data["routes"][0]["legs"][0];
-
-        final duration = leg["duration"]["text"]; // e.g. "18 mins"
-        estimatedTimeText = "ETA: $duration";
-      } else {
-        estimatedTimeText = "ETA unavailable";
-      }
-
-      setState(() => isCalculatingEta = false);
-    } catch (e) {
-      log("ETA error: $e");
-      estimatedTimeText = "ETA unavailable";
-      setState(() => isCalculatingEta = false);
-    }
   }
 
   Future<void> _fetchOrderDetails() async {
@@ -166,10 +116,6 @@ class _LiveTrackingState extends State<LiveTracking> {
     }
   }
 
-  /// ---------------------------------------------------
-  /// Initialize pickup & dropoff from store + user address
-  /// coordinates are [lat, lng]
-  /// ---------------------------------------------------
   void _setupLocationsFromOrder(Order order) {
     // Default fallback if coordinates are missing
     const fallbackPickup = LatLng(24.861714457432807, 67.07000228675905);
@@ -194,6 +140,19 @@ class _LiveTrackingState extends State<LiveTracking> {
     } else {
       dropoffLatLng = fallbackDropoff;
     }
+  }
+
+  String convertEtaStringToReadable(String etaString) {
+    log("ETA STRING: $etaString");
+    final minutes = int.tryParse(etaString) ?? 0;
+
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+
+    log("hours: $hours");
+    log("minutes: $mins");
+
+    return "$hours h $mins m";
   }
 
   /// ---------------------------------------------------
@@ -323,7 +282,7 @@ class _LiveTrackingState extends State<LiveTracking> {
     final currentStep = _stepFromStatus(order.status);
 
     return AppBarBaseView(
-      title: estimatedTimeText ?? "Calculating ETA...",
+      title: order.eta ?? "ETA Not Available ",
       button: _buildTopContent(context, order, currentStep),
       body: _buildMapAndBottomContent(
         order,
@@ -446,7 +405,10 @@ class _LiveTrackingState extends State<LiveTracking> {
     StoreAddress? storeAddress,
     Items? firstItem,
   ) {
-    // Address strings are available via order data when needed.
+    // final pickupAddress =
+    //     storeAddress?.address ?? "Store address not available";
+    // final dropoffAddress =
+    //     userAddress?.address ?? "Delivery address not available";
 
     return CustomGoogleMap(
       onMapCreated: (controller) => mapController = controller,

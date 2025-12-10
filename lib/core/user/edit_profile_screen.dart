@@ -169,6 +169,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: CustomTextField(
                     hint: "Email",
                     controller: emailController,
+                    isEditable: false,
                     validator: (value) => Validation.validateEmail(value),
                     prefxicon: AssetsPath.email,
                   ),
@@ -176,7 +177,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                 // Phone
                 Padding(
-                  padding: EdgeInsets.only(bottom: 15.h),
+                  padding: EdgeInsets.only(bottom: 0.h),
                   child: CustomTextField(
                     hint: "Phone",
                     controller: phoneController,

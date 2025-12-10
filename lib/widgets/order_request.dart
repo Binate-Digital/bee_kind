@@ -92,8 +92,7 @@ class OrderRequest extends StatelessWidget {
                       order != null &&
                           order?.items != null &&
                           order!.items!.isNotEmpty
-                      ? "Qty: " +
-                            (order?.items!.first.quantity?.toString() ?? '0')
+                      ? "Qty: ${order?.items!.first.quantity?.toString() ?? '0'}"
                       : "Qty: 01",
                   fontSize: 14.sp,
                   fontColor: AppColors.blackColor,

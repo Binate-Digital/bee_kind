@@ -261,7 +261,7 @@ class _SelectedProductState extends State<SelectedProduct> {
                                   ),
                                   SizedBox(width: 10.w),
                                   CustomText(
-                                    text: "\$${price}",
+                                    text: "\$$price",
                                     lineThrough: true,
                                     fontSize: 20.sp,
                                     fontColor: AppColors.yellow2,
@@ -270,7 +270,7 @@ class _SelectedProductState extends State<SelectedProduct> {
                                 ],
                               )
                             : CustomText(
-                                text: "\$${price}",
+                                text: "\$$price",
                                 fontSize: 20.sp,
                                 fontColor: AppColors.yellow2,
                                 weight: FontWeight.bold,

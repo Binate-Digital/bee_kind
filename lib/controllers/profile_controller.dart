@@ -87,7 +87,7 @@ class ProfileController extends GetxController {
   final lastNameController = TextEditingController();
   final businessNameController = TextEditingController();
   final businessDescriptionController = TextEditingController();
-  final emailController = TextEditingController();
+  final  emailController = TextEditingController();
   final phoneController = TextEditingController();
   final streetAddressController = TextEditingController();
   final apartmentNumberController = TextEditingController();
@@ -158,27 +158,23 @@ class ProfileController extends GetxController {
             ),
           ),
         );
-
-        // Handle the result when user returns from verification
-        // if (result == true) {
-        // Verification was successful
         AppDialogs.showToast("Verification completed successfully!");
         isVerifyLoading.value = false;
 
         // Check verification status with your backend
         await _checkVerificationStatus();
-        // } else {
-        //   // User cancelled or verification failed
-        //   isVerifyLoading.value = false;
-        //   // AppDialogs.showToast("Verification was not completed");
-        // }
       } else {
-        AppDialogs.showToast(data["message"] ?? "Failed to start verification");
+        log("ERROR VERIFF: ${data["message"]}");
+        AppDialogs.showToast(
+          "Either verfication is complete or something went wrong.",
+        );
       }
     } catch (e) {
       isVerifyLoading.value = false;
-      log("Veriff verification error: $e");
-      AppDialogs.showToast("Something went wrong during verification");
+      log("Veriff verification exception: $e");
+      AppDialogs.showToast(
+        "Either verfication is complete or something went wrong.",
+      );
     }
   }
 
