@@ -13,7 +13,6 @@ import 'package:bee_kind/models/response_models/get_vendor_products_response_mod
 import 'package:bee_kind/models/response_models/orders_response_model.dart'
     as order;
 import 'package:bee_kind/models/response_models/product_reviews_response_model.dart';
-import 'package:bee_kind/models/response_models/vendor_single_order_response_model.dart';
 import 'package:bee_kind/models/response_models/vendor_stats_response_model.dart';
 import 'package:bee_kind/models/response_models/vendor_orders_response_model.dart'
     as vendorOrder;
@@ -69,10 +68,8 @@ class StoreController extends GetxController {
   // VENDOR ORDERS
   RxList<vendorOrder.VendorOrder> vendorOrders =
       <vendorOrder.VendorOrder>[].obs;
-  // Rxn<vendorOrder.VendorOrder> selectedVendorOrder =
-  //     Rxn<vendorOrder.VendorOrder>();
-  Rxn<VendorSingleOrderResponseModel> selectedVendorOrder =
-      Rxn<VendorSingleOrderResponseModel>();
+  Rxn<vendorOrder.VendorOrder> selectedVendorOrder =
+      Rxn<vendorOrder.VendorOrder>();
   // PENDING ORDERS (different response model)
   RxList<pendingOrder.PendingOrder> pendingOrders =
       <pendingOrder.PendingOrder>[].obs;
@@ -1570,10 +1567,10 @@ class StoreController extends GetxController {
 
       if (data["status"] == true && data["data"] != null) {
         try {
-          selectedVendorOrder.value = VendorSingleOrderResponseModel.fromJson(
-            data,
+          selectedVendorOrder.value = vendorOrder.VendorOrder.fromJson(
+            data["data"],
           );
-          log('Vendor order fetched: ${selectedVendorOrder.value?.data}');
+          log('Vendor order fetched: ${selectedVendorOrder.value?.orderId}');
         } catch (e) {
           log('Failed to parse vendor order: $e');
           AppDialogs.showToast(data["message"] ?? "Failed to load order");

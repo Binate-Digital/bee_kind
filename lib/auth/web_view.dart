@@ -1,9 +1,6 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class VeriffWebViewScreen extends StatefulWidget {
   final String verificationUrl;
@@ -27,28 +24,34 @@ class _VeriffWebViewScreenState extends State<VeriffWebViewScreen> {
   void initState() {
     super.initState();
 
-    // iOS-specific WKWebView config required by Veriff
-    final PlatformWebViewControllerCreationParams params =
-        WebKitWebViewControllerCreationParams(
-          allowsInlineMediaPlayback: true, // Veriff requirement
-          // empty set == no gesture required
-        );
-
-    controller = WebViewController.fromPlatformCreationParams(params)
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (_) => setState(() => isLoading = true),
-          onPageFinished: (url) {
-            setState(() => isLoading = false);
-            log("onPageFinished: $url");
-            _checkForCompletion(url);
-          },
-          onWebResourceError: (_) => setState(() => isLoading = false),
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.verificationUrl));
+    controller =
+        WebViewController(
+            onPermissionRequest: (WebViewPermissionRequest request) =>
+                request.grant(),
+          )
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setBackgroundColor(Colors.white)
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onProgress: (int progress) {},
+              onPageStarted: (String url) {
+                setState(() => isLoading = true);
+              },
+              onPageFinished: (String url) {
+                setState(() => isLoading = false);
+                log("onPageFinished: (String $url)");
+                _checkForCompletion(url);
+              },
+              onNavigationRequest: (NavigationRequest request) {
+                return NavigationDecision.navigate;
+              },
+              onWebResourceError: (WebResourceError error) {
+                // don't mark as failed here, just hide loader
+                setState(() => isLoading = false);
+              },
+            ),
+          )
+          ..loadRequest(Uri.parse(widget.verificationUrl));
   }
 
   void _checkForCompletion(String url) {
@@ -77,21 +80,6 @@ class _VeriffWebViewScreenState extends State<VeriffWebViewScreen> {
     } catch (e) {
       Navigator.of(context).pop();
     }
-  }
-
-  @override
-  void dispose() {
-    controller.runJavaScript("""
-    (function(){
-      const vids = document.querySelectorAll('video');
-      vids.forEach(v => {
-        const s = v.srcObject;
-        if(s && s.getTracks) s.getTracks().forEach(t=>t.stop());
-        v.srcObject = null;
-      });
-    })();
-  """);
-    super.dispose();
   }
 
   @override

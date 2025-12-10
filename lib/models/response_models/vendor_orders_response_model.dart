@@ -44,6 +44,7 @@ class VendorOrder {
   String? updatedAt;
   UserInfo? user;
 
+
   VendorOrder({
     this.sId,
     this.orderId,
@@ -80,7 +81,7 @@ class VendorOrder {
               : double.tryParse(json['totalAmount'].toString()))
         : null;
     paymentStatus = json['paymentStatus'];
-    deliveryAddress = json['deliveryAddress'];
+    deliveryAddress = json['userAddress']['address'];
     phoneNumber = json['phoneNumber'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];

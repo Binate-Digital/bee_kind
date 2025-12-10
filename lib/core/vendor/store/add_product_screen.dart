@@ -205,6 +205,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
       if (response.statusCode == 200 && data["status"] == true) {
         AppDialogs.showToast(data["message"] ?? "Product added successfully");
+
+
         setState(() => isLoading = false);
 
         // Clear form
@@ -222,7 +224,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
         // Pop back
         Navigator.pop(context);
-        Get.find<StoreController>().getVendorProducts();
+          Get.find<StoreController>().getVendorProducts();
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to add product");
         setState(() => isLoading = false);

@@ -507,9 +507,8 @@ class CreateProfileScreen extends StatelessWidget {
                           ),
                       ],
                     ),
-                    SizedBox(height: 30.h),
                     Padding(
-                      padding: EdgeInsets.only(bottom: 5.h),
+                      padding: EdgeInsets.only(bottom: 10.h),
                       child: CustomText(
                         text: "Delivery Radius",
                         fontFamily: "Raleway",
@@ -518,7 +517,7 @@ class CreateProfileScreen extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(top: 5.h),
+                      padding: EdgeInsets.only(top: 30.h),
                       child: CustomSliderWidget(
                         min: controller.minRadius,
                         max: controller.maxRadius,
@@ -650,28 +649,27 @@ class CreateProfileScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ],
-
-                  Container(
-                    color: AppColors.whiteColor,
-                    height: 100.h,
-                    padding: EdgeInsets.symmetric(
-                      vertical: 20.h,
-                      // horizontal: 20.w,
-                    ),
-                    child: CustomButton(
-                      onTap: () => controller.handleCreateProfile(
-                        context,
-                        isEdit: isEdit,
+                    Container(
+                      color: AppColors.whiteColor,
+                      height: 100.h,
+                      padding: EdgeInsets.symmetric(
+                        vertical: 20.h,
+                        // horizontal: 20.w,
                       ),
-                      text: isEdit ? "Edit Profile" : "Continue",
-                      borderColor: AppColors.blackColor,
-                      isLoading: controller.isLoading.value,
-                      verticalPadding: 20.h,
-                      horizontalPadding: 10.w,
-                      fontSize: 18.sp,
+                      child: CustomButton(
+                        onTap: () => controller.handleCreateProfile(
+                          context,
+                          isEdit: isEdit,
+                        ),
+                        text: isEdit ? "Edit Profile" : "Continue",
+                        borderColor: AppColors.blackColor,
+                        isLoading: controller.isLoading.value,
+                        verticalPadding: 20.h,
+                        horizontalPadding: 10.w,
+                        fontSize: 18.sp,
+                      ),
                     ),
-                  ),
+                  ],
 
                   /// Extra space at bottom
                   SizedBox(height: controller.isVendor.value ? 150.h : 60.h),

@@ -55,8 +55,6 @@ class Order {
   String? updatedAt;
   int? iV;
   StoreAddress? storeAddress;
-  String? distance;
-  String? eta;
 
   Order({
     this.userAddress,
@@ -76,8 +74,6 @@ class Order {
     this.updatedAt,
     this.iV,
     this.storeAddress,
-    this.distance,
-    this.eta,
   });
 
   Order.fromJson(Map<String, dynamic> json) {
@@ -115,9 +111,6 @@ class Order {
     storeAddress = (json['storeAddress'] is Map)
         ? StoreAddress.fromJson(json['storeAddress'])
         : null;
-
-    distance = json["distance"];
-    eta = json["eta"];
   }
 
   Map<String, dynamic> toJson() {
@@ -139,8 +132,6 @@ class Order {
       "updatedAt": updatedAt,
       "__v": iV,
       "storeAddress": storeAddress?.toJson(),
-      "distance": distance,
-      "eta": eta,
     };
   }
 

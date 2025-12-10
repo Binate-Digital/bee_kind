@@ -10,7 +10,6 @@ class CustomExtendedImageWidget extends StatelessWidget {
   final String? imagePath, imageType;
   final String imagePlaceholder;
   final BoxFit? fit;
-  final double width;
   final Color? placeholderColor, imageColor;
   final VoidCallback? onTap;
 
@@ -23,7 +22,6 @@ class CustomExtendedImageWidget extends StatelessWidget {
     this.placeholderColor,
     this.fit,
     this.onTap,
-    this.width = double.infinity,
   });
 
   @override
@@ -31,110 +29,101 @@ class CustomExtendedImageWidget extends StatelessWidget {
     return imagePath != null && imageType == MediaPathType.FILE.name
         ? GestureDetector(
             onTap: onTap,
-            child: SizedBox(
-              width: width,
-              child: ExtendedImage.file(
-                File(imagePath!),
-                fit: fit ?? BoxFit.cover,
-                color: imageColor,
-                loadStateChanged: (state) {
-                  switch (state.extendedImageLoadState) {
-                    case LoadState.loading:
-                      return Image.asset(
-                        imagePlaceholder,
-                        // fit: BoxFit.contain,
-                        fit: fit ?? BoxFit.cover,
-                        color: placeholderColor,
-                      );
+            child: ExtendedImage.file(
+              File(imagePath!),
+              fit: fit ?? BoxFit.cover,
+              color: imageColor,
+              loadStateChanged: (state) {
+                switch (state.extendedImageLoadState) {
+                  case LoadState.loading:
+                    return Image.asset(
+                      imagePlaceholder,
+                      // fit: BoxFit.contain,
+                      fit: fit ?? BoxFit.cover,
+                      color: placeholderColor,
+                    );
 
-                    case LoadState.failed:
-                      return Image.asset(
-                        imagePlaceholder,
-                        // fit: BoxFit.contain,
-                        fit: fit ?? BoxFit.cover,
-                        color: placeholderColor,
-                      );
+                  case LoadState.failed:
+                    return Image.asset(
+                      imagePlaceholder,
+                      // fit: BoxFit.contain,
+                      fit: fit ?? BoxFit.cover,
+                      color: placeholderColor,
+                    );
 
-                    case LoadState.completed:
-                      break;
-                  }
-                  return null;
-                },
-                //cancelToken: cancellationToken,
-              ),
+                  case LoadState.completed:
+                    break;
+                }
+                return null;
+              },
+              //cancelToken: cancellationToken,
             ),
           )
         : imagePath != null && imageType == MediaPathType.NETWORK.name
         ? GestureDetector(
             onTap: onTap,
-            child: SizedBox(
-              width: width,
-              child: ExtendedImage.network(
-                imagePath!,
-                fit: fit ?? BoxFit.cover,
-                color: imageColor,
-                loadStateChanged: (state) {
-                  switch (state.extendedImageLoadState) {
-                    case LoadState.loading:
-                      // return Image.asset(
-                      //   imagePlaceholder,
-                      //   // fit: BoxFit.contain,
-                      //   fit: fit ?? BoxFit.cover,
-                      //   color: placeholderColor,
-                      // );
-                      return Shimmer.fromColors(
-                        baseColor: AppColors.shimmerBaseColor,
-                        highlightColor: AppColors.shimmerHighlightColor,
-                        child: Container(color: Colors.grey),
-                      );
+            child: ExtendedImage.network(
+              imagePath!,
+              fit: fit ?? BoxFit.cover,
+              color: imageColor,
+              loadStateChanged: (state) {
+                switch (state.extendedImageLoadState) {
+                  case LoadState.loading:
+                    // return Image.asset(
+                    //   imagePlaceholder,
+                    //   // fit: BoxFit.contain,
+                    //   fit: fit ?? BoxFit.cover,
+                    //   color: placeholderColor,
+                    // );
+                    return Shimmer.fromColors(
+                      baseColor: AppColors.shimmerBaseColor,
+                      highlightColor: AppColors.shimmerHighlightColor,
+                      child: Container(color: Colors.grey),
+                    );
 
-                    case LoadState.failed:
-                      return Image.asset(
-                        imagePlaceholder,
-                        fit: fit ?? BoxFit.cover,
-                        // fit: BoxFit.contain,
-                        color: placeholderColor,
-                      );
-                    case LoadState.completed:
-                      break;
-                  }
-                  return null;
-                },
-                //cancelToken: cancellationToken,
-              ),
+                  case LoadState.failed:
+                    return Image.asset(
+                      imagePlaceholder,
+                      fit: fit ?? BoxFit.cover,
+                      // fit: BoxFit.contain,
+                      color: placeholderColor,
+                    );
+                  case LoadState.completed:
+                    break;
+                }
+                return null;
+              },
+              //cancelToken: cancellationToken,
             ),
           )
         : imagePath != null && imageType == MediaPathType.ASSETS.name
         ? GestureDetector(
             onTap: onTap,
-            child: SizedBox(
-              width: width,
-              child: ExtendedImage.asset(
-                imagePath!,
-                color: imageColor,
-                fit: fit ?? BoxFit.cover,
-                loadStateChanged: (state) {
-                  switch (state.extendedImageLoadState) {
-                    case LoadState.loading:
-                      return Image.asset(
-                        imagePlaceholder,
-                        fit: fit ?? BoxFit.cover,
-                        color: placeholderColor,
-                      );
+            child: ExtendedImage.asset(
+              imagePath!,
+              color: imageColor,
+              fit: fit ?? BoxFit.cover,
+              loadStateChanged: (state) {
+                switch (state.extendedImageLoadState) {
+                  case LoadState.loading:
+                    return Image.asset(
+                      imagePlaceholder,
+                      fit: fit ?? BoxFit.cover,
+                      color: placeholderColor,
+                    );
 
-                    case LoadState.failed:
-                      return Image.asset(
-                        imagePlaceholder,
-                        fit: fit ?? BoxFit.cover,
-                        color: placeholderColor,
-                      );
+                  case LoadState.failed:
+                    return Image.asset(
+                      imagePlaceholder,
+                      fit: fit ?? BoxFit.cover,
+                      color: placeholderColor,
+                    );
 
-                    case LoadState.completed:
-                      return SizedBox();
-                  }
-                },
-                //cancelToken: cancellationToken,
-              ),
+                  case LoadState.completed:
+                    return SizedBox();
+                }
+              },
+              //cancelToken: cancellationToken,
             ),
           )
         : Image.asset(

@@ -49,7 +49,7 @@ class SignInScreen extends StatelessWidget {
                       isSuffixIcon: true,
                       isObscure: controller.loginObscure.value,
                       controller: controller.loginPasswordCtrl,
-
+                      validator: (value) => Validation.validatePassword(value),
                       suffixIcon: GestureDetector(
                         onTap: controller.toggleLoginPasswordVisibility,
                         child: Icon(

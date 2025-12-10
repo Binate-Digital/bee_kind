@@ -20,13 +20,12 @@ class PastProducts extends StatelessWidget {
   final vorder.VendorOrder? vendorOrder;
 
   String _resolveImageUrl(String? image) {
-    if (image == null) {
-      return '${NetworkStrings.NETWORK_IMAGE_BASE_URL}uploads/images/default.png';
-    }
+    if (image == null)
+      return NetworkStrings.NETWORK_IMAGE_BASE_URL +
+          'uploads/images/default.png';
     if (image.startsWith('http')) return image;
-    if (image.startsWith('/')) {
+    if (image.startsWith('/'))
       return NetworkStrings.NETWORK_IMAGE_BASE_URL + image.substring(1);
-    }
     return NetworkStrings.NETWORK_IMAGE_BASE_URL + image;
   }
 
