@@ -4,8 +4,8 @@ class NetworkStrings {
   ///BASE URL
   static const String baseUrl =
       "https://beekind-backend.deployment-uat.com/api/v1/";
-  // static const String baseUrl =
-  //     "https://3dsr3m62-5000.uks1.devtunnels.ms/api/v1/";
+  //   static const String baseUrl =
+  //       "https://3dsr3m62-5000.uks1.devtunnels.ms/api/v1/";
 
   static const String NETWORK_IMAGE_BASE_URL =
       "https://beekind-backend.deployment-uat.com/";

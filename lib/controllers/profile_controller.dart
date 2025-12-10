@@ -87,7 +87,7 @@ class ProfileController extends GetxController {
   final lastNameController = TextEditingController();
   final businessNameController = TextEditingController();
   final businessDescriptionController = TextEditingController();
-  final emailController = TextEditingController();
+  final  emailController = TextEditingController();
   final phoneController = TextEditingController();
   final streetAddressController = TextEditingController();
   final apartmentNumberController = TextEditingController();

@@ -38,7 +38,7 @@ class OrdersHistoryScreen extends StatelessWidget {
         }
 
         return ListView.builder(
-          physics: NeverScrollableScrollPhysics(),
+          // physics: NeverScrollableScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           itemCount: controller.ordersList.length,
           shrinkWrap: true,
