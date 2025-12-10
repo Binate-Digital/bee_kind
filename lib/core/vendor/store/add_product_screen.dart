@@ -222,6 +222,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
         // Pop back
         Navigator.pop(context);
+        Get.find<StoreController>().getVendorProducts();
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to add product");
         setState(() => isLoading = false);
