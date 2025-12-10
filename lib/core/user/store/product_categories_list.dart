@@ -22,7 +22,7 @@ class CategoryWiseProductsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(StoreController());
+    final controller = Get.find<StoreController>();
     return AppBarBaseView(
       title: categoryName ?? 'Lorem Ipsum',
       body: ListView.builder(

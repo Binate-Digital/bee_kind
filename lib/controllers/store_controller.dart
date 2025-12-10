@@ -9,9 +9,15 @@ import 'package:bee_kind/models/data_models/create_order_data_model.dart';
 import 'package:bee_kind/models/response_models/address_response_model.dart';
 import 'package:bee_kind/models/response_models/card_response_model.dart';
 import 'package:bee_kind/models/response_models/get_products_by_category_response_model.dart';
+import 'package:bee_kind/models/response_models/get_vendor_products_response_model.dart';
 import 'package:bee_kind/models/response_models/orders_response_model.dart'
     as order;
 import 'package:bee_kind/models/response_models/product_reviews_response_model.dart';
+import 'package:bee_kind/models/response_models/vendor_stats_response_model.dart';
+import 'package:bee_kind/models/response_models/vendor_orders_response_model.dart'
+    as vendorOrder;
+import 'package:bee_kind/models/response_models/vendor_pending_orders_response_model.dart'
+    as pendingOrder;
 import 'package:bee_kind/models/data_models/search_result_model.dart';
 import 'package:bee_kind/models/response_models/single_product_response_model.dart'
     hide Reviews;
@@ -56,6 +62,20 @@ class StoreController extends GetxController {
   Rxn<ProductReviewsResponseModel> productReviews =
       Rxn<ProductReviewsResponseModel>();
 
+  Rxn<VendorStatsResponseModel> vendorStatsModel =
+      Rxn<VendorStatsResponseModel>();
+
+  // VENDOR ORDERS
+  RxList<vendorOrder.VendorOrder> vendorOrders =
+      <vendorOrder.VendorOrder>[].obs;
+  Rxn<vendorOrder.VendorOrder> selectedVendorOrder =
+      Rxn<vendorOrder.VendorOrder>();
+  // PENDING ORDERS (different response model)
+  RxList<pendingOrder.PendingOrder> pendingOrders =
+      <pendingOrder.PendingOrder>[].obs;
+  Rxn<pendingOrder.PendingOrder> selectedPendingOrder =
+      Rxn<pendingOrder.PendingOrder>();
+
   // DIRECT ACCESS TO LIST OF REVIEWS
   RxList<Reviews>? reviewsList = <Reviews>[].obs;
 
@@ -97,6 +117,9 @@ class StoreController extends GetxController {
 
   Rxn<GetProductsByCategoriesResponseModel> productsByCategory =
       Rxn<GetProductsByCategoriesResponseModel>();
+
+  Rxn<GetVendorProductsResponseModel> vendorProducts =
+      Rxn<GetVendorProductsResponseModel>();
 
   RxInt selectedAddressIndex = (-1).obs;
   Rxn<AddressModel> selectedAddress = Rxn<AddressModel>();
@@ -221,6 +244,45 @@ class StoreController extends GetxController {
       Navigator.pop(context);
       AppDialogs.showToast("Something went wrong while cancelling order.");
       log("ERROR CANCEL ORDER: $e");
+    }
+  }
+
+  /// Fetch vendor products (list of products for the current vendor)
+  Future<void> getVendorProducts({
+    BuildContext? context,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      if (context != null) showLoadingDialog(context);
+
+      final response = await network.getRequest(
+        endPoint: NetworkStrings.getVendorProducts,
+        queryParameters: queryParameters,
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      if (context != null) Navigator.pop(context);
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to fetch products");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        vendorProducts.value = GetVendorProductsResponseModel.fromJson(data);
+        // Keep `allProducts` unchanged for now. If you need to map the
+        // fetched vendor products into an app-specific Product model,
+        // do that mapping here (vendorProducts.value?.data).
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to fetch products");
+      }
+    } catch (e) {
+      if (context != null) Navigator.pop(context);
+      log("getVendorProducts Exception: $e");
+      AppDialogs.showToast("Something went wrong while fetching products.");
     }
   }
 
@@ -647,6 +709,184 @@ class StoreController extends GetxController {
     }
   }
 
+  /// Fetch product reviews as a vendor (vendor/get-reviews/:productId)
+  Future<void> fetchVendorProductReviews(
+    String? productId,
+    BuildContext context,
+  ) async {
+    try {
+      isLoading.value = true;
+
+      final response = await network.getRequest(
+        endPoint: "${NetworkStrings.getVendorProductReviews}/$productId",
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      isLoading.value = false;
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to load product reviews");
+        return;
+      }
+
+      final data = response.data;
+      // API can return different shapes for vendor reviews:
+      // - { status: true, message: '...', data: { averageRating, totalReviews, reviews: [...] } }
+      // - { status: true, message: 'No reviews found for this product', data: [] }
+      try {
+        final payload = data["data"] ?? data;
+
+        if (payload is List) {
+          // No reviews
+          productReviews.value = ProductReviewsResponseModel(
+            status: data["status"],
+            message: data["message"],
+            data: null,
+          );
+          averageRating.value = 0;
+          totalReviews.value = 0;
+          reviewsList?.value = [];
+        } else if (payload is Map) {
+          // Normal object shape
+          productReviews.value = ProductReviewsResponseModel.fromJson(data);
+          final details = productReviews.value?.data;
+          averageRating.value = details?.averageRating ?? 0;
+          totalReviews.value = details?.totalReviews ?? 0;
+          reviewsList?.value = details?.reviews ?? [];
+        } else {
+          // Fallback
+          productReviews.value = ProductReviewsResponseModel(
+            status: data["status"],
+            message: data["message"],
+            data: null,
+          );
+          averageRating.value = 0;
+          totalReviews.value = 0;
+          reviewsList?.value = [];
+        }
+      } catch (e) {
+        log('fetchVendorProductReviews parse Exception: $e');
+        AppDialogs.showToast(data["message"] ?? "Reviews not found.");
+      }
+    } catch (e) {
+      isLoading.value = false;
+      log("fetchVendorProductReviews Exception: $e");
+      AppDialogs.showToast("Error loading reviews");
+    }
+  }
+
+  Future<void> addReplyToReview(
+    String? reviewId,
+    String reply,
+    BuildContext context,
+  ) async {
+    try {
+      if (reviewId == null || reviewId.isEmpty) {
+        AppDialogs.showToast("Invalid review ID");
+        return;
+      }
+
+      final response = await network.postRequest(
+        endPoint: "${NetworkStrings.addReplyToReview}/$reviewId",
+        data: {"reply": reply},
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      if (response == null) {
+        AppDialogs.showToast("Failed to send reply");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        AppDialogs.showToast("Reply sent successfully");
+        // Refresh reviews to show the new reply
+        await fetchProductReviews(singleProduct.value?.data?.sId, context);
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to send reply");
+        log("Add reply failed: ${data['message']}");
+      }
+    } catch (e) {
+      log("addReplyToReview Exception: $e");
+      AppDialogs.showToast("Error sending reply: $e");
+    }
+  }
+
+  Future<void> deleteReview(String? reviewId, BuildContext context) async {
+    try {
+      if (reviewId == null || reviewId.isEmpty) {
+        AppDialogs.showToast("Invalid review ID");
+        return;
+      }
+
+      final response = await network.deleteRequest(
+        endPoint: "${NetworkStrings.deleteReview}/$reviewId",
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      if (response == null) {
+        AppDialogs.showToast("Failed to delete review");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        AppDialogs.showToast("Review deleted successfully");
+        // Refresh reviews to remove the deleted one
+        await fetchProductReviews(singleProduct.value?.data?.sId, context);
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to delete review");
+        log("Delete review failed: ${data['message']}");
+      }
+    } catch (e) {
+      log("deleteReview Exception: $e");
+      AppDialogs.showToast("Error deleting review: $e");
+    }
+  }
+
+  Future<void> updateReview(
+    String? reviewId,
+    String updatedText,
+    BuildContext context,
+  ) async {
+    try {
+      if (reviewId == null || reviewId.isEmpty) {
+        AppDialogs.showToast("Invalid review ID");
+        return;
+      }
+
+      final response = await network.patchRequest(
+        endPoint: "${NetworkStrings.updateReview}/$reviewId",
+        data: {"review": updatedText},
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      if (response == null) {
+        AppDialogs.showToast("Failed to update review");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        AppDialogs.showToast("Review updated successfully");
+        await fetchProductReviews(singleProduct.value?.data?.sId, context);
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to update review");
+        log("Update review failed: ${data['message']}");
+      }
+    } catch (e) {
+      log("updateReview Exception: $e");
+      AppDialogs.showToast("Error updating review: $e");
+    }
+  }
+
   Future<void> fetchStoreDetail(String? storeId, BuildContext context) async {
     debugPrint("fetch store detail");
     try {
@@ -686,8 +926,14 @@ class StoreController extends GetxController {
     }
   }
 
-  setAvailibility(bool val) {
-    isAvailable.value = val;
+  setAvailibility(bool val) async {
+    // Call toggle API when vendor toggles availability
+    if (singleProduct.value?.data?.sId != null) {
+      await toggleVendorProduct(singleProduct.value!.data!.sId!, val);
+    } else {
+      // Fallback if product ID not available
+      isAvailable.value = val;
+    }
   }
 
   void search(String query) {
@@ -732,6 +978,15 @@ class StoreController extends GetxController {
     selectedStockStatus.value = status;
   }
 
+  /// Convert API inventory status format to display format
+  /// "in-stock" -> "In Stock", "low-stock" -> "Low Stock", "out-of-stock" -> "Out Of Stock"
+  String convertApiStatusToDisplay(String apiStatus) {
+    return apiStatus
+        .split('-')
+        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .join(' ');
+  }
+
   void updateCarouselIndex(int index) {
     currentCarouselIndex.value = index;
   }
@@ -743,6 +998,12 @@ class StoreController extends GetxController {
     bool fromHome,
   ) async {
     try {
+      // Validate categoryId before making the request
+      if (categoryId == null || categoryId.isEmpty) {
+        AppDialogs.showToast("Invalid category. Please try again.");
+        return;
+      }
+
       showLoadingDialog(context);
 
       final response = await network.getRequest(
@@ -751,9 +1012,12 @@ class StoreController extends GetxController {
         isToast: false,
       );
 
-      Navigator.pop(context);
+      if (context.mounted) Navigator.pop(context);
 
-      if (response == null) return;
+      if (response == null) {
+        AppDialogs.showToast("Unable to fetch products");
+        return;
+      }
 
       final data = response.data;
 
@@ -761,26 +1025,39 @@ class StoreController extends GetxController {
         productsByCategory.value =
             GetProductsByCategoriesResponseModel.fromJson(data);
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => CategoryWiseProductsList(
-              fromHome: fromHome,
-              products: productsByCategory.value?.data ?? [],
-              categoryName: categoryName,
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CategoryWiseProductsList(
+                fromHome: fromHome,
+                products: productsByCategory.value?.data ?? [],
+                categoryName: categoryName,
+              ),
             ),
-          ),
-        );
+          );
+        }
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to fetch products");
       }
     } catch (e) {
-      Navigator.pop(context);
+      if (context.mounted) {
+        try {
+          Navigator.pop(context);
+        } catch (e) {
+          // Ignore if dialog not open
+        }
+      }
+      log("getProductsByCategory Exception: $e");
+      AppDialogs.showToast("Something went wrong while fetching products.");
     }
   }
 
   Future<void> fetchSingleProduct(
     String? productId,
-    BuildContext context,
-  ) async {
+    BuildContext context, {
+    bool navigate = true,
+  }) async {
     try {
       showLoadingDialog(context);
 
@@ -803,26 +1080,39 @@ class StoreController extends GetxController {
         // PARSE API
         singleProduct.value = SingleProductResponseModel.fromJson(data);
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => SelectedProduct(
-              productId: productId,
-              productName: singleProduct.value?.data?.productName,
-              ingredients: singleProduct.value?.data?.ingredients,
-              description: singleProduct.value?.data?.description,
-              effets: singleProduct.value?.data?.effects,
-              price: singleProduct.value?.data?.price,
-              afterDiscountPrice: singleProduct.value?.data?.afterDiscountPrice,
-              inventoryStatus: singleProduct.value?.data?.inventoryStatus,
-              hasDiscount:
-                  singleProduct.value?.data?.isDiscountAvailable ?? false,
-              isAvailable: singleProduct.value?.data?.isAvailable ?? false,
-              quantity: singleProduct.value?.data?.quantity,
-              productImages: singleProduct.value?.data?.productImages,
+        // Initialize isAvailable from API response
+        isAvailable.value = singleProduct.value?.data?.isAvailable ?? false;
+
+        // Initialize selectedStockStatus from API response (convert from API format to display format)
+        if (singleProduct.value?.data?.inventoryStatus != null) {
+          selectedStockStatus.value = convertApiStatusToDisplay(
+            singleProduct.value!.data!.inventoryStatus!,
+          );
+        }
+
+        if (navigate) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SelectedProduct(
+                productId: productId,
+                productName: singleProduct.value?.data?.productName,
+                ingredients: singleProduct.value?.data?.ingredients,
+                description: singleProduct.value?.data?.description,
+                effets: singleProduct.value?.data?.effects,
+                price: singleProduct.value?.data?.price,
+                afterDiscountPrice:
+                    singleProduct.value?.data?.afterDiscountPrice,
+                inventoryStatus: singleProduct.value?.data?.inventoryStatus,
+                hasDiscount:
+                    singleProduct.value?.data?.isDiscountAvailable ?? false,
+                isAvailable: singleProduct.value?.data?.isAvailable ?? false,
+                quantity: singleProduct.value?.data?.quantity,
+                productImages: singleProduct.value?.data?.productImages,
+              ),
             ),
-          ),
-        );
+          );
+        }
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to load product");
       }
@@ -830,6 +1120,562 @@ class StoreController extends GetxController {
       Navigator.pop(context);
       log("fetchSingleProduct Exception: $e");
       AppDialogs.showToast("Something went wrong while getting product.");
+    }
+  }
+
+  /// Fetch single product as a vendor (vendor/get-product/:id)
+  Future<void> fetchVendorProduct(
+    String? productId,
+    BuildContext context, {
+    bool navigate = true,
+  }) async {
+    try {
+      showLoadingDialog(context);
+
+      final response = await network.getRequest(
+        endPoint: "${NetworkStrings.getVendorProduct}/$productId",
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      Navigator.pop(context);
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to fetch product details");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true && data["data"] != null) {
+        singleProduct.value = SingleProductResponseModel.fromJson(data);
+
+        // Initialize isAvailable from API response
+        isAvailable.value = singleProduct.value?.data?.isAvailable ?? false;
+
+        // Initialize selectedStockStatus from API response (convert from API format to display format)
+        if (singleProduct.value?.data?.inventoryStatus != null) {
+          selectedStockStatus.value = convertApiStatusToDisplay(
+            singleProduct.value!.data!.inventoryStatus!,
+          );
+        }
+
+        if (navigate) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SelectedProduct(
+                productId: productId,
+                productName: singleProduct.value?.data?.productName,
+                ingredients: singleProduct.value?.data?.ingredients,
+                description: singleProduct.value?.data?.description,
+                effets: singleProduct.value?.data?.effects,
+                price: singleProduct.value?.data?.price,
+                afterDiscountPrice:
+                    singleProduct.value?.data?.afterDiscountPrice,
+                inventoryStatus: singleProduct.value?.data?.inventoryStatus,
+                hasDiscount:
+                    singleProduct.value?.data?.isDiscountAvailable ?? false,
+                isAvailable: singleProduct.value?.data?.isAvailable ?? false,
+                quantity: singleProduct.value?.data?.quantity,
+                productImages: singleProduct.value?.data?.productImages,
+              ),
+            ),
+          );
+        }
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to load product");
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      log("fetchVendorProduct Exception: $e");
+      AppDialogs.showToast("Something went wrong while getting product.");
+    }
+  }
+
+  /// Delete vendor product
+  Future<void> deleteVendorProduct(
+    String? productId,
+    BuildContext? context,
+  ) async {
+    try {
+      // Show loading using GetX dialog (no context needed)
+      Get.dialog(
+        Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      final response = await network.deleteRequest(
+        endPoint: "${NetworkStrings.deleteVendorProduct}/$productId",
+        isHeaderRequire: true,
+      );
+
+      Get.back(); // Close loader
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to delete product");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        AppDialogs.showToast("Product deleted successfully");
+        // Close SelectedProduct screen (dialog already closed in delete_product_dialog)
+        Get.back();
+        // Refresh vendor products list (don't pass context—it's invalid after dialog closes)
+        await getVendorProducts();
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Failed to delete product");
+      }
+    } catch (e) {
+      Get.back();
+      log("deleteVendorProduct Exception: $e");
+      AppDialogs.showToast("Something went wrong while deleting product.");
+    }
+  }
+
+  /// Toggle vendor product availability
+  Future<void> toggleVendorProduct(
+    String productId,
+    bool isAvailableStatus,
+  ) async {
+    try {
+      // Store previous state for rollback
+      final previousState = singleProduct.value?.data?.isAvailable;
+
+      // Update UI optimistically for the current product in detail view
+      if (singleProduct.value?.data != null) {
+        singleProduct.value!.data!.isAvailable = isAvailableStatus;
+        singleProduct.refresh(); // Notify Rx observers
+      }
+
+      // Also update in vendor products list
+      if (vendorProducts.value?.data != null) {
+        final index = vendorProducts.value!.data!.indexWhere(
+          (p) => p.sId == productId,
+        );
+        if (index != -1) {
+          vendorProducts.value!.data![index].isAvailable = isAvailableStatus;
+          vendorProducts.refresh();
+        }
+      }
+
+      isAvailable.value = isAvailableStatus;
+
+      final response = await network.patchRequest(
+        endPoint: "${NetworkStrings.toggleVendorProduct}/$productId",
+        isHeaderRequire: true,
+      );
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to toggle product");
+        // Rollback on failure
+        if (singleProduct.value?.data != null && previousState != null) {
+          singleProduct.value!.data!.isAvailable = previousState;
+          singleProduct.refresh();
+        }
+        if (vendorProducts.value?.data != null) {
+          final index = vendorProducts.value!.data!.indexWhere(
+            (p) => p.sId == productId,
+          );
+          if (index != -1) {
+            vendorProducts.value!.data![index].isAvailable = previousState;
+            vendorProducts.refresh();
+          }
+        }
+        isAvailable.value = previousState ?? true;
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        AppDialogs.showToast(
+          isAvailableStatus
+              ? "Product is now available"
+              : "Product is now unavailable",
+        );
+      } else {
+        // Rollback to previous state on error
+        if (singleProduct.value?.data != null && previousState != null) {
+          singleProduct.value!.data!.isAvailable = previousState;
+          singleProduct.refresh();
+        }
+        if (vendorProducts.value?.data != null) {
+          final index = vendorProducts.value!.data!.indexWhere(
+            (p) => p.sId == productId,
+          );
+          if (index != -1) {
+            vendorProducts.value!.data![index].isAvailable = previousState;
+            vendorProducts.refresh();
+          }
+        }
+        isAvailable.value = previousState ?? true;
+        AppDialogs.showToast(data["message"] ?? "Failed to toggle product");
+      }
+    } catch (e) {
+      // Rollback on exception
+      final previousState = !isAvailableStatus;
+      if (singleProduct.value?.data != null) {
+        singleProduct.value!.data!.isAvailable = previousState;
+        singleProduct.refresh();
+      }
+      if (vendorProducts.value?.data != null) {
+        final index = vendorProducts.value!.data!.indexWhere(
+          (p) => p.sId == productId,
+        );
+        if (index != -1) {
+          vendorProducts.value!.data![index].isAvailable = previousState;
+          vendorProducts.refresh();
+        }
+      }
+      isAvailable.value = previousState;
+      log("toggleVendorProduct Exception: $e");
+      AppDialogs.showToast("Something went wrong while toggling product.");
+    }
+  }
+
+  /// Update vendor product inventory status
+  Future<void> updateVendorInventoryStatus(
+    String productId,
+    String inventoryStatus,
+  ) async {
+    try {
+      // Convert display name to API format
+      // "In Stock" -> "in-stock", "Low Stock" -> "low-stock", "Out Of Stock" -> "out-of-stock"
+      final apiStatus = inventoryStatus.toLowerCase().replaceAll(" ", "-");
+
+      // Store previous state for rollback
+      final previousState = selectedStockStatus.value;
+
+      // Update UI optimistically
+      selectedStockStatus.value = inventoryStatus;
+
+      // Also update in single product view
+      if (singleProduct.value?.data != null) {
+        singleProduct.value!.data!.inventoryStatus = inventoryStatus;
+        singleProduct.refresh();
+      }
+
+      // Also update in vendor products list
+      if (vendorProducts.value?.data != null) {
+        final index = vendorProducts.value!.data!.indexWhere(
+          (p) => p.sId == productId,
+        );
+        if (index != -1) {
+          vendorProducts.value!.data![index].inventoryStatus = inventoryStatus;
+          vendorProducts.refresh();
+        }
+      }
+
+      final response = await network.patchRequest(
+        endPoint: "${NetworkStrings.updateInventoryStatus}/$productId",
+        data: {"inventoryStatus": apiStatus},
+        isHeaderRequire: true,
+      );
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to update inventory status");
+        // Rollback on failure
+        selectedStockStatus.value = previousState;
+        if (singleProduct.value?.data != null) {
+          singleProduct.value!.data!.inventoryStatus = previousState;
+          singleProduct.refresh();
+        }
+        if (vendorProducts.value?.data != null) {
+          final index = vendorProducts.value!.data!.indexWhere(
+            (p) => p.sId == productId,
+          );
+          if (index != -1) {
+            vendorProducts.value!.data![index].inventoryStatus = previousState;
+            vendorProducts.refresh();
+          }
+        }
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        AppDialogs.showToast("Inventory status updated");
+      } else {
+        // Rollback to previous state on error
+        selectedStockStatus.value = previousState;
+        if (singleProduct.value?.data != null) {
+          singleProduct.value!.data!.inventoryStatus = previousState;
+          singleProduct.refresh();
+        }
+        if (vendorProducts.value?.data != null) {
+          final index = vendorProducts.value!.data!.indexWhere(
+            (p) => p.sId == productId,
+          );
+          if (index != -1) {
+            vendorProducts.value!.data![index].inventoryStatus = previousState;
+            vendorProducts.refresh();
+          }
+        }
+        AppDialogs.showToast(
+          data["message"] ?? "Failed to update inventory status",
+        );
+      }
+    } catch (e) {
+      // Rollback on exception
+      final previousState = selectedStockStatus.value;
+      selectedStockStatus.value = previousState;
+      if (singleProduct.value?.data != null) {
+        singleProduct.value!.data!.inventoryStatus = previousState;
+        singleProduct.refresh();
+      }
+      if (vendorProducts.value?.data != null) {
+        final index = vendorProducts.value!.data!.indexWhere(
+          (p) => p.sId == productId,
+        );
+        if (index != -1) {
+          vendorProducts.value!.data![index].inventoryStatus = previousState;
+          vendorProducts.refresh();
+        }
+      }
+      log("updateVendorInventoryStatus Exception: $e");
+      AppDialogs.showToast(
+        "Something went wrong while updating inventory status.",
+      );
+    }
+  }
+
+  /// Fetch vendor stats for dashboard analytics
+  Future<VendorStatsResponseModel?> getVendorStats({
+    required String month,
+    String? start,
+    String? end,
+    BuildContext? context,
+  }) async {
+    try {
+      log('getVendorStats called with month: $month, start: $start, end: $end');
+      if (context != null) showLoadingDialog(context);
+      final queryParams = {
+        "month": month,
+        if (start != null) "start": start,
+        if (end != null) "end": end,
+      };
+      final response = await network.getRequest(
+        endPoint: NetworkStrings.getVendorStats,
+        queryParameters: queryParams,
+        isHeaderRequire: true,
+        isToast: false,
+      );
+      if (context != null) Navigator.pop(context);
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to fetch vendor stats");
+        return null;
+      }
+
+      final data = response.data;
+      log('getVendorStats response: $data');
+
+      // Some endpoints return data at root, others wrap under `data`.
+      final payload = data["data"] ?? data;
+
+      try {
+        final model = VendorStatsResponseModel.fromJson(
+          Map<String, dynamic>.from(payload as Map),
+        );
+        vendorStatsModel.value = model;
+        return model;
+      } catch (e) {
+        log('Failed to parse vendor stats model: $e');
+        AppDialogs.showToast(data["message"] ?? "No vendor stats available");
+        return null;
+      }
+    } catch (e) {
+      if (context != null) Navigator.pop(context);
+      log("getVendorStats Exception: $e");
+      AppDialogs.showToast("Error fetching vendor stats");
+      return null;
+    }
+  }
+
+  /// Fetch vendor orders with optional status filter
+  Future<void> fetchVendorOrders({
+    String? status,
+    BuildContext? context,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      // Backend requires a status parameter. If not provided, default to 'accepted'
+      final queryParams = <String, dynamic>{
+        'status': (status != null && status.isNotEmpty) ? status : 'accepted',
+      };
+
+      final response = await network.getRequest(
+        endPoint: NetworkStrings.vendorGetOrders,
+        queryParameters: queryParams,
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      isLoading.value = false;
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to fetch vendor orders");
+        return;
+      }
+
+      final data = response.data;
+      log('fetchVendorOrders response: $data');
+
+      if (data["status"] == true && data["data"] != null) {
+        try {
+          final model = vendorOrder.VendorOrdersResponseModel.fromJson(data);
+          vendorOrders.value = model.data ?? [];
+          log('Vendor orders fetched: ${vendorOrders.length}');
+        } catch (e) {
+          log('Failed to parse vendor orders: $e');
+          AppDialogs.showToast(data["message"] ?? "Failed to load orders");
+        }
+      } else {
+        AppDialogs.showToast(data["message"] ?? "No orders found");
+      }
+    } catch (e) {
+      isLoading.value = false;
+      log("fetchVendorOrders Exception: $e");
+      AppDialogs.showToast("Error fetching vendor orders");
+    }
+  }
+
+  /// Fetch a single vendor order by ID
+  Future<void> fetchVendorOrder(String orderId, BuildContext context) async {
+    try {
+      showLoadingDialog(context);
+
+      final response = await network.getRequest(
+        endPoint: "${NetworkStrings.vendorGetOrder}/$orderId",
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      Navigator.pop(context);
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to fetch order details");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true && data["data"] != null) {
+        try {
+          selectedVendorOrder.value = vendorOrder.VendorOrder.fromJson(
+            data["data"],
+          );
+          log('Vendor order fetched: ${selectedVendorOrder.value?.orderId}');
+        } catch (e) {
+          log('Failed to parse vendor order: $e');
+          AppDialogs.showToast(data["message"] ?? "Failed to load order");
+        }
+      } else {
+        AppDialogs.showToast(data["message"] ?? "Order not found");
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      log("fetchVendorOrder Exception: $e");
+      AppDialogs.showToast("Error fetching order details");
+    }
+  }
+
+  /// Change vendor order status with optional driver details
+  Future<void> changeVendorOrderStatus(
+    String orderId,
+    String newStatus,
+    BuildContext context, {
+    Map<String, dynamic>? driverDetail,
+  }) async {
+    try {
+      showLoadingDialog(context);
+
+      final Map<String, dynamic> body = {
+        "orderId": orderId,
+        "status": newStatus,
+      };
+
+      if (driverDetail != null) {
+        body["driverDetail"] = driverDetail;
+      }
+
+      final response = await network.patchRequest(
+        endPoint: NetworkStrings.vendorChangeOrderStatus,
+        data: body,
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      Navigator.pop(context);
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to update order status");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        AppDialogs.showToast("Order status updated successfully");
+        // Refresh orders list
+        await fetchVendorOrders(context: context);
+        // also refresh pending orders
+        await fetchPendingOrders(context: context);
+      } else {
+        AppDialogs.showToast(
+          data["message"] ?? "Failed to update order status",
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      log("changeVendorOrderStatus Exception: $e");
+      AppDialogs.showToast("Error updating order status");
+    }
+  }
+
+  /// Fetch vendor pending orders (uses a different response shape)
+  Future<void> fetchPendingOrders({BuildContext? context}) async {
+    try {
+      isLoading.value = true;
+
+      final response = await network.getRequest(
+        endPoint: NetworkStrings.vendorGetOrders,
+        queryParameters: {'status': 'pending'},
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      isLoading.value = false;
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to fetch pending orders");
+        return;
+      }
+
+      final data = response.data;
+      log('fetchPendingOrders response: $data');
+
+      if (data["status"] == true && data["data"] != null) {
+        try {
+          final model = pendingOrder.PendingOrdersResponseModel.fromJson(data);
+          pendingOrders.value = model.data ?? [];
+          log('Pending orders fetched: ${pendingOrders.length}');
+        } catch (e) {
+          log('Failed to parse pending orders: $e');
+          AppDialogs.showToast(data["message"] ?? "Failed to load orders");
+        }
+      } else {
+        AppDialogs.showToast(data["message"] ?? "No orders found");
+      }
+    } catch (e) {
+      isLoading.value = false;
+      log("fetchPendingOrders Exception: $e");
+      AppDialogs.showToast("Error fetching pending orders");
     }
   }
 }

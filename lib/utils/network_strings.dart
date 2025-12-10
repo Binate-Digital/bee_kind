@@ -63,6 +63,25 @@ class NetworkStrings {
   static const String getProductsByCategory = "user/products-by-category";
   static const String getSingleProduct = "user/product";
   static const String getProductReviews = "user/product-reviews";
+  static const String getVendorProductReviews = "vendor/get-reviews";
+  static const String addReplyToReview = "vendor/add-reply";
+  static const String deleteReview = "vendor/delete-review";
+
+  static const String updateReview = "vendor/update-review";
 
   ///VENDOR
+  static const String addProduct = "vendor/add-product";
+  static const String updateProduct = "vendor/update-product";
+  static const String getVendorProducts = "vendor/get-products";
+  static const String getVendorProduct = "vendor/get-product";
+  static const String deleteVendorProduct = "vendor/delete-product";
+  static const String toggleVendorProduct = "vendor/toggle-product";
+  static const String updateInventoryStatus = "vendor/update-inventory-status";
+  static const String getVendorStats = "vendor/get-vendor-stats";
+  static const String toggleHideProfile = "vendor/toggle-hide-profile";
+
+  ///VENDOR ORDERS
+  static const String vendorChangeOrderStatus = "vendor/change-order-status";
+  static const String vendorGetOrder = "vendor/get-order";
+  static const String vendorGetOrders = "vendor/order";
 }

@@ -72,7 +72,7 @@ class _HelpAndSupportScreenState extends State<HelpAndSupportScreen> {
 
               DottedBorderImagePicker(
                 maxImages: 3,
-                onImagesSelected: (images) {
+                onImagesSelected: (images, networkImages) {
                   setState(() {
                     selectedImages = images;
                   });

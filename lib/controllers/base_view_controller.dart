@@ -404,6 +404,12 @@ class BaseViewController extends GetxController {
     BuildContext context,
   ) async {
     try {
+      // Validate categoryId before making the request
+      if (categoryId == null || categoryId.isEmpty) {
+        AppDialogs.showToast("Invalid category. Please try again.");
+        return;
+      }
+
       // SHOW LOADING
       showLoadingDialog(context);
 
@@ -414,7 +420,7 @@ class BaseViewController extends GetxController {
       );
 
       // HIDE LOADING
-      Navigator.pop(context);
+      if (context.mounted) Navigator.pop(context);
 
       if (response == null) {
         AppDialogs.showToast("Unable to fetch products");
@@ -429,23 +435,31 @@ class BaseViewController extends GetxController {
 
         dev.log("Products Loaded Successfully");
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => CategoryWiseProductsList(
-              fromHome: true,
-              products: productsByCategory.value?.data ?? [],
-              categoryName: categoryName,
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CategoryWiseProductsList(
+                fromHome: true,
+                products: productsByCategory.value?.data ?? [],
+                categoryName: categoryName,
+              ),
             ),
-          ),
-        );
+          );
+        }
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to fetch products");
         dev.log("Products Load Failed: ${data['message']}");
       }
     } catch (e) {
       // HIDE LOADING if crash occurs
-      Navigator.pop(context);
+      if (context.mounted) {
+        try {
+          Navigator.pop(context);
+        } catch (e) {
+          // Ignore if dialog not open
+        }
+      }
 
       dev.log("getProductsByCategory Exception: $e");
       AppDialogs.showToast("Something went wrong while fetching products.");
@@ -630,6 +644,41 @@ class BaseViewController extends GetxController {
       isLoading.value = false;
       dev.log("GetProfile Exception: $e");
       AppDialogs.showToast("Something went wrong while fetching profile.");
+    }
+  }
+
+  /// Toggle vendor hide-profile setting
+  Future<void> toggleHideProfile(BuildContext context) async {
+    try {
+      showLoadingDialog(context);
+
+      final response = await network.patchRequest(
+        endPoint: NetworkStrings.toggleHideProfile,
+        isHeaderRequire: true,
+      );
+
+      Navigator.pop(context);
+
+      if (response == null) {
+        AppDialogs.showToast("Unable to toggle hide profile");
+        return;
+      }
+
+      final data = response.data;
+
+      if (data["status"] == true) {
+        AppDialogs.showToast(data["message"] ?? "Profile visibility updated");
+        // Refresh profile to get updated hideProfile flag
+        await getProfile();
+      } else {
+        AppDialogs.showToast(
+          data["message"] ?? "Failed to update profile visibility",
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      dev.log("toggleHideProfile Exception: $e");
+      AppDialogs.showToast("Error toggling profile visibility");
     }
   }
 

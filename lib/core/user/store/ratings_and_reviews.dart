@@ -244,6 +244,7 @@ class RatingScreen extends StatelessWidget {
                     ratingCount: data?.rating ?? 0,
                     userName: data?.user?.fullName,
                     userImage: data?.user?.profileImage,
+                    reviewId: data?.sId,
                   );
                 },
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

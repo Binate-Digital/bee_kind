@@ -6,7 +6,7 @@ import 'package:bee_kind/widgets/dialogs/delete_product_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-void showOptionsBottomSheet(BuildContext context) {
+void showOptionsBottomSheet(BuildContext context, {String? productId}) {
   showModalBottomSheet(
     context: context,
     backgroundColor: AppColors.whiteColor,
@@ -30,7 +30,10 @@ void showOptionsBottomSheet(BuildContext context) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => AddProductScreen(isEdit: true),
+                        builder: (_) => AddProductScreen(
+                          isEdit: true,
+                          productId: productId,
+                        ),
                       ),
                     );
                   },
@@ -58,7 +61,7 @@ void showOptionsBottomSheet(BuildContext context) {
                 GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
-                    deleteProductDialog(context);
+                    deleteProductDialog(context, productId: productId);
                   },
                   child: Row(
                     children: [
