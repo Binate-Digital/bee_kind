@@ -62,15 +62,22 @@ class _VerticalStepperState extends State<VerticalStepper> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Progress text
-                        CustomText(
-                          text: widget.progressSteps[index],
-                          fontSize: 18.sp,
-                          weight: isActive ? FontWeight.w600 : FontWeight.w400,
-                          fontColor: isActive
-                              ? widget.activeColor
-                              : widget.inactiveColor,
+                        Container(
+                          width: 250.w,
+                          child: CustomText(
+                            text: widget.progressSteps[index],
+                            fontSize: 18.sp,
+                            maxLines: 3,
+                            textAlign: TextAlign.start,
+                            weight: isActive
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            fontColor: isActive
+                                ? widget.activeColor
+                                : widget.inactiveColor,
+                          ),
                         ),
-                        SizedBox(height: 4.h),
+                        SizedBox(height: 6.h),
                         // Location text
                         SizedBox(
                           width: 230.w,
@@ -138,7 +145,7 @@ class _VerticalStepperState extends State<VerticalStepper> {
   Widget _buildVerticalConnector(bool isCompleted) {
     return Container(
       width: 2.w,
-      height: 40.h,
+      height: 48.h,
       margin: EdgeInsets.symmetric(vertical: 4.h),
       child: VerticalDottedLine(
         color: isCompleted ? widget.activeColor : widget.inactiveColor,

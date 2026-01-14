@@ -62,7 +62,9 @@ class _ReviewCardState extends State<ReviewCard> {
                   children: [
                     // Name + Action buttons (if vendor)
                     CustomText(
-                      text: widget.userName ?? "John Smith",
+                      text: (widget.userName != null && widget.userName!.isNotEmpty) 
+                          ? widget.userName! 
+                          : "Anonymous User",
                       fontSize: 18.sp,
                       fontColor: AppColors.blackColor,
                       weight: FontWeight.bold,
@@ -236,39 +238,39 @@ class _ReviewCardState extends State<ReviewCard> {
         SizedBox(height: 10.h),
 
         // === Vendor Response Section ===
-        if (!widget.isVendor && widget.vendorResponse != null) ...[
-          SizedBox(height: 8.h),
-          Container(
-            width: double.infinity,
-            // height: 120.h,
-            decoration: BoxDecoration(
-              color: AppColors.yellow1.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(15.r),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomText(
-                    text: "Vendor:",
-                    fontSize: 15.sp,
-                    fontColor: AppColors.blackColor,
-                    weight: FontWeight.bold,
-                  ),
-                  SizedBox(height: 6.h),
-                  CustomText(
-                    text: widget.vendorResponse ?? "",
-                    fontSize: 15.sp,
-                    fontColor: AppColors.blackColor,
-                    maxLines: 3,
-                    textAlign: TextAlign.start,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        // if (!widget.isVendor && widget.vendorResponse != null) ...[
+        //   SizedBox(height: 8.h),
+        //   Container(
+        //     width: double.infinity,
+        //     // height: 120.h,
+        //     decoration: BoxDecoration(
+        //       color: AppColors.yellow1.withValues(alpha: 0.3),
+        //       borderRadius: BorderRadius.circular(15.r),
+        //     ),
+        //     child: Padding(
+        //       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        //       child: Column(
+        //         crossAxisAlignment: CrossAxisAlignment.start,
+        //         children: [
+        //           CustomText(
+        //             text: "Vendor:",
+        //             fontSize: 15.sp,
+        //             fontColor: AppColors.blackColor,
+        //             weight: FontWeight.bold,
+        //           ),
+        //           SizedBox(height: 6.h),
+        //           CustomText(
+        //             text: widget.vendorResponse ?? "",
+        //             fontSize: 15.sp,
+        //             fontColor: AppColors.blackColor,
+        //             maxLines: 3,
+        //             textAlign: TextAlign.start,
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
+        // ],
 
         SizedBox(height: 15.h),
         Container(

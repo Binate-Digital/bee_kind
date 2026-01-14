@@ -39,32 +39,58 @@ class CartItem extends GetView<StoreController> {
               width: 100.w,
               height: 100.h,
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.r),
                 border: Border.all(color: AppColors.yellow2, width: 1.w),
+                color: AppColors.whiteColor,
               ),
               child:
                   (item?.productImage != null &&
                       item!.productImage!.isNotEmpty &&
-                      item?.productImage != "null")
+                      item!.productImage != "null")
                   ? Image.network(
                       item!.productImage!,
-                      fit: BoxFit.contain,
+                      fit: BoxFit.cover, // 🔥 FULL FILL
                       errorBuilder: (_, __, ___) =>
-                          Image.asset(AssetsPath.product, fit: BoxFit.contain),
+                          Image.asset(AssetsPath.product, fit: BoxFit.cover),
                     )
-                  : Image.asset(AssetsPath.product, fit: BoxFit.contain),
+                  : Image.asset(AssetsPath.product, fit: BoxFit.cover),
             ),
           ),
 
+          // ClipRRect(
+          //   borderRadius: BorderRadius.circular(20.r),
+          //   child: Container(
+          //     width: 100.w,
+          //     height: 100.h,
+          //     decoration: BoxDecoration(
+          //       border: Border.all(color: AppColors.yellow2, width: 1.w),
+          //     ),
+          //     child:
+          //         (item?.productImage != null &&
+          //             item!.productImage!.isNotEmpty &&
+          //             item?.productImage != "null")
+          //         ? Image.network(
+          //             item!.productImage!,
+          //             fit: BoxFit.contain,
+          //             errorBuilder: (_, __, ___) =>
+          //                 Image.asset(AssetsPath.product, fit: BoxFit.contain),
+          //           )
+          //         : Image.asset(AssetsPath.product, fit: BoxFit.contain),
+          //   ),
+          // ),
           SizedBox(width: 10.w),
 
           // ---------- NAME & QUANTITY ----------
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomText(
-                text: item?.productName ?? "",
-                fontSize: 18.sp,
-                weight: FontWeight.bold,
+              Container(
+                width: 150.w,
+                child: CustomText(
+                  text: item?.productName ?? "",
+                  fontSize: 18.sp,
+                  weight: FontWeight.bold,
+                ),
               ),
 
               SizedBox(height: 20.h),

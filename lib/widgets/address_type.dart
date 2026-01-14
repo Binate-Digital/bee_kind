@@ -47,15 +47,25 @@ class AddressType extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Checkbox
-          Checkbox(
-            value: isChecked,
-            onChanged: onChanged,
-            checkColor: AppColors.yellow2,
-            fillColor: WidgetStateProperty.all(
-              AppColors.yellow1.withValues(alpha: 0.2),
+          // Custom Checkbox
+          GestureDetector(
+            onTap: () => onChanged?.call(!isChecked),
+            child: Container(
+              width: 24.w,
+              height: 24.h,
+              decoration: BoxDecoration(
+                color: isChecked ? AppColors.yellow2 : Colors.transparent,
+                border: Border.all(color: AppColors.yellow2, width: 1),
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+              child: isChecked
+                  ? Icon(
+                      Icons.check,
+                      size: 16.sp,
+                      color: Colors.white,
+                    )
+                  : null,
             ),
-            side: BorderSide(color: AppColors.yellow2, width: 1),
           ),
 
           SizedBox(width: 10.w),

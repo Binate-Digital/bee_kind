@@ -301,10 +301,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             "firstName": firstNameController.text.trim(),
                             "lastName": lastNameController.text.trim(),
                             "email": emailController.text.trim(),
-                            "phone": phoneController.text.trim(),
+                            "phoneNumber": phoneController.text.trim(),
                             // "dateOfBirth": selectedDate!.toIso8601String(),
                             "gender": selectedGender,
-                            "profileImage": baseController.profileImage.value,
+                            "profilePicture": baseController.profileImage.value,
                           };
 
                           log("body: $body");

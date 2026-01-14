@@ -13,9 +13,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../controllers/profile_controller.dart';
+import '../controllers/base_view_controller.dart';
 
 class CreateProfileScreen extends StatelessWidget {
   CreateProfileScreen({super.key, this.isEdit = false});
+
   final bool isEdit;
 
   final focusNode = FocusNode();
@@ -24,11 +26,19 @@ class CreateProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProfileController controller = Get.put(ProfileController());
+    final BaseViewController controller1 = Get.put(BaseViewController());
+
+    // Load existing profile data if in edit mode
+    if (isEdit) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await controller.loadProfileDataForEdit();
+      });
+    }
 
     return Obx(
       () => AppBarBaseView(
-        title: "Create Profile",
-        isLeading: false,
+        title: isEdit ? "Edit Profile" : "Create Profile",
+        isLeading: true,
         // button: Container(
         //   color: AppColors.whiteColor,
         //   height: 100.h,
@@ -271,14 +281,14 @@ class CreateProfileScreen extends StatelessWidget {
                   ],
 
                   /// -------------------- ADDRESS (VENDOR ONLY) --------------------
-                  if (controller.isVendor.value) ...[
-                    CustomTextField(
-                      hint: "Business Address",
-                      controller: controller.streetAddressController,
-                      validator: Validation.validateAddressName,
-                    ),
-                    SizedBox(height: 10.h),
-                  ],
+                  // if (controller.isVendor.value) ...[
+                  //   CustomTextField(
+                  //     hint: "Business Address",
+                  //     controller: controller.streetAddressController,
+                  //     validator: Validation.validateAddressName,
+                  //   ),
+                  //   SizedBox(height: 10.h),
+                  // ],
 
                   /// -------------------- LOCATION --------------------
                   Column(
@@ -304,11 +314,20 @@ class CreateProfileScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: CustomText(
-                                  text:
-                                      controller
-                                          .locationAddress
-                                          .value
-                                          .isNotEmpty
+                                  text: isEdit == true
+                                      ? Get.find<BaseViewController>()
+                                                        .address !=
+                                                    null &&
+                                                Get.find<BaseViewController>()
+                                                        .address !=
+                                                    ""
+                                            ? Get.find<BaseViewController>()
+                                                  .address
+                                            : "Location"
+                                      : controller
+                                            .locationAddress
+                                            .value
+                                            .isNotEmpty
                                       ? controller.locationAddress.value
                                       : "Location",
                                   textAlign: TextAlign.start,
@@ -555,6 +574,29 @@ class CreateProfileScreen extends StatelessWidget {
                       ],
                     ),
                   ],
+
+                  /// -------------------- VENDOR SAVE BUTTON --------------------
+                  if (controller.isVendor.value)
+                    Container(
+                      color: AppColors.whiteColor,
+                      height: 100.h,
+                      padding: EdgeInsets.symmetric(
+                        vertical: 20.h,
+                        horizontal: 20.w,
+                      ),
+                      child: CustomButton(
+                        onTap: () => controller.handleCreateProfile(
+                          context,
+                          isEdit: isEdit,
+                        ),
+                        text: isEdit ? "Update Profile" : "Create Profile",
+                        borderColor: AppColors.blackColor,
+                        isLoading: controller.isLoading.value,
+                        verticalPadding: 20.h,
+                        horizontalPadding: 10.w,
+                        fontSize: 18.sp,
+                      ),
+                    ),
 
                   /// -------------------- USER CONSENT --------------------
                   if (!controller.isVendor.value) ...[

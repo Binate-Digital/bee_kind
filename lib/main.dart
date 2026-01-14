@@ -1,10 +1,13 @@
 import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/firebase_options.dart';
+import 'package:bee_kind/services/firebase_messaging_service.dart';
+import 'package:bee_kind/services/push_notification_service.dart';
 import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/splash/splash_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/network_strings.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,7 +23,17 @@ void main() async {
     SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  FirebaseMessaging.onBackgroundMessage(
+    PushNotificationService.firebaseBackgroundHandler,
+  );
+
+  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await SharedPrefs.init();
   Get.lazyPut(() => StoreController(), fenix: true);
   runApp(const BeeKind());

@@ -2,6 +2,7 @@
 
 import 'dart:developer' as dev;
 import 'dart:io';
+import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/utils/app_navigation.dart';
 import 'package:bee_kind/widgets/bottom_sheets/image_picker_bottom_sheet.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
@@ -23,6 +24,7 @@ import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/network_strings.dart';
 import 'package:bee_kind/services/network.dart';
 import 'package:bee_kind/widgets/dialogs/show_loading_dialog.dart';
+import 'package:bee_kind/widgets/dialogs/vendor_details_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -68,6 +70,10 @@ class BaseViewController extends GetxController {
   final searchController = TextEditingController();
   final maxPriceController = TextEditingController();
   final minPriceController = TextEditingController();
+
+  // Search suggestions
+  RxList<String> searchSuggestions = <String>[].obs;
+  RxBool showSuggestions = false.obs;
 
   List<LatLng> coordinates = [];
 
@@ -151,15 +157,54 @@ class BaseViewController extends GetxController {
   void onInit() {
     super.onInit();
 
+    // Add listener to search controller for suggestions
+    searchController.addListener(_onSearchTextChanged);
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       isVendor.value = prefs.getString("role") == "vendor";
 
       await getProfile();
       await loadUserLocation();
       await getCategories();
+
+      // Fetch user addresses so we have the default address for map positioning
+      final storeController = Get.find<StoreController>();
+      await storeController.fetchUserAddresses();
+
       await fetchStores();
       await showStoreMarkers();
     });
+  }
+
+  void _onSearchTextChanged() {
+    final text = searchController.text.trim();
+    if (text.length >= 2) {
+      // Filter store names that match the search text
+      final matchingStores = storesList
+          .where((store) =>
+              store.businessName?.toLowerCase().contains(text.toLowerCase()) ??
+              false)
+          .map((store) => store.businessName ?? '')
+          .where((name) => name.isNotEmpty)
+          .toList();
+
+      searchSuggestions.value = matchingStores.take(5).toList(); // Limit to 5 suggestions
+      showSuggestions.value = searchSuggestions.isNotEmpty;
+    } else {
+      searchSuggestions.clear();
+      showSuggestions.value = false;
+    }
+  }
+
+  void selectSuggestion(String suggestion) {
+    searchController.text = suggestion;
+    searchSuggestions.clear();
+    showSuggestions.value = false;
+    fetchStores();
+  }
+
+  void hideSuggestions() {
+    showSuggestions.value = false;
   }
 
   void updateRadius(double value) {
@@ -254,6 +299,28 @@ class BaseViewController extends GetxController {
         }
 
         await showStoreMarkers();
+
+        // If searching and found results, navigate to first store's location
+        if (searchController.text.isNotEmpty && storesList.isNotEmpty) {
+          final firstStore = storesList.first;
+          final coords = firstStore.vendorAddress?.coordinates;
+          if (coords != null && coords.length >= 2) {
+            final lat = coords[1];
+            final lng = coords[0];
+            final storeLocation = LatLng(lat, lng);
+
+            // Animate camera to store location
+            if (mapController != null) {
+              await mapController!.animateCamera(
+                CameraUpdate.newLatLngZoom(storeLocation, 18),
+              );
+            }
+
+            dev.log(
+              "Navigated to searched store: ${firstStore.businessName} at $storeLocation",
+            );
+          }
+        }
       } else {
         Navigator.pop(StaticData.navigatorKey.currentContext!);
         AppDialogs.showToast(data["message"] ?? "Failed to load stores");
@@ -271,18 +338,51 @@ class BaseViewController extends GetxController {
   Future<void> showStoreMarkers() async {
     markers.removeWhere((m) => m.markerId != const MarkerId('user_location'));
 
-    final BitmapDescriptor storeIcon = await BitmapDescriptor.asset(
-      const ImageConfiguration(size: Size(60, 70)),
-      AssetsPath.marker, // <-- add a store pin asset or use default
-    );
+    BitmapDescriptor storeIcon;
+    try {
+      storeIcon = await BitmapDescriptor.asset(
+        const ImageConfiguration(size: Size(60, 70)),
+        AssetsPath.marker,
+      );
+    } catch (e) {
+      dev.log("Failed to load marker icon, using blue marker: $e");
+      storeIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+    }
 
+    dev.log("Processing ${storesList.length} stores for markers");
+
+    int addedMarkers = 0;
     for (int i = 0; i < storesList.length; i++) {
       final store = storesList[i];
+      dev.log("Store ${i + 1}: ${store.businessName}, ID: ${store.sId}");
+
       final coords = store.vendorAddress?.coordinates;
+      dev.log("Coordinates: $coords");
 
-      if (coords == null || coords.length < 2) continue;
+      if (coords == null) {
+        dev.log("❌ Store ${store.businessName} has null coordinates");
+        continue;
+      }
 
-      final position = LatLng(coords[1], coords[0]); // lat, lng
+      if (coords.length < 2) {
+        dev.log(
+          "❌ Store ${store.businessName} has insufficient coordinates: ${coords.length}",
+        );
+        continue;
+      }
+
+      final lat = coords[1];
+      final lng = coords[0];
+
+      if (lat == null || lng == null || lat == 0 || lng == 0) {
+        dev.log(
+          "❌ Store ${store.businessName} has invalid coordinates: lat=$lat, lng=$lng",
+        );
+        continue;
+      }
+
+      final position = LatLng(lat, lng);
+      dev.log("✅ Adding marker for ${store.businessName} at $position");
 
       markers.add(
         Marker(
@@ -290,13 +390,18 @@ class BaseViewController extends GetxController {
           position: position,
           icon: storeIcon,
           onTap: () {
+            // We'll handle this in the home screen with proper context
             selectStore(store);
           },
         ),
       );
-
-      markers.refresh();
+      addedMarkers++;
     }
+
+    dev.log("Successfully added $addedMarkers store markers");
+
+    markers.refresh();
+    dev.log("Total markers on map: ${markers.length}");
   }
 
   String formatTime(String? time) {
@@ -321,18 +426,14 @@ class BaseViewController extends GetxController {
     showWindow.value = true;
   }
 
-  Future<void> fetchStoreDetail(String? storeId, BuildContext context) async {
+  Future<void> fetchStoreDetail(String? storeId) async {
     debugPrint("fetch store detail");
     try {
-      showLoadingDialog(context);
-
       final response = await network.getRequest(
         endPoint: "${NetworkStrings.getStoreDetail}/$storeId",
         isHeaderRequire: true,
         isToast: false,
       );
-
-      Navigator.pop(context);
 
       if (response == null) {
         return;
@@ -351,13 +452,9 @@ class BaseViewController extends GetxController {
         allProducts = storeData.value?.products ?? [];
         allPopularProducts = storeData.value?.popularProducts ?? [];
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => StoreScreen(data: storeData.value)),
-        );
+        Get.to(() => StoreScreen(data: storeData.value));
       }
     } catch (e) {
-      Navigator.pop(context);
       dev.log("StoreDetailResponseModel Exception: $e");
     }
   }
@@ -521,25 +618,44 @@ class BaseViewController extends GetxController {
 
       prefs.setString("address", address.toString());
 
-      // ⭐ Add the default red Google Maps marker
+      // Update map to selected address (which may be current location if no selected address)
+      updateMapToSelectedAddress();
+    }
+  }
+
+  Future<void> updateMapToSelectedAddress() async {
+    // Always use current location for the red pin
+    final mapCenter = currentLatLng.value;
+    const markerTitle = "Your Location";
+
+    dev.log("Updating map to current location: $mapCenter");
+
+    if (mapCenter != null) {
+      // Update or add the user location marker
       markers.removeWhere((m) => m.markerId == const MarkerId("user_location"));
 
       markers.add(
         Marker(
           markerId: const MarkerId("user_location"),
-          position: currentLatLng.value!,
+          position: mapCenter,
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          infoWindow: InfoWindow(title: markerTitle),
         ),
       );
 
       markers.refresh();
 
-      // Move map camera
+      // Move map camera to current location
       if (mapController != null) {
-        mapController!.animateCamera(
-          CameraUpdate.newLatLngZoom(currentLatLng.value!, 15),
-        );
+        mapController!.animateCamera(CameraUpdate.newLatLngZoom(mapCenter, 15));
+        dev.log("Map camera animated to current location: $mapCenter");
+      } else {
+        dev.log("Map controller is null, cannot animate camera");
       }
+
+      dev.log("Map updated to show current location pin");
+    } else {
+      dev.log("No current location available, cannot update map");
     }
   }
 
@@ -698,12 +814,12 @@ class BaseViewController extends GetxController {
       final model = UserProfileDataModel(
         firstName: body["firstName"],
         lastName: body["lastName"],
-        phoneNumber: body["phone"],
+        phoneNumber: body["phoneNumber"],
         gender: body["gender"],
         dateOfBirth: body["dateOfBirth"],
-        profilePicture: body["profileImage"],
+        profilePicture: body["profilePicture"],
       );
-      dev.log("profile image: ${body["profileImage"]}");
+      dev.log("profile image: ${body["profilePicture"]}");
 
       final Map<String, dynamic> baseMap = model.toFormDataMap()
         ..removeWhere((key, value) => value == null);
@@ -723,6 +839,11 @@ class BaseViewController extends GetxController {
     } catch (e) {
       AppDialogs.showToast("Something went wrong while updating profile.");
       dev.log("updateProfile Exception: $e");
+    } finally {
+      // Ensure loading dialog is always dismissed
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -763,7 +884,12 @@ class BaseViewController extends GetxController {
       profileImage.value = null;
 
       // REFRESH PROFILE FROM API
-      await getProfile();
+      try {
+        await getProfile();
+      } catch (e) {
+        dev.log("Failed to refresh profile after update: $e");
+        // Don't show error toast here since profile was updated successfully
+      }
 
       // GO BACK
       AppNavigation.navigatorPop(context);

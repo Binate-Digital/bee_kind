@@ -38,7 +38,6 @@ class OrdersListScreen extends StatelessWidget {
       return SingleChildScrollView(
         child: Column(
           children: [
-            
             ListView.builder(
               shrinkWrap: true,
               reverse: true,
@@ -47,34 +46,34 @@ class OrdersListScreen extends StatelessWidget {
               itemCount: controller.ordersList.length,
               itemBuilder: (_, index) {
                 final order = controller.ordersList[index];
-      
+
                 // Safely extract first product
-                final firstItem =
-                    order.items != null && order.items!.isNotEmpty
+                final firstItem = order.items != null && order.items!.isNotEmpty
                     ? order.items!.first
                     : null;
-      
+
                 return GestureDetector(
                   onTap: () {}, // If you want whole tile tap as well
                   child: OrderItem(
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            LiveTracking(orderId: order.sId ?? ""),
+                        builder: (_) => LiveTracking(orderId: order.sId ?? ""),
                       ),
                     ),
-      
+
                     /// Pass real data to OrderItem
                     productName: firstItem?.productName,
                     quantity: firstItem?.quantity,
                     price: firstItem?.price,
                     status: order.status,
                     imageUrl: firstItem?.productImage,
+                    hideButton: order.status=="cancelled"?true:false,
                   ),
                 );
               },
             ),
+            110.verticalSpace,
           ],
         ),
       );

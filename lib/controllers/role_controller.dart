@@ -26,6 +26,7 @@ class RoleController extends GetxController {
     final hasSelectedRole = prefs.containsKey('role');
 
     log("user token: ${prefs.getUserToken()}");
+    log("userData: ${prefs.getUser()}");
     log("user role: ${prefs.getRole()}");
     log("hasCompletedProfile: $hasCompletedProfile");
     log("hasSelectedRole: $hasSelectedRole");

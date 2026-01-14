@@ -55,6 +55,7 @@ class Order {
   String? updatedAt;
   int? iV;
   StoreAddress? storeAddress;
+  DriverDetail? driverDetail;
 
   Order({
     this.userAddress,
@@ -74,6 +75,7 @@ class Order {
     this.updatedAt,
     this.iV,
     this.storeAddress,
+    this.driverDetail,
   });
 
   Order.fromJson(Map<String, dynamic> json) {
@@ -111,6 +113,10 @@ class Order {
     storeAddress = (json['storeAddress'] is Map)
         ? StoreAddress.fromJson(json['storeAddress'])
         : null;
+
+    driverDetail = (json['driverDetail'] is Map)
+        ? DriverDetail.fromJson(json['driverDetail'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -132,6 +138,7 @@ class Order {
       "updatedAt": updatedAt,
       "__v": iV,
       "storeAddress": storeAddress?.toJson(),
+      "driverDetail": driverDetail?.toJson(),
     };
   }
 
@@ -233,6 +240,40 @@ class Items {
     if (value is int) return value;
     if (value is String) return int.tryParse(value);
     return null;
+  }
+}
+
+class DriverDetail {
+  String? driverName;
+  String? phoneNumber;
+  String? color;
+  String? make;
+  String? numberPlate;
+
+  DriverDetail({
+    this.driverName,
+    this.phoneNumber,
+    this.color,
+    this.make,
+    this.numberPlate,
+  });
+
+  DriverDetail.fromJson(Map<String, dynamic> json) {
+    driverName = json['driverName']?.toString();
+    phoneNumber = json['phoneNumber']?.toString();
+    color = json['color']?.toString();
+    make = json['make']?.toString();
+    numberPlate = json['numberPlate']?.toString();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['driverName'] = driverName;
+    data['phoneNumber'] = phoneNumber;
+    data['color'] = color;
+    data['make'] = make;
+    data['numberPlate'] = numberPlate;
+    return data;
   }
 }
 

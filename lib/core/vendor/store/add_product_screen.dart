@@ -142,6 +142,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
       // Build FormData
       final formData = dio.FormData();
 
+<<<<<<< Updated upstream
+=======
+      final String discountText = discountPriceController.text.trim();
+
+      final bool isDiscountAvailable =
+          discountText.isNotEmpty &&
+              double.tryParse(discountText) != null &&
+              double.tryParse(discountText)! > 0;
+
+
+>>>>>>> Stashed changes
       // Add text fields
       formData.fields.addAll([
         MapEntry('productName', productNameController.text.trim()),
@@ -153,6 +164,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
         MapEntry('effects', effectsController.text.trim()),
         MapEntry('ingredients', ingredientsController.text.trim()),
         MapEntry('description', descriptionController.text.trim()),
+<<<<<<< Updated upstream
+=======
+        MapEntry('isDiscountAvailable', isDiscountAvailable.toString()),
+>>>>>>> Stashed changes
       ]);
 
       // Add images

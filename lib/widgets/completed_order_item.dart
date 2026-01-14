@@ -64,33 +64,36 @@ class CompletedOrderItem extends StatelessWidget {
           ),
 
           // ---------- TEXTS ----------
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomText(
-                text: productName ?? "N/A",
-                fontSize: 18.sp,
-                weight: FontWeight.bold,
-              ),
-              SizedBox(height: 10.h),
-
-              CustomText(text: "Qty: ${quantity ?? '--'}", fontSize: 18.sp),
-              SizedBox(height: 10.h),
-
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.lightGreenAccent,
-                  borderRadius: BorderRadius.circular(30.r),
+          Container(
+            width: 100.w,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  text: productName ?? "N/A",
+                  fontSize: 18.sp,
+                  weight: FontWeight.bold,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CustomText(
-                    text: status ?? "Completed",
-                    fontSize: 12.sp,
+                SizedBox(height: 10.h),
+
+                CustomText(text: "Qty: ${quantity ?? '--'}", fontSize: 18.sp),
+                SizedBox(height: 10.h),
+
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.lightGreenAccent,
+                    borderRadius: BorderRadius.circular(30.r),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CustomText(
+                      text: status ?? "Completed",
+                      fontSize: 12.sp,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           SizedBox(width: 35.w),

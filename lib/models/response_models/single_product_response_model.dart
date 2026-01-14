@@ -132,14 +132,14 @@ class ProductDetail {
 }
 
 class ProductReviews {
-  int? averageRating;
+  double? averageRating;
   int? totalReviews;
   List<ProductReviews>? reviews;
 
   ProductReviews({this.averageRating, this.totalReviews, this.reviews});
 
   ProductReviews.fromJson(Map<String, dynamic> json) {
-    averageRating = json['averageRating'];
+    averageRating = json['averageRating']?.toDouble();
     totalReviews = json['totalReviews'];
     if (json['reviews'] != null) {
       reviews = <ProductReviews>[];

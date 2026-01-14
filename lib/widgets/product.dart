@@ -1,5 +1,6 @@
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
+import 'package:bee_kind/widgets/custom_extended_image.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,12 +13,14 @@ class Product extends StatelessWidget {
     this.price,
     this.afterDiscountPrice,
     this.productName,
+    this.productImages,
   });
   final String? stockStatus;
   final bool isDiscountAvailable;
   final int? price;
   final int? afterDiscountPrice;
   final String? productName;
+  final List<String>? productImages;
 
   @override
   Widget build(BuildContext context) {
@@ -28,17 +31,49 @@ class Product extends StatelessWidget {
           child: Stack(
             children: [
               Container(
-                padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 75.w),
+                height: 120.h,
+                width: MediaQuery.of(context).size.width * 0.42,
+                // width: 120.w, // <-- static width
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(color: AppColors.yellow2, width: 1.w),
                   color: AppColors.whiteColor,
-                  image: DecorationImage(
-                    image: AssetImage(AssetsPath.product),
-                    fit: BoxFit.cover,
-                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20.r),
+                  child: (productImages != null && productImages!.isNotEmpty)
+                      ? CustomExtendedImageWidget(
+                          imagePath: productImages!.first,
+                          imageType: MediaPathType.NETWORK.name,
+                          imagePlaceholder: AssetsPath.product,
+                          fit: BoxFit.cover, // <--- fully fill container
+                        )
+                      : Image.asset(
+                          AssetsPath.product,
+                          fit: BoxFit.cover, // <--- fully fill
+                        ),
                 ),
               ),
+
+              // Container(
+              //   padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 75.w),
+              //   decoration: BoxDecoration(
+              //     borderRadius: BorderRadius.circular(20.r),
+              //     border: Border.all(color: AppColors.yellow2, width: 1.w),
+              //     color: AppColors.whiteColor,
+              //   ),
+              //   child: (productImages != null && productImages!.isNotEmpty)
+              //       ? CustomExtendedImageWidget(
+              //           imagePath: productImages!.first,
+              //           imageType: MediaPathType.NETWORK.name,
+              //           imagePlaceholder: AssetsPath.product,
+              //           fit: BoxFit.cover,
+              //         )
+              //       : Image.asset(
+              //           AssetsPath.product,
+              //           fit: BoxFit.cover,
+              //         ),
+              // ),
               stockStatus == "out-of-stock"
                   ? Positioned(
                       top: 10.h,

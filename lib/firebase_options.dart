@@ -17,7 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -25,9 +28,15 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
-        return windows;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -41,50 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDpmIvtybbRLxF_GnZSy7L1aslgLdV8wx8',
-    appId: '1:880415272421:android:9d995bdf2cae8c6b4ad30c',
-    messagingSenderId: '880415272421',
-    projectId: 'beekind-71062',
-    storageBucket: 'beekind-71062.firebasestorage.app',
+    apiKey: 'AIzaSyCD9YQJ5uVKlQzgMgt5vlkcpmaA9yJX3CA',
+    appId: '1:665813359634:android:171ac326da27fa1cc68ccb',
+    messagingSenderId: '665813359634',
+    projectId: 'beekind-27fc7',
+    storageBucket: 'beekind-27fc7.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCaVc9eKnwYy-RM34nCxfNrK8sSCClshzI',
-    appId: '1:880415272421:ios:bc755bffbb4d71d94ad30c',
-    messagingSenderId: '880415272421',
-    projectId: 'beekind-71062',
-    storageBucket: 'beekind-71062.firebasestorage.app',
-    iosClientId: '880415272421-2063vitristbl6f45lh53rsguetl5lvj.apps.googleusercontent.com',
+    apiKey: 'AIzaSyAEmEUHf2-TiUvC2p6ikK3_wUyM6UTPpEc',
+    appId: '1:665813359634:ios:caf60c984f1ccab1c68ccb',
+    messagingSenderId: '665813359634',
+    projectId: 'beekind-27fc7',
+    storageBucket: 'beekind-27fc7.firebasestorage.app',
     iosBundleId: 'com.binatedigital.beekind',
   );
-
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyB2otAHEt8o_gCzLXVIvKSSWP25fpLCmfA',
-    appId: '1:880415272421:web:44f94159bc75fec74ad30c',
-    messagingSenderId: '880415272421',
-    projectId: 'beekind-71062',
-    authDomain: 'beekind-71062.firebaseapp.com',
-    storageBucket: 'beekind-71062.firebasestorage.app',
-    measurementId: 'G-EW1NJZ5VZG',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCaVc9eKnwYy-RM34nCxfNrK8sSCClshzI',
-    appId: '1:880415272421:ios:b7f50b8dbf1b2db14ad30c',
-    messagingSenderId: '880415272421',
-    projectId: 'beekind-71062',
-    storageBucket: 'beekind-71062.firebasestorage.app',
-    iosBundleId: 'com.binatedigital.beekind',
-  );
-
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyB2otAHEt8o_gCzLXVIvKSSWP25fpLCmfA',
-    appId: '1:880415272421:web:22b74850c1ed29f54ad30c',
-    messagingSenderId: '880415272421',
-    projectId: 'beekind-71062',
-    authDomain: 'beekind-71062.firebaseapp.com',
-    storageBucket: 'beekind-71062.firebasestorage.app',
-    measurementId: 'G-1LNM23Y4KV',
-  );
-
 }

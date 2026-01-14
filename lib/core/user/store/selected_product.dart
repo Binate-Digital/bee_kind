@@ -65,14 +65,25 @@ class _SelectedProductState extends State<SelectedProduct> {
 
       if (widget.productId != null) {
         if (widget.isVendor) {
+<<<<<<< Updated upstream
+=======
+          log("Fetching vendor product details for ID: ${widget.productId}");
+>>>>>>> Stashed changes
           await controller.fetchVendorProduct(
             widget.productId,
             context,
             navigate: false,
           );
           // Fetch vendor-specific reviews
+<<<<<<< Updated upstream
           await controller.fetchVendorProductReviews(widget.productId, context);
         } else {
+=======
+          log("Fetching vendor reviews for product ID: ${widget.productId}");
+          await controller.fetchVendorProductReviews(widget.productId, context);
+        } else {
+          log("Fetching user product details for ID: ${widget.productId}");
+>>>>>>> Stashed changes
           await controller.fetchSingleProduct(
             widget.productId,
             context,
@@ -80,6 +91,15 @@ class _SelectedProductState extends State<SelectedProduct> {
           );
           await controller.fetchProductReviews(widget.productId, context);
         }
+<<<<<<< Updated upstream
+=======
+
+        // Debug: Check if reviews are loaded
+        log("Reviews list after fetch: ${controller.reviewsList?.length ?? 0}");
+        log(
+          "Product reviews model: ${controller.productReviews.value?.toJson()}",
+        );
+>>>>>>> Stashed changes
       }
     });
   }
@@ -485,8 +505,7 @@ class _SelectedProductState extends State<SelectedProduct> {
               SizedBox(height: 30.h),
 
               if (!widget.isVendor)
-                Obx(() {
-                  return CustomButton(
+               CustomButton(
                     text: "Add To Cart",
                     gradientColors:
                         widget.isAvailable == true &&
@@ -531,8 +550,8 @@ class _SelectedProductState extends State<SelectedProduct> {
                             );
                           }
                         : null,
-                  );
-                }),
+                  ),
+
 
               SizedBox(height: 30.h),
 

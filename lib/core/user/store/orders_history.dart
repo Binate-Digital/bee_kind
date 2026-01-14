@@ -14,9 +14,9 @@ class OrdersHistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<StoreController>();
 
-    // Load completed orders
+    // Load completed and cancelled orders
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchOrdersByStatus("completed");
+      controller.fetchCompletedAndCancelledOrders();
     });
 
     return AppBarBaseView(
@@ -31,29 +31,32 @@ class OrdersHistoryScreen extends StatelessWidget {
         if (controller.ordersList.isEmpty) {
           return Center(
             child: Text(
-              "No completed orders found",
+              "No orders found",
               style: TextStyle(fontSize: 18.sp, color: Colors.grey),
             ),
           );
         }
 
         return ListView.builder(
-          physics: NeverScrollableScrollPhysics(),
+          physics: BouncingScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           itemCount: controller.ordersList.length,
-          shrinkWrap: true,
+          shrinkWrap: false,
           itemBuilder: (context, index) {
             final order = controller.ordersList[index];
             final firstItem = order.items?.isNotEmpty == true
                 ? order.items!.first
                 : null;
 
+            print("controller.ordersList.length");
+            print(controller.ordersList.length);
             return GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => SelectedCompletedOrderScreen(),
+                    builder: (_) =>
+                        SelectedCompletedOrderScreen(orderId: order.sId ?? ""),
                   ),
                 );
               },
@@ -63,7 +66,7 @@ class OrdersHistoryScreen extends StatelessWidget {
                 // ---- Pass API Data Here ----
                 productName: firstItem?.productName,
                 quantity: firstItem?.quantity,
-                price: double.tryParse("${firstItem?.price ?? 0}"),
+                price: double.tryParse("${controller.ordersList[index].totalAmount ?? 0}"),
                 status: order.status,
                 imageUrl: firstItem?.productImage,
 

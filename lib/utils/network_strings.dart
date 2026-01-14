@@ -4,6 +4,8 @@ class NetworkStrings {
   ///BASE URL
   static const String baseUrl =
       "https://beekind-backend.deployment-uat.com/api/v1/";
+      // "https://3dsr3m62-5000.uks1.devtunnels.ms/api/v1/";
+      // "https://3dsr3m62-5000.uks1.devtunnels.ms/api/v1/";
   // static const String baseUrl =
   //     "https://3dsr3m62-5000.uks1.devtunnels.ms/api/v1/";
 
@@ -21,6 +23,7 @@ class NetworkStrings {
   ///AUTHENTICATION
   static const String login = "auth/login";
   static const String signup = "auth/signup";
+  static const String firebaseSocialLogin = "auth/firebase-social-login";
   static const String verifyOtp = "auth/verify-otp";
   static const String resendOtp = "auth/resend-otp";
   static const String forgotPassword = "auth/forget-password";
@@ -56,13 +59,17 @@ class NetworkStrings {
   static const String getCategories = "user/categories";
   static const String getStores = "user/stores";
   static const String createOrder = "user/create-order";
-  static const String fetchOrders = "user/orders";
+  static const String fetchOrders = "user/get-orders";
   static const String getSingleOrder = "user/get-order";
   static const String cancelOrder = "user/cancel-order";
   static const String getStoreDetail = "user/store-details";
   static const String getProductsByCategory = "user/products-by-category";
   static const String getSingleProduct = "user/product";
   static const String getProductReviews = "user/product-reviews";
+<<<<<<< Updated upstream
+=======
+  static const String addReview = "user/add-review";
+>>>>>>> Stashed changes
   static const String getVendorProductReviews = "vendor/get-reviews";
   static const String addReplyToReview = "vendor/add-reply";
   static const String deleteReview = "vendor/delete-review";

@@ -36,6 +36,7 @@ class OrderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(status);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       margin: EdgeInsets.symmetric(vertical: 10.h),
@@ -65,37 +66,62 @@ class OrderItem extends StatelessWidget {
                 border: Border.all(color: AppColors.yellow2, width: 1.w),
                 color: AppColors.whiteColor,
                 image: DecorationImage(
-                  image: imageUrl != null && imageUrl!.isNotEmpty
+                  image:
+                      (imageUrl != null &&
+                          imageUrl!.isNotEmpty &&
+                          imageUrl != "null")
                       ? NetworkImage(imageUrl!)
-                      : AssetImage(AssetsPath.product) as ImageProvider,
+                      : const AssetImage(AssetsPath.product),
+                  fit: BoxFit.cover, // 🔥 FULL FILL
                 ),
               ),
             ),
           ),
 
+          // ClipRRect(
+          //   borderRadius: BorderRadius.circular(20.r),
+          //   child: Container(
+          //     width: 100.w,
+          //     height: 100.h,
+          //     decoration: BoxDecoration(
+          //       borderRadius: BorderRadius.circular(20.r),
+          //       border: Border.all(color: AppColors.yellow2, width: 1.w),
+          //       color: AppColors.whiteColor,
+          //       image: DecorationImage(
+          //         image: imageUrl != null && imageUrl!.isNotEmpty
+          //             ? NetworkImage(imageUrl!)
+          //             : AssetImage(AssetsPath.product) as ImageProvider,
+          //       ),
+          //     ),
+          //   ),
+          // ),
+
           /// MIDDLE TEXT
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomText(
-                text: productName ?? "N/A",
-                fontSize: fontSize ?? 18.sp,
-                weight: FontWeight.bold,
-              ),
-              SizedBox(height: 10.h),
-              CustomText(text: "Qty: ${quantity ?? '--'}", fontSize: 18.sp),
-              SizedBox(height: 10.h),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.lightGreenAccent,
-                  borderRadius: BorderRadius.circular(30.r),
+          Container(
+            width: 100.w,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  text: productName ?? "N/A",
+                  fontSize: fontSize ?? 18.sp,
+                  weight: FontWeight.bold,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CustomText(text: status ?? "N/A", fontSize: 12.sp),
+                SizedBox(height: 10.h),
+                CustomText(text: "Qty: ${quantity ?? '--'}", fontSize: 18.sp),
+                SizedBox(height: 10.h),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.lightGreenAccent,
+                    borderRadius: BorderRadius.circular(30.r),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CustomText(text: status ?? "N/A", fontSize: 12.sp),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           SizedBox(width: 35.w),

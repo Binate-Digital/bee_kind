@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:bee_kind/auth/web_view.dart';
 import 'package:bee_kind/common/base_view.dart';
+import 'package:bee_kind/controllers/base_view_controller.dart';
 import 'package:bee_kind/models/data_models/user_profile_data_model.dart';
 import 'package:bee_kind/models/data_models/vendor_profile_data_model.dart';
 import 'package:bee_kind/services/network.dart';
@@ -113,6 +114,150 @@ class ProfileController extends GetxController {
     }
   }
 
+  /// Load existing profile data for edit mode
+  Future<void> loadProfileDataForEdit() async {
+    try {
+      // Get the base controller which has the profile data
+      final baseController = Get.find<BaseViewController>();
+
+      // Wait for profile to be loaded if it's not already
+      if (baseController.profile.value == null) {
+        await baseController.getProfile();
+      }
+
+      final profileData = baseController.profile.value?.data;
+
+      if (profileData == null) {
+        log("No profile data available");
+        return;
+      }
+
+      log("Loading profile data for edit mode");
+
+      // Load common fields
+      phoneController.text = profileData.phoneNumber?.toString() ?? '';
+      emailController.text = profileData.email?.toString() ?? '';
+
+      if (isVendor.value) {
+        // Load vendor-specific fields
+        businessNameController.text = profileData.businessName?.toString() ?? '';
+        // businessDescription is not in ProfileData, so we can't load it
+
+        // Parse and set open/close times
+        if (profileData.openTime != null) {
+          final timeParts = profileData.openTime.toString().split(':');
+          if (timeParts.length == 2) {
+            openTime.value = TimeOfDay(
+              hour: int.parse(timeParts[0]),
+              minute: int.parse(timeParts[1]),
+            );
+          }
+        }
+
+        if (profileData.closeTime != null) {
+          final timeParts = profileData.closeTime.toString().split(':');
+          if (timeParts.length == 2) {
+            closeTime.value = TimeOfDay(
+              hour: int.parse(timeParts[0]),
+              minute: int.parse(timeParts[1]),
+            );
+          }
+        }
+
+        // Load off days - convert dynamic list to String list
+        if (profileData.offDays != null) {
+          selectedOffDays.value = profileData.offDays!.map((day) => day.toString()).toList();
+        } else {
+          selectedOffDays.value = [];
+        }
+
+        // Load delivery radius
+        currentRadius.value = profileData.deliveryRadius ?? 50.0;
+
+        // Load business address from addressName
+        if (profileData.addressName != null) {
+          streetAddressController.text = profileData.addressName.toString();
+          locationAddress.value = profileData.addressName?.toString() ?? '';
+
+        }
+
+        // Load location from vendorAddress coordinates if available, combined with addressName
+        if (profileData.vendorAddress != null && profileData.vendorAddress!.coordinates != null) {
+          location = {
+            "address": profileData.addressName?.toString() ?? '',
+            "coordinates": profileData.vendorAddress!.coordinates ?? [],
+            "type": profileData.vendorAddress!.type?.toString() ?? 'Point',
+          };
+          locationAddress.value = profileData.addressName?.toString() ?? '';
+        } else if (profileData.userAddress != null && profileData.userAddress!.isNotEmpty) {
+          // Use first user address as fallback
+          final firstAddress = profileData.userAddress!.first;
+          location = {
+            "address": firstAddress.address?.toString() ?? '',
+            "coordinates": firstAddress.coordinates ?? [],
+            "type": firstAddress.type?.toString() ?? 'Point',
+          };
+          locationAddress.value = firstAddress.address?.toString() ?? '';
+        } else if (profileData.addressName != null) {
+          // Fallback to just address name if no coordinates available
+          location = {
+            "address": profileData.addressName.toString(),
+            "coordinates": [],
+            "type": 'Point',
+          };
+          locationAddress.value = profileData.addressName.toString();
+        }
+
+        // Load business license from documents if available
+        if (profileData.documents != null && profileData.documents!.isNotEmpty) {
+          // In a real implementation, you might want to download and display the license image
+          // For now, we'll just note that documents exist
+          log("Business documents exist: ${profileData.documents}");
+        }
+
+      } else {
+        // Load user-specific fields
+        firstNameController.text = profileData.firstName?.toString() ?? '';
+        lastNameController.text = profileData.lastName?.toString() ?? '';
+
+        // Load gender
+        selectedGender.value = profileData.gender?.toString();
+
+        // Load date of birth
+        if (profileData.dateOfBirth != null) {
+          selectedDate.value = DateTime.tryParse(profileData.dateOfBirth.toString());
+        }
+
+        // Load address type - not directly available in ProfileData, use addressName as fallback
+        selectedAddressType.value = profileData.addressName?.toString();
+
+        // Load apartment and floor numbers from userAddress if available
+        if (profileData.userAddress != null && profileData.userAddress!.isNotEmpty) {
+          final firstAddress = profileData.userAddress!.first;
+          apartmentNumberController.text = firstAddress.apartmentNumber?.toString() ?? '';
+          floorNumberController.text = firstAddress.floorNumber?.toString() ?? '';
+        }
+
+        // Load location from userAddress if available
+        if (profileData.userAddress != null && profileData.userAddress!.isNotEmpty) {
+          final firstAddress = profileData.userAddress!.first;
+          location = {
+            "address": firstAddress.address?.toString() ?? '',
+            "coordinates": firstAddress.coordinates ?? [],
+            "type": firstAddress.type?.toString() ?? 'Point',
+          };
+          locationAddress.value = firstAddress.address?.toString() ?? '';
+        }
+      }
+
+      log("Profile data loaded successfully for edit mode");
+
+    } catch (e) {
+      log("Error loading profile data for edit: $e");
+      // Don't show error to user, just log it
+    }
+  }
+
   /// Launch Veriff verification
   Future<void> launchVeriffVerification(BuildContext context) async {
     log("INSIDE VERIFF FUNCTION");
@@ -216,10 +361,10 @@ class ProfileController extends GetxController {
     BuildContext context, {
     bool isEdit = false,
   }) async {
-    if (!validateForm(context)) {
-      log("Validation Failed");
-      return;
-    }
+    // if (!validateForm(context, isEdit: isEdit)) {
+    //   log("Validation Failed");
+    //   return;
+    // }
 
     try {
       isLoading.value = true;
@@ -238,7 +383,7 @@ class ProfileController extends GetxController {
 
       if (!isVendor.value) {
         // --------------------- USER MODEL ---------------------
-        log("LOcation before creating USER model: $location");
+        log("LOcation before creating USER model: ${profileImage.value}");
         model = UserProfileDataModel(
           firstName: firstNameController.text.trim(),
           lastName: lastNameController.text.trim(),
@@ -249,34 +394,43 @@ class ProfileController extends GetxController {
           floorNumber: floorNumberController.text.trim(),
 
           address: selectedAddressType.value,
+          // location: location, // map
           location: location, // map
           profilePicture: profileImage.value,
         );
       } else {
-        // --------------------- VENDOR MODEL ---------------------
-        model = VendorProfileDataModel(
-          businessName: businessNameController.text.trim(),
-          businessDescription: businessDescriptionController.text.trim(),
+      // --------------------- VENDOR MODEL ---------------------
+      // Ensure phone number is properly formatted (remove any non-digit characters)
+      final cleanedPhoneNumber = phoneController.text.trim().replaceAll(RegExp(r'[^0-9]'), '');
 
-          openTime: openTime.value != null
-              ? "${openTime.value!.hour.toString().padLeft(2, '0')}:${openTime.value!.minute.toString().padLeft(2, '0')}"
-              : null,
+      model = VendorProfileDataModel(
+        businessName: businessNameController.text.trim(),
+        businessDescription: businessDescriptionController.text.trim(),
 
-          closeTime: closeTime.value != null
-              ? "${closeTime.value!.hour.toString().padLeft(2, '0')}:${closeTime.value!.minute.toString().padLeft(2, '0')}"
-              : null,
+        openTime: openTime.value != null
+            ? "${openTime.value!.hour.toString().padLeft(2, '0')}:${openTime.value!.minute.toString().padLeft(2, '0')}"
+            : null,
 
-          phoneNumber: phoneController.text.trim(),
+        closeTime: closeTime.value != null
+            ? "${closeTime.value!.hour.toString().padLeft(2, '0')}:${closeTime.value!.minute.toString().padLeft(2, '0')}"
+            : null,
 
-          offDays: selectedOffDays,
-          deliveryRadius: currentRadius.value,
+        phoneNumber: cleanedPhoneNumber.isNotEmpty ? cleanedPhoneNumber : phoneController.text.trim(),
 
-          businessLicense: businessLicense.value,
-          profilePicture: profileImage.value,
+        offDays: selectedOffDays,
+        deliveryRadius: currentRadius.value,
 
-          address: streetAddressController.text.trim(),
-          location: location, // map
-        );
+        businessLicense: businessLicense.value,
+        profilePicture: profileImage.value,
+
+        address: streetAddressController.text.trim(),
+        location: location, // map
+      );
+
+      // Debug log to check phone number
+      log("Phone number being sent: ${model.phoneNumber}");
+      log("Phone number controller text: ${phoneController.text}");
+      log("Cleaned phone number: $cleanedPhoneNumber");
       }
 
       // ---------------------------------------------------------
@@ -291,9 +445,13 @@ class ProfileController extends GetxController {
       final formData = dio.FormData.fromMap(baseMap);
 
       // ---------------- offDays (Vendor only) ----------------
-      if (isVendor.value) {
-        for (final day in selectedOffDays) {
-          formData.fields.add(MapEntry("offDays", day));
+      if (isVendor.value && selectedOffDays.isNotEmpty) {
+        // Only add offDays if they exist and this is not an edit (to avoid duplication)
+        // For edits, the offDays are already in the model
+        if (!isEdit) {
+          for (final day in selectedOffDays) {
+            formData.fields.add(MapEntry("offDays", day));
+          }
         }
       }
 
@@ -302,35 +460,52 @@ class ProfileController extends GetxController {
       log("===== FINAL FORMDATA FILES ===== ${formData.files}");
 
       // ---------------------------------------------------------
-      // API CALL
+      // API CALL - Use POST for create, PATCH for update
       // ---------------------------------------------------------
 
-      final response = await network.postRequest(
-        endPoint: NetworkStrings.completeProfile,
-        data: formData,
-        isHeaderRequire: true,
-      );
+      final response = isEdit
+          ? await network.patchRequest(
+              endPoint: NetworkStrings.updateProfile,
+              data: formData,
+              isHeaderRequire: true,
+            )
+          : await network.postRequest(
+              endPoint: NetworkStrings.completeProfile,
+              data: formData,
+              isHeaderRequire: true,
+            );
 
       if (response == null) {
         isLoading.value = false;
-        AppDialogs.showToast("Unable to complete profile. Please try again.");
+        AppDialogs.showToast(isEdit ? "Unable to update profile. Please try again." : "Unable to complete profile. Please try again.");
         return;
       }
 
       final data = response.data;
-      log("Create Profile Response: $data");
+      log("${isEdit ? "Update" : "Create"} Profile Response: $data");
 
       if (data["status"] == true) {
         isLoading.value = false;
         AppDialogs.showToast(
-          data["message"] ?? "Profile submitted successfully",
+          data["message"] ?? (isEdit ? "Profile updated successfully" : "Profile submitted successfully"),
         );
 
-        await prefs.isProfileComplete(
-          data["data"]["user"]["isProfileCompleted"],
-        );
-
-        log("IS PROFILE COMPLETE: ${prefs.checkProfile()}");
+        if (isEdit) {
+          // For updates, refresh the profile data
+          try {
+            final baseController = Get.find<BaseViewController>();
+            await baseController.getProfile();
+            log("Profile refreshed successfully after update");
+          } catch (e) {
+            log("Failed to refresh profile after update: $e");
+            // Don't show error to user, just log it
+          }
+        } else {
+          await prefs.isProfileComplete(
+            data["data"]["user"]["isProfileCompleted"],
+          );
+          log("IS PROFILE COMPLETE: ${prefs.checkProfile()}");
+        }
 
         if (!isEdit) {
           Get.offAll(() => BaseView());
@@ -339,7 +514,7 @@ class ProfileController extends GetxController {
         }
       } else {
         isLoading.value = false;
-        AppDialogs.showToast(data["message"] ?? "Profile submit failed");
+        AppDialogs.showToast(data["message"] ?? (isEdit ? "Profile update failed" : "Profile submit failed"));
       }
     } catch (e) {
       isLoading.value = false;
@@ -475,7 +650,7 @@ class ProfileController extends GetxController {
   }
 
   /// Validate form data
-  bool validateForm(BuildContext context) {
+  bool validateForm(BuildContext context, {bool isEdit = false}) {
     log("====== VALIDATING PROFILE FORM ======");
 
     bool isValid = true;
@@ -567,7 +742,8 @@ class ProfileController extends GetxController {
         isValid = false;
       }
 
-      if (businessLicense.value == null) {
+      // Only require business license if this is a new profile creation, not for edits
+      if (!isEdit && businessLicense.value == null) {
         log(" Validation Failed: Business license missing");
         licenseError.value = "Business license image is required";
         isValid = false;
@@ -589,7 +765,7 @@ class ProfileController extends GetxController {
 
   /// Handle submission
   void handleSubmit(BuildContext context, bool isEdit) {
-    if (validateForm(context)) {
+    if (validateForm(context, isEdit: isEdit)) {
       log("Validation Successful");
       if (isEdit) {
         AppNavigation.navigatorPop(context);

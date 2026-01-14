@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CategoryWiseProduct extends StatelessWidget {
   const CategoryWiseProduct({super.key, this.fromHome = false, this.product});
+
   final bool fromHome;
   final ProductByCategoryData? product;
 
@@ -90,14 +91,26 @@ class CategoryWiseProduct extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SizedBox(height: 10.h),
+
               CustomText(
-                text: product?.isDiscountAvailable ?? true
-                    ? "\$${product?.afterDiscountPrice.toString()}"
-                    : "\$${product?.price.toString()}",
+                text: "\$${product?.price.toString()}",
                 fontSize: 20.sp,
-                fontColor: AppColors.yellow2,
+                lineThrough: product?.isDiscountAvailable == true
+                    ? true
+                    : false,
+                fontColor: product?.isDiscountAvailable == true
+                    ? AppColors.shimmerHighlightColor
+                    : AppColors.yellow2,
                 weight: FontWeight.bold,
               ),
+              product?.isDiscountAvailable == true
+                  ? CustomText(
+                      text: "\$${product?.afterDiscountPrice.toString()}",
+                      fontSize: 20.sp,
+                      fontColor: AppColors.yellow2,
+                      weight: FontWeight.bold,
+                    )
+                  : SizedBox(),
               SizedBox(height: 55.h),
               fromHome
                   ? CustomText(

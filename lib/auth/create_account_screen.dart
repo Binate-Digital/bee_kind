@@ -182,7 +182,7 @@ class CreateAccountScreen extends StatelessWidget {
                   ),
 
                   socialLoginButton(
-                    // onTap: controller.signInWithGoogle,
+                    onTap: controller.signUpWithGoogle,
                     icon: AssetsPath.google,
                     buttonColor: Colors.red,
                     text: "Sign Up with Google",

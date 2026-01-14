@@ -375,23 +375,32 @@ class _LiveTrackingState extends State<LiveTracking> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Left
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomText(
-                        text: "Delivery personnel name: N/A",
-                        fontSize: 18.sp,
-                      ),
-                      SizedBox(height: 10.h),
-                      CustomText(text: "Car: Not available", fontSize: 16.sp),
-                      SizedBox(height: 10.h),
-                      CustomText(
-                        text: "Phone: Not available!",
-                        fontSize: 16.sp,
-                        fontColor: AppColors.yellow2,
-                        weight: FontWeight.bold,
-                      ),
-                    ],
+                  Container(
+                    width: 250.w,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          text:
+                              "Driver's Name: ${_order?.driverDetail?.driverName ?? 'N/A'}",
+                          fontSize: 18.sp,
+                        ),
+                        SizedBox(height: 10.h),
+                        CustomText(
+                          text:
+                              "Car: ${_order?.driverDetail?.make != null && _order?.driverDetail?.color != null ? '${_order?.driverDetail?.color} ${_order?.driverDetail?.make}' : 'Not available'}",
+                          fontSize: 16.sp,
+                        ),
+                        SizedBox(height: 10.h),
+                        CustomText(
+                          text:
+                              "Phone: ${_order?.driverDetail?.phoneNumber ?? 'Not available!'}",
+                          fontSize: 16.sp,
+                          fontColor: AppColors.yellow2,
+                          weight: FontWeight.bold,
+                        ),
+                      ],
+                    ),
                   ),
 
                   // Right
@@ -399,7 +408,11 @@ class _LiveTrackingState extends State<LiveTracking> {
                     width: 100.w,
                     text: "Call",
                     onTap: () {
-                      launchCaller("+1 919-555-8247");
+                      if (_order?.driverDetail?.phoneNumber != null) {
+                        launchCaller(_order!.driverDetail!.phoneNumber!);
+                      } else {
+                        launchCaller("+1 919-555-8247");
+                      }
                     },
                   ),
                 ],

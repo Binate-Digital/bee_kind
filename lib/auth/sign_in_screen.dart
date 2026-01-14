@@ -87,23 +87,36 @@ class SignInScreen extends StatelessWidget {
                   ),
                   Padding(
                     padding: EdgeInsets.only(top: 250.h),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
                       children: [
-                        CustomText(
-                          text: "Don't have an account?\t\t",
-                          fontSize: 22.sp,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomText(
+                              text: "Don't have an account?\t\t",
+                              fontSize: 22.sp,
+                            ),
+                            GestureDetector(
+                              onTap: () =>
+                                  Get.to(() => const CreateAccountScreen()),
+                              child: CustomText(
+                                text: "Sign Up",
+                                fontSize: 22.sp,
+                                underlined: true,
+                                weight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        GestureDetector(
-                          onTap: () =>
-                              Get.to(() => const CreateAccountScreen()),
-                          child: CustomText(
-                            text: "Sign Up",
-                            fontSize: 22.sp,
-                            underlined: true,
-                            weight: FontWeight.bold,
-                          ),
-                        ),
+                        SizedBox(height: 20.h),
+                        // GestureDetector(
+                        //   onTap: controller.signInWithGoogle,
+                        //   child: Image.asset(
+                        //     AssetsPath.google,
+                        //     height: 40.h,
+                        //     width: 40.w,
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),

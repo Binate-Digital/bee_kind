@@ -24,7 +24,7 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(BaseViewController());
+    final controller = Get.find<BaseViewController>();
     return Container(
       decoration: BoxDecoration(
         color: AppColors.whiteColor,

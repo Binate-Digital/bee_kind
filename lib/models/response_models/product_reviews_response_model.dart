@@ -119,15 +119,32 @@ class Reviews {
 
 class UserModel {
   String? fullName;
-
   String? profileImage;
 
   UserModel({this.fullName, this.profileImage});
 
   UserModel.fromJson(Map<String, dynamic> json) {
-    fullName = json['name'];
+    // Handle different possible field names for user name
+    fullName = json['name'] ?? 
+               json['fullName'] ?? 
+               json['userName'] ?? 
+               json['username'] ??
+               _buildFullName(json['firstName'], json['lastName']);
 
-    profileImage = json['profilePicture'];
+    // Handle different possible field names for profile image
+    profileImage = json['profilePicture'] ?? 
+                   json['profileImage'] ?? 
+                   json['avatar'] ??
+                   json['image'];
+  }
+
+  // Helper to combine firstName and lastName
+  String? _buildFullName(dynamic firstName, dynamic lastName) {
+    if (firstName == null && lastName == null) return null;
+    final first = firstName?.toString() ?? '';
+    final last = lastName?.toString() ?? '';
+    final combined = '$first $last'.trim();
+    return combined.isEmpty ? null : combined;
   }
 
   Map<String, dynamic> toJson() {

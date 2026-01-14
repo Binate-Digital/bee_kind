@@ -244,6 +244,7 @@ class StoreScreen extends GetView<StoreController> {
                     productName: item.productName,
                     price: item.price,
                     afterDiscountPrice: item.afterDiscountPrice,
+                    productImages: item.productImages,
                   ),
                 );
               },
@@ -309,8 +310,7 @@ class StoreScreen extends GetView<StoreController> {
                                           p?.isDiscountAvailable ?? false,
                                       isAvailable: p?.isAvailable ?? false,
                                       quantity: p?.quantity,
-                                      productImages: p?.productImages,
-                                    ),
+                                          ),
                                   ),
                                 );
                               },
@@ -321,6 +321,7 @@ class StoreScreen extends GetView<StoreController> {
                                 productName: p?.productName,
                                 price: p?.price,
                                 afterDiscountPrice: p?.afterDiscountPrice,
+                                productImages: p?.productImages,
                               ),
                             ),
                           );
@@ -410,13 +411,14 @@ class StoreScreen extends GetView<StoreController> {
                       ),
                     );
                   },
-                  child: Product(
-                    stockStatus: p?.inventoryStatus,
-                    isDiscountAvailable: p?.isDiscountAvailable ?? false,
-                    productName: p?.productName,
-                    price: p?.price,
-                    afterDiscountPrice: p?.afterDiscountPrice,
-                  ),
+                              child: Product(
+                                stockStatus: p?.inventoryStatus,
+                                isDiscountAvailable: p?.isDiscountAvailable ?? false,
+                                productName: p?.productName,
+                                price: p?.price,
+                                afterDiscountPrice: p?.afterDiscountPrice,
+                                productImages: p?.productImages,
+                              ),
                 );
               },
             ),

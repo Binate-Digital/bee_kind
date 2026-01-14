@@ -60,7 +60,6 @@ class RatingScreen extends StatelessWidget {
           ],
         ),
       ),
-
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Padding(
@@ -97,6 +96,7 @@ class RatingScreen extends StatelessWidget {
                                           Navigator.pop(context);
                                           showModalBottomSheet(
                                             isDismissible: true,
+                                            isScrollControlled: true,
                                             context: context,
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.only(
@@ -108,56 +108,41 @@ class RatingScreen extends StatelessWidget {
                                               return StatefulBuilder(
                                                 builder: (context, setModalState) {
                                                   return Padding(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                          vertical: 50.h,
-                                                          horizontal: 20.h,
-                                                        ),
+                                                    padding: EdgeInsets.only(
+                                                      top: 50.h,
+                                                      bottom: MediaQuery.of(context).viewInsets.bottom + 50.h,
+                                                      left: 20.w,
+                                                      right: 20.w,
+                                                    ),
                                                     child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
+                                                      mainAxisSize: MainAxisSize.min,
                                                       children: [
                                                         CustomText(
-                                                          text:
-                                                              "Edit Rating & Review",
-                                                          weight:
-                                                              FontWeight.bold,
+                                                          text: "Edit Rating & Review",
+                                                          weight: FontWeight.bold,
                                                           fontSize: 18.sp,
                                                         ),
                                                         Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                top: 20.h,
-                                                                bottom: 10.h,
-                                                              ),
+                                                          padding: EdgeInsets.only(
+                                                            top: 20.h,
+                                                            bottom: 10.h,
+                                                          ),
                                                           child: StarRating(
                                                             size: 40.r,
                                                             rating: rating,
-                                                            color: AppColors
-                                                                .yellow2,
-                                                            borderColor:
-                                                                Colors.grey,
-                                                            allowHalfRating:
-                                                                true,
+                                                            color: AppColors.yellow2,
+                                                            borderColor: Colors.grey,
+                                                            allowHalfRating: true,
                                                             starCount: 5,
-                                                            onRatingChanged:
-                                                                (rate) =>
-                                                                    setModalState(
-                                                                      () {
-                                                                        rating =
-                                                                            rate;
-                                                                      },
-                                                                    ),
+                                                            onRatingChanged: (rate) => setModalState(() {
+                                                              rating = rate;
+                                                            }),
                                                           ),
                                                         ),
                                                         Padding(
-                                                          padding:
-                                                              EdgeInsets.symmetric(
-                                                                vertical: 10.h,
-                                                              ),
+                                                          padding: EdgeInsets.symmetric(vertical: 10.h),
                                                           child: CustomTextField(
-                                                            hint:
-                                                                "Write a Review",
+                                                            hint: "Write a Review",
                                                             radius: 10.r,
                                                             maxlines: 6,
                                                           ),
@@ -165,9 +150,7 @@ class RatingScreen extends StatelessWidget {
                                                         SizedBox(height: 20.h),
                                                         CustomButton(
                                                           onTap: () {
-                                                            Navigator.pop(
-                                                              context,
-                                                            );
+                                                            Navigator.pop(context);
                                                           },
                                                           text: "Save",
                                                         ),

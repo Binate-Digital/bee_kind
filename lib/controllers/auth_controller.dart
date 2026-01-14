@@ -12,10 +12,14 @@ import 'package:bee_kind/services/network.dart';
 import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/utils/app_dialogs.dart';
 import 'package:bee_kind/utils/network_strings.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
+import '../widgets/webview_flutter_widget.dart';
 
 class AuthController extends GetxController {
   final SharedPrefs prefs = SharedPrefs();
@@ -36,7 +40,9 @@ class AuthController extends GetxController {
   String role = "";
 
   void togglePasswordVisibility() => isObscure.toggle();
+
   void toggleConfirmPasswordVisibility() => isAlsoObscure.toggle();
+
   void toggleTerms(bool? value) => isChecked.value = value ?? false;
 
   @override
@@ -120,10 +126,13 @@ class AuthController extends GetxController {
 
     try {
       isLoading.value = true;
+      final token = await FirebaseMessaging.instance.getToken();
+
       final model = LoginDataModel(
         email: loginEmailCtrl.text.trim(),
         password: loginPasswordCtrl.text.trim(),
         role: role,
+        deviceToken: token.toString(),
       );
 
       log("Login body: ${model.toJson()}");
@@ -139,7 +148,9 @@ class AuthController extends GetxController {
         log("Login Response Parsed: ${loginResponse.toJson()}");
 
         if (loginResponse.status == true) {
-          // Save user data locally
+          print("loginResponse.message");
+          print(loginResponse.message);
+          //Save user data locally
           await prefs.setGlobalEmail(loginResponse.data?.email ?? "");
           await prefs.setuserId(loginResponse.data?.sId ?? "");
           await prefs.isProfileComplete(
@@ -157,11 +168,21 @@ class AuthController extends GetxController {
             "isProfileCompleted: ${loginResponse.data?.isProfileCompleted}"
             "Token: ${loginResponse.data?.userAuthToken}",
           );
-
+          //
           isLoading.value = false;
+          //
 
+          print("loginResponse.data?.stripeCustomerId");
+          print(loginResponse.data?.stripeCustomerId);
           if (!prefs.checkProfile()) {
-            Get.to(() => CreateProfileScreen());
+            if (loginResponse.message == "Vendor onboarding required") {
+              AppDialogs.showToast(
+                loginResponse.message ?? "Something Went Wrong",
+              );
+              Get.to(() => OnboardingWebView(url: response.data['data']['onboardingUrl']));
+            } else {
+              Get.to(() => CreateProfileScreen());
+            }
           } else {
             Get.offAll(() => BaseView());
           }
@@ -241,6 +262,7 @@ class AuthController extends GetxController {
   RxBool resetIsAlsoObscure = true.obs;
 
   void toggleResetPasswordVisibility() => resetIsObscure.toggle();
+
   void toggleResetConfirmPasswordVisibility() => resetIsAlsoObscure.toggle();
 
   void handleResetPassword() async {
@@ -298,54 +320,239 @@ class AuthController extends GetxController {
     }
   }
 
-  // ---------------- SOCIAL LOGIN ----------------
-  Future<void> signInWithGoogle() async {
+  // ---------------- SOCIAL SIGN-UP ----------------
+  Future<void> signUpWithGoogle() async {
     try {
-      // Singleton instance from the new API
-      final google = GoogleSignIn.instance;
+      isLoading.value = true;
 
-      // Safe to call multiple times; if you've already initialized in main(),
-      // this just returns quickly.
-      await google.initialize();
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId:
+            '665813359634-v0ibbh2ve7a4puuoi73nc0ikmresnh2v.apps.googleusercontent.com',
+      );
 
-      if (!google.supportsAuthenticate()) {
-        log('GoogleSignIn.authenticate() is not supported on this platform');
+      log('Starting Google Sign-Up...');
+
+      await googleSignIn.signOut();
+
+      final GoogleSignInAccount? user = await googleSignIn.signIn();
+
+      if (user == null) {
+        log('Google Sign-Up cancelled by user');
+        isLoading.value = false;
         return;
       }
 
-      log('Starting Google Sign-In...');
+      final GoogleSignInAuthentication auth = await user.authentication;
 
-      await GoogleSignIn.instance.disconnect();
-      await GoogleSignIn.instance.signOut();
+      final credential = GoogleAuthProvider.credential(
+        accessToken: auth.accessToken,
+        idToken: auth.idToken,
+      );
 
-      // New API: authenticate()
-      final GoogleSignInAccount user = await google.authenticate();
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
 
-      // ---- User details ----
-      log('Google user details:');
-      log('  displayName: ${user.displayName}');
-      log('  email      : ${user.email}');
-      log('  id         : ${user.id}');
-      log('  photoUrl   : ${user.photoUrl}');
+      final userData = userCredential.user;
 
-      // ---- Token (only idToken exists in v7+) ----
-      final GoogleSignInAuthentication auth = user.authentication;
-      log('Google idToken: ${auth.idToken}');
+      log('Firebase Sign-Up Success ✔');
+      log('uid: ${userData?.uid}');
+      log('email: ${userData?.email}');
+      log('name: ${userData?.displayName}');
+      log('photo: ${userData?.photoURL}');
 
-      log('Google Login Successful ✔');
-    }
-    // on GoogleSignInException catch (e) {
-    //   // Nice error handling for cancel vs other errors
-    //   // if (e.code == GoogleSignInExceptionCode.canceled) {
-    //   //   log('Google Sign-In cancelled by user');
-    //   // } else {
-    //   //   log('GoogleSignInException ${e.code}: ${e.description}');
-    //   // }
-    // }
-    catch (e) {
-      log('Google Sign-In Error: $e');
+      // Save Google email to SharedPrefs (same as regular signup)
+      if (userData?.email != null) {
+        await prefs.setGlobalEmail(userData!.email!);
+        log('Google email saved: ${userData.email}');
+
+        isLoading.value = false;
+
+        // Navigate directly to Create Profile screen (skip OTP verification for Google)
+        Get.offAll(() => CreateProfileScreen());
+      } else {
+        isLoading.value = false;
+        AppDialogs.showToast("Failed to get email from Google account");
+      }
+    } catch (e) {
+      log('Google Sign-Up Error: $e');
+      isLoading.value = false;
+      AppDialogs.showToast("Google sign-up failed. Please try again.");
     }
   }
+
+  // ---------------- SOCIAL LOGIN ----------------
+  Future<void> signInWithGoogle() async {
+    try {
+      isLoading.value = true;
+
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId:
+            '665813359634-v0ibbh2ve7a4puuoi73nc0ikmresnh2v.apps.googleusercontent.com',
+      );
+
+      log('Starting Google Sign-In...');
+
+      await googleSignIn.signOut();
+
+      final GoogleSignInAccount? user = await googleSignIn.signIn();
+
+      if (user == null) {
+        log('Google Sign-In cancelled by user');
+        isLoading.value = false;
+        return;
+      }
+
+      final GoogleSignInAuthentication auth = await user.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: auth.accessToken, // IMPORTANT
+        idToken: auth.idToken,
+      );
+
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
+
+      final userData = userCredential.user;
+
+      log('Firebase Login Success ✔');
+      log('uid: ${userData?.uid}');
+      log('email: ${userData?.email}');
+      log('name: ${userData?.displayName}');
+      log('photo: ${userData?.photoURL}');
+      log('idToken: ${auth.idToken}');
+
+      // Call the social login API
+      if (auth.idToken != null) {
+        final socialLoginBody = {
+          // "idToken": auth.idToken,
+          "idToken": await userData?.getIdToken(),
+          "provider": "google",
+          "role": role.isNotEmpty ? role : "user",
+          // Default to "user" if role is empty
+        };
+
+        log("Social Login API body: $socialLoginBody");
+
+        final response = await network.postRequest(
+          endPoint: NetworkStrings.firebaseSocialLogin,
+          data: socialLoginBody,
+        );
+
+        if (response != null && response.statusCode == NetworkStrings.success) {
+          final responseData = response.data;
+          log("Social Login API Response: $responseData");
+
+          if (responseData['status'] == true) {
+            // Save user data locally (similar to regular login)
+            final userData = responseData['data'];
+            if (userData != null) {
+              await prefs.setGlobalEmail(userData['email'] ?? "");
+              await prefs.setuserId(
+                userData['_id'] ?? userData['userId'] ?? "",
+              );
+              await prefs.isProfileComplete(
+                userData['isProfileCompleted'] ?? false,
+              );
+              await prefs.setuserToken(userData['userAuthToken'] ?? "");
+
+              log(
+                "Social Login - Is Profile Complete: ${prefs.checkProfile()}",
+              );
+              log("Social Login - Token: ${prefs.getUserToken()}");
+              log("Social Login - User ID: ${prefs.getUserId()}");
+
+              if (!prefs.checkProfile()) {
+                Get.to(() => CreateProfileScreen());
+              } else {
+                Get.offAll(() => BaseView());
+              }
+            } else {
+              AppDialogs.showToast("Invalid response from server");
+            }
+          } else {
+            AppDialogs.showToast(
+              responseData['message'] ?? "Social login failed",
+            );
+          }
+        } else {
+          log("Social Login API failed: ${response?.data}");
+          AppDialogs.showToast(
+            response?.data?['message'] ?? "Social login failed",
+          );
+        }
+      } else {
+        AppDialogs.showToast("Failed to get authentication token");
+      }
+
+      isLoading.value = false;
+    } catch (e) {
+      log('Google Sign-In Error: $e');
+      isLoading.value = false;
+      AppDialogs.showToast("Google sign-in failed. Please try again.");
+    }
+  }
+
+  // Future<void> signInWithGoogle() async {
+  //   try {
+  //     // Google Sign-In instance with client ID
+  //     final google = GoogleSignIn(
+  //       clientId: '665813359634-v0ibbh2ve7a4puuoi73nc0ikmresnh2v.apps.googleusercontent.com',
+  //     );
+
+  //     log('Starting Google Sign-In...');
+
+  //     await google.disconnect();
+  //     await google.signOut();
+
+  //     // Sign in
+  //     final GoogleSignInAccount? user = await google.signIn();
+
+  //     if (user == null) {
+  //       log('Google Sign-In cancelled by user');
+  //       return;
+  //     }
+
+  //     // ---- User details ----
+  //     log('Google user details:');
+  //     log('  displayName: ${user.displayName}');
+  //     log('  email      : ${user.email}');
+  //     log('  id         : ${user.id}');
+  //     log('  photoUrl   : ${user.photoUrl}');
+
+  //     // ---- Token ----
+  //     final GoogleSignInAuthentication auth = await user.authentication;
+  //     log('Google idToken: ${auth.idToken}');
+
+  //     // Sign in to Firebase with Google credential
+  //     final AuthCredential credential = GoogleAuthProvider.credential(
+  //       idToken: auth.idToken,
+  //     );
+
+  //     final UserCredential userCredential =
+  //         await FirebaseAuth.instance.signInWithCredential(credential);
+
+  //     final User? firebaseUser = userCredential.user;
+
+  //     log('Firebase user signed in:');
+  //     log('  uid       : ${firebaseUser?.uid}');
+  //     log('  email     : ${firebaseUser?.email}');
+  //     log('  displayName: ${firebaseUser?.displayName}');
+  //     log('  photoURL  : ${firebaseUser?.photoURL}');
+
+  //     log('Google Login Successful ✔');
+  //   }
+  //   // on GoogleSignInException catch (e) {
+  //   //   // Nice error handling for cancel vs other errors
+  //   //   // if (e.code == GoogleSignInExceptionCode.canceled) {
+  //   //   //   log('Google Sign-In cancelled by user');
+  //   //   // } else {
+  //   //   //   log('GoogleSignInException ${e.code}: ${e.description}');
+  //   //   // }
+  //   // }
+  //   catch (e) {
+  //     log('Google Sign-In Error: $e');
+  //   }
+  // }
 
   Future<void> signInWithApple() async {
     try {

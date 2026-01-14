@@ -40,6 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(baseController.profile.value?.data?.profilePicture);
     return SingleChildScrollView(
       physics: BouncingScrollPhysics(),
       child: Padding(
@@ -127,8 +128,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             SizedBox(height: 20.h),
             ProfileOption(
-              onTap: () {},
-              isNotification: true,
+              onTap: () {
+                if (baseController.profile.value?.data?.isNotificationEnabled ==
+                    false) {
+                  baseController.profile.value?.data?.isNotificationEnabled =
+                      true;
+                } else {
+                  baseController.profile.value?.data?.isNotificationEnabled =
+                      false;
+                }
+              },
+              isNotification:
+                  true,
+              initialToggleValue: baseController.profile.value?.data?.isNotificationEnabled ??
+                  false,
               image: AssetsPath.notifications,
               text: "Notifications",
             ),

@@ -218,8 +218,8 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
       }
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showAddAddressBottomSheet();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await showAddAddressBottomSheet();
     });
   }
 
@@ -250,10 +250,11 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
     );
   }
 
-  void showAddAddressBottomSheet() {
-    showModalBottomSheet(
+  Future<void> showAddAddressBottomSheet() async {
+    await showModalBottomSheet(
       context: context,
-      isDismissible: false,
+      // barrierDismissible: false, // Prevent closing by tapping outside
+      isDismissible: true, // Allow closing by swiping down
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(30.r),
@@ -267,7 +268,12 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
           decoration: BoxDecoration(color: Colors.white),
           child: SafeArea(
             child: Padding(
-              padding: EdgeInsets.all(20.w),
+              padding: EdgeInsets.only(
+                left: 20.w,
+                right: 20.w,
+                top: 20.h,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20.h,
+              ),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -326,28 +332,65 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                           borderRadius: BorderRadius.circular(30.r),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            SizedBox(
-                              width: 330.w,
-                              child: Align(
-                                alignment: AlignmentGeometry.centerLeft,
-                                child: CustomText(
-                                  text: locationAddress.isNotEmpty
-                                      ? locationAddress
-                                      : "Location",
-                                  overflow: TextOverflow.ellipsis,
-                                  fontColor: AppColors.yellow2,
-                                  fontSize: 18.sp,
-                                ),
+                            Expanded(
+                              // 🔥 overflow fix
+                              child: CustomText(
+                                text: locationAddress.isNotEmpty
+                                    ? locationAddress
+                                    : "Location",
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                fontColor: AppColors.yellow2,
+                                fontSize: 18.sp,
                               ),
                             ),
+                            SizedBox(width: 10.w),
                             Icon(Icons.location_on, color: AppColors.yellow2),
                           ],
                         ),
                       ),
                     ),
 
+                    SizedBox(height: 20.h),
+
+                    // GestureDetector(
+                    //   onTap: () => pickLocation(context, setSheetState),
+                    //   child: Container(
+                    //     padding: EdgeInsets.symmetric(
+                    //       vertical: 15.h,
+                    //       horizontal: 15.w,
+                    //     ),
+                    //     decoration: BoxDecoration(
+                    //       color: AppColors.yellow1.withValues(alpha: 0.2),
+                    //       border: Border.all(
+                    //         color: AppColors.yellow2,
+                    //         width: 1,
+                    //       ),
+                    //       borderRadius: BorderRadius.circular(30.r),
+                    //     ),
+                    //     child: Row(
+                    //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //       children: [
+                    //         SizedBox(
+                    //           width: 330.w,
+                    //           child: Align(
+                    //             alignment: AlignmentGeometry.centerLeft,
+                    //             child: CustomText(
+                    //               text: locationAddress.isNotEmpty
+                    //                   ? locationAddress
+                    //                   : "Location",
+                    //               overflow: TextOverflow.ellipsis,
+                    //               fontColor: AppColors.yellow2,
+                    //               fontSize: 18.sp,
+                    //             ),
+                    //           ),
+                    //         ),
+                    //         Icon(Icons.location_on, color: AppColors.yellow2),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
                     SizedBox(height: 20.h),
 
                     /// ----- APT + FLOOR -----
@@ -438,7 +481,10 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
           ),
         ),
       ),
-    );
+    ).then((_) {
+      // If dismissed by swipe down, go back
+      Navigator.pop(context);
+    });
   }
 
   @override

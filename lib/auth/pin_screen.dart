@@ -48,7 +48,7 @@ class PinScreen extends StatelessWidget {
                   showHintText: false,
                   fieldBorderRadius: 30.r,
                   fieldBorderWidth: 1.5,
-                  fieldPadding: 8.w,
+                  fieldPadding: 5.w,
                   textStyle: TextStyle(
                     fontSize: 16.sp,
                     color: AppColors.blackColor,

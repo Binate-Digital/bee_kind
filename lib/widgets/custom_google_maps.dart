@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -14,7 +16,7 @@ class CustomGoogleMap extends StatelessWidget {
   final bool buildingsEnabled;
   final Function(GoogleMapController)? onMapCreated;
   final Function(LatLng)? onTap;
-  final Widget widget;
+  final Widget? widget;
 
   const CustomGoogleMap({
     super.key,
@@ -30,33 +32,37 @@ class CustomGoogleMap extends StatelessWidget {
     this.buildingsEnabled = true,
     this.onMapCreated,
     this.onTap,
-    required this.widget,
+    this.widget,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        GoogleMap(
-          initialCameraPosition: initialCameraPosition,
-          markers: markers,
-          circles: circles,
-          polylines: polylines,
-          myLocationEnabled: myLocationEnabled,
-          myLocationButtonEnabled: myLocationButtonEnabled,
-          zoomControlsEnabled: zoomControlsEnabled,
-          mapToolbarEnabled: mapToolbarEnabled,
-          compassEnabled: compassEnabled,
-          buildingsEnabled: buildingsEnabled,
-          onMapCreated: (controller) {
-            if (onMapCreated != null) onMapCreated!(controller);
-          },
-          onTap: (position) {
-            if (onTap != null) onTap!(position);
-          },
-        ),
-        widget,
-      ],
-    );
+    final children = <Widget>[
+      GoogleMap(
+        initialCameraPosition: initialCameraPosition,
+        markers: markers,
+        circles: circles,
+        polylines: polylines,
+        myLocationEnabled: myLocationEnabled,
+        myLocationButtonEnabled: myLocationButtonEnabled,
+        zoomControlsEnabled: zoomControlsEnabled,
+        mapToolbarEnabled: mapToolbarEnabled,
+        compassEnabled: compassEnabled,
+        buildingsEnabled: buildingsEnabled,
+        // Let Google Maps handle its own gestures
+        onMapCreated: (controller) {
+          if (onMapCreated != null) onMapCreated!(controller);
+        },
+        onTap: (position) {
+          if (onTap != null) onTap!(position);
+        },
+      ),
+    ];
+
+    if (widget != null) {
+      children.add(widget!);
+    }
+
+    return Stack(children: children);
   }
 }

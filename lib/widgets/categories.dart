@@ -17,7 +17,7 @@ class Categories extends StatelessWidget {
       child: Column(
         children: [
           UserAvatarWidget(
-            radius: 110,
+            radius: 60,
             selectedImgPath: image,
             isViewOnly: true,
           ),

@@ -39,6 +39,45 @@ class PastProducts extends StatelessWidget {
     }
   }
 
+<<<<<<< Updated upstream
+=======
+  String _getCustomerName() {
+    // Try multiple possible data sources for customer name
+    final user = vendorOrder?.user;
+
+    // Check if we have firstName and lastName available
+    if ((user?.firstName?.isNotEmpty ?? false) &&
+        (user?.lastName?.isNotEmpty ?? false)) {
+      return "${user!.firstName} ${user.lastName}";
+    }
+
+    // Fallback to name field if available
+    if (user?.name?.isNotEmpty ?? false) {
+      return user!.name!;
+    }
+
+    // Fallback to phone number if name is not available
+    if (user?.phoneNumber?.isNotEmpty ?? false) {
+      return user!.phoneNumber!;
+    }
+
+    if (vendorOrder?.phoneNumber?.isNotEmpty ?? false) {
+      return vendorOrder!.phoneNumber!;
+    }
+
+    // Final fallback
+    return "Customer";
+  }
+
+  ImageProvider _getCustomerImage() {
+    final user = vendorOrder?.user;
+    if (user?.profilePicture?.isNotEmpty ?? false) {
+      return NetworkImage(user!.profilePicture!);
+    }
+    return AssetImage(AssetsPath.dummy);
+  }
+
+>>>>>>> Stashed changes
   ImageProvider _getProductImage(String? imageUrl) {
     if (imageUrl != null && imageUrl.isNotEmpty) {
       return NetworkImage(_resolveImageUrl(imageUrl));
@@ -103,12 +142,41 @@ class PastProducts extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 8.h),
+<<<<<<< Updated upstream
                 CustomText(
                   text: vendorOrder?.user?.name ?? "John Smith",
                   fontSize: 14.sp,
                   fontColor: AppColors.blackColor,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+=======
+                Row(
+                  children: [
+                    // Container(
+                    //   width: 30.w,
+                    //   height: 30.h,
+                    //   margin: EdgeInsets.only(right: 8.w),
+                    //   decoration: BoxDecoration(
+                    //     shape: BoxShape.circle,
+                    //     border: Border.all(
+                    //       color: AppColors.yellow2,
+                    //       width: 1.w,
+                    //     ),
+                    //     image: DecorationImage(
+                    //       image: _getCustomerImage(),
+                    //       fit: BoxFit.cover,
+                    //     ),
+                    //   ),
+                    // ),
+                    CustomText(
+                      text: _getCustomerName(),
+                      fontSize: 14.sp,
+                      fontColor: AppColors.blackColor,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+>>>>>>> Stashed changes
                 ),
                 CustomText(
                   text: "Order Date: ${_formatDate(vendorOrder?.createdAt)}",
