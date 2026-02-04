@@ -1,4 +1,6 @@
+import 'dart:developer' as dev;
 import 'package:bee_kind/controllers/base_view_controller.dart';
+import 'package:bee_kind/utils/app_dialogs.dart';
 import 'package:bee_kind/models/response_models/get_stores_response_model.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
@@ -164,10 +166,36 @@ Future<void> showVendorDetailsDialog(
                       CustomButton(
                         onTap: () async {
                           Navigator.pop(context); // Close dialog
-                          final storeId = store.sId;
-                          if (storeId != null) {
-                            await controller.fetchStoreDetail(storeId);
+                          // Resolve store id safely. If missing, try to find a matching store in controller.storesList
+                          String? storeId = store.sId;
+                          dev.log('View Store tapped for id: $storeId');
+
+                          if (storeId == null || storeId.isEmpty) {
+                            try {
+                              final match = controller.storesList.firstWhere((
+                                s,
+                              ) {
+                                final sameName =
+                                    (s.businessName ?? '').trim() ==
+                                    (store.businessName ?? '').trim();
+                                final sameAddress =
+                                    (s.vendorAddress?.address ?? '').trim() ==
+                                    (store.vendorAddress?.address ?? '').trim();
+                                return sameName && sameAddress;
+                              });
+                              storeId = match.sId;
+                              dev.log('Resolved store id from list: $storeId');
+                            } catch (e) {
+                              storeId = null;
+                            }
                           }
+
+                          if (storeId == null || storeId.isEmpty) {
+                            AppDialogs.showToast('Store id missing');
+                            return;
+                          }
+
+                          await controller.fetchStoreDetail(storeId);
                         },
                         text: "View Store",
                       ),

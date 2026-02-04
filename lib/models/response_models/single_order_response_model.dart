@@ -1,3 +1,19 @@
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
+int? _parseInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is String) return int.tryParse(value);
+  if (value is double) return value.toInt();
+  return null;
+}
+
 class SingleOrderResponseModel {
   bool? status;
   String? message;
@@ -43,8 +59,8 @@ class Order {
   String? userId;
   String? storeId;
   List<Items>? items;
-  int? totalAmount;
-  int? deliverCharges;
+  double? totalAmount;
+  double? deliverCharges;
   String? status;
   bool? isDeleted;
   dynamic additionalNotes;
@@ -91,8 +107,8 @@ class Order {
         ? (json['items'] as List).map((e) => Items.fromJson(e)).toList()
         : [];
 
-    totalAmount = _parseInt(json['totalAmount']);
-    deliverCharges = _parseInt(json['deliverCharges']);
+    totalAmount = _parseDouble(json['totalAmount']);
+    deliverCharges = _parseDouble(json['deliverCharges']);
 
     status = json['status']?.toString();
     isDeleted = json['isDeleted'] as bool?;
@@ -142,11 +158,7 @@ class Order {
     };
   }
 
-  int? _parseInt(dynamic value) {
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value);
-    return null;
-  }
+  // removed instance helper; using module-level helpers above
 }
 
 class UserAddress {
@@ -201,7 +213,7 @@ class Items {
   String? productId;
   String? productName;
   int? quantity;
-  int? price;
+  double? price;
   String? productImage;
   String? sId;
 
@@ -219,7 +231,7 @@ class Items {
     productName = json['productName']?.toString();
 
     quantity = _parseInt(json['quantity']);
-    price = _parseInt(json['price']);
+    price = _parseDouble(json['price']);
 
     productImage = json['productImage']?.toString();
     sId = json['_id']?.toString();

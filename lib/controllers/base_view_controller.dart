@@ -24,7 +24,6 @@ import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/utils/network_strings.dart';
 import 'package:bee_kind/services/network.dart';
 import 'package:bee_kind/widgets/dialogs/show_loading_dialog.dart';
-import 'package:bee_kind/widgets/dialogs/vendor_details_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -177,18 +176,28 @@ class BaseViewController extends GetxController {
   }
 
   void _onSearchTextChanged() {
-    final text = searchController.text.trim();
+    final text = searchController.text.trim().toLowerCase();
     if (text.length >= 2) {
-      // Filter store names that match the search text
+      // Filter stores that match the search text by name or address
       final matchingStores = storesList
-          .where((store) =>
-              store.businessName?.toLowerCase().contains(text.toLowerCase()) ??
-              false)
+          .where((store) {
+            final businessName = store.businessName?.toLowerCase() ?? '';
+            final address = store.vendorAddress?.address?.toLowerCase() ?? '';
+            final description = store.businessDescription?.toLowerCase() ?? '';
+
+            // Match against business name, address, or description
+            return businessName.contains(text) ||
+                address.contains(text) ||
+                description.contains(text);
+          })
           .map((store) => store.businessName ?? '')
           .where((name) => name.isNotEmpty)
+          .toSet() // Remove duplicates
           .toList();
 
-      searchSuggestions.value = matchingStores.take(5).toList(); // Limit to 5 suggestions
+      searchSuggestions.value = matchingStores
+          .take(5)
+          .toList(); // Limit to 5 suggestions
       showSuggestions.value = searchSuggestions.isNotEmpty;
     } else {
       searchSuggestions.clear();
@@ -252,23 +261,40 @@ class BaseViewController extends GetxController {
     dev.log(
       "latitude: ${currentLatLng.value?.latitude} longitude: ${currentLatLng.value?.longitude}",
     );
-    dev.log(
-      "QUERY PARAMETERS: ${{"search": searchController.text, "lat": currentLatLng.value?.latitude, "lng": currentLatLng.value?.longitude, "categoryId": selectedCategoryId.value, "radius": currentRadius.value, "minPrice": maxPriceController.text, "maxPrice": minPriceController.text}}",
-    );
+
+    // Build query parameters, filtering out empty values
+    final Map<String, dynamic> queryParams = {};
+
+    if (searchController.text.trim().isNotEmpty) {
+      queryParams["search"] = searchController.text.trim();
+    }
+    if (currentLatLng.value?.latitude != null) {
+      queryParams["lat"] = currentLatLng.value!.latitude;
+    }
+    if (currentLatLng.value?.longitude != null) {
+      queryParams["lng"] = currentLatLng.value!.longitude;
+    }
+    if (selectedCategoryId.value.isNotEmpty) {
+      queryParams["categoryId"] = selectedCategoryId.value;
+    }
+    if (currentRadius.value > 0) {
+      queryParams["radius"] = currentRadius.value;
+    }
+    if (minPriceController.text.trim().isNotEmpty) {
+      queryParams["minPrice"] = minPriceController.text.trim();
+    }
+    if (maxPriceController.text.trim().isNotEmpty) {
+      queryParams["maxPrice"] = maxPriceController.text.trim();
+    }
+
+    dev.log("QUERY PARAMETERS: $queryParams");
+
     try {
       showLoadingDialog(StaticData.navigatorKey.currentContext!);
 
       final response = await network.getRequest(
         endPoint: NetworkStrings.getStores,
-        queryParameters: {
-          "search": searchController.text,
-          "lat": currentLatLng.value?.latitude,
-          "lng": currentLatLng.value?.longitude,
-          "categoryId": selectedCategoryId.value,
-          "radius": currentRadius.value,
-          "minPrice": maxPriceController.text,
-          "maxPrice": minPriceController.text,
-        },
+        queryParameters: queryParams,
         isHeaderRequire: true,
         isToast: false,
       );
@@ -346,7 +372,9 @@ class BaseViewController extends GetxController {
       );
     } catch (e) {
       dev.log("Failed to load marker icon, using blue marker: $e");
-      storeIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+      storeIcon = BitmapDescriptor.defaultMarkerWithHue(
+        BitmapDescriptor.hueBlue,
+      );
     }
 
     dev.log("Processing ${storesList.length} stores for markers");
@@ -374,7 +402,7 @@ class BaseViewController extends GetxController {
       final lat = coords[1];
       final lng = coords[0];
 
-      if (lat == null || lng == null || lat == 0 || lng == 0) {
+      if (lat == 0 || lng == 0) {
         dev.log(
           "❌ Store ${store.businessName} has invalid coordinates: lat=$lat, lng=$lng",
         );
@@ -421,7 +449,7 @@ class BaseViewController extends GetxController {
   Rxn<StoreInformation> selectedStore = Rxn<StoreInformation>();
 
   void selectStore(StoreInformation store) {
-    dev.log("selectedStore: ${store.businessName}");
+    dev.log("selectedStore: ${store.businessName} (id: ${store.sId})");
     selectedStore.value = store;
     showWindow.value = true;
   }
@@ -722,6 +750,23 @@ class BaseViewController extends GetxController {
         String lastName = profile.value?.data?.lastName ?? "";
         String cellNo = profile.value?.data?.phoneNumber ?? "";
         String picture = profile.value?.data?.profilePicture ?? "";
+        // Normalize picture URL: if backend returns a relative path (e.g. "uploads/.." or "/uploads/.."),
+        // prefix it with the configured NETWORK_IMAGE_BASE_URL so widgets treating it as network image
+        // will load correctly.
+        String normalizedPicture = picture;
+        if (picture.isNotEmpty && !picture.startsWith('http')) {
+          final trimmed = picture.startsWith('/')
+              ? picture.substring(1)
+              : picture;
+          normalizedPicture = NetworkStrings.NETWORK_IMAGE_BASE_URL + trimmed;
+        }
+        // Add cache-busting query param so UI reflects updated image immediately
+        if (normalizedPicture.isNotEmpty) {
+          final ts = DateTime.now().millisecondsSinceEpoch;
+          normalizedPicture = normalizedPicture.contains('?')
+              ? '$normalizedPicture&v=$ts'
+              : '$normalizedPicture?v=$ts';
+        }
         String businessName = profile.value?.data?.businessName ?? "";
 
         await prefs.isProfileComplete(
@@ -738,10 +783,22 @@ class BaseViewController extends GetxController {
         prefs.setString("lastName", lastName);
         prefs.setString("businessName", businessName);
         prefs.setString("phone", cellNo);
-        prefs.setString("profileImage", picture);
+        prefs.setString("profileImage", normalizedPicture);
         prefs.setString("email", profile.value?.data?.email ?? "");
         prefs.setString("dob", profile.value?.data?.dateOfBirth ?? "");
         prefs.setString("gender", profile.value?.data?.gender ?? "");
+
+        // Save floor/apartment from first userAddress (if present) so UI reading prefs updates
+        if (profile.value?.data?.userAddress != null &&
+            profile.value!.data!.userAddress!.isNotEmpty) {
+          final firstAddr = profile.value!.data!.userAddress!.first;
+          final floor = firstAddr.floorNumber?.toString() ?? '';
+          final apt = firstAddr.apartmentNumber?.toString() ?? '';
+          prefs.setString('floorNumber', floor);
+          prefs.setString('apartmentNumber', apt);
+          dev.log('Saved floorNumber to prefs: $floor');
+          dev.log('Saved apartmentNumber to prefs: $apt');
+        }
 
         dev.log("First Name: ${prefs.getString("firstName")}");
         dev.log("Last Name: ${prefs.getString("lastName")}");
@@ -877,7 +934,18 @@ class BaseViewController extends GetxController {
 
       // NEW: always replace with backend updated image URL
       if (uploadedImageUrl != null) {
-        prefs.setString("profileImage", uploadedImageUrl);
+        String finalUrl = uploadedImageUrl.toString();
+        if (!finalUrl.startsWith('http')) {
+          finalUrl =
+              NetworkStrings.NETWORK_IMAGE_BASE_URL +
+              (finalUrl.startsWith('/') ? finalUrl.substring(1) : finalUrl);
+        }
+        // append cache-busting param
+        final ts = DateTime.now().millisecondsSinceEpoch;
+        finalUrl = finalUrl.contains('?')
+            ? '$finalUrl&v=$ts'
+            : '$finalUrl?v=$ts';
+        prefs.setString("profileImage", finalUrl);
       }
 
       // Reset selected image

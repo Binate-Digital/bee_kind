@@ -71,7 +71,7 @@ Future<void> successfulOrderDialog(BuildContext context) async {
                 padding: EdgeInsets.symmetric(horizontal: 25.w),
                 child: CustomText(
                   text:
-                      "Lorem ipsum dolor sit amet consectetur elit odio ac arcu mi felis",
+                      "Your order has been placed successfully! You can track your order from the orders section.",
                   fontSize: 16.sp,
                   maxLines: 2,
 

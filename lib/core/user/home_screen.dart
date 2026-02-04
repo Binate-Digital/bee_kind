@@ -1,7 +1,5 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-import 'dart:developer';
-
 import 'package:bee_kind/common/profile/address_screen.dart';
 import 'package:bee_kind/controllers/base_view_controller.dart';
 import 'package:bee_kind/controllers/store_controller.dart';
@@ -12,9 +10,7 @@ import 'package:bee_kind/widgets/address_bar.dart';
 import 'package:bee_kind/widgets/categories.dart';
 import 'package:bee_kind/widgets/custom_button.dart';
 import 'package:bee_kind/widgets/custom_drop_down.dart';
-import 'package:bee_kind/widgets/custom_google_maps.dart';
 import 'package:bee_kind/widgets/custom_keyboard_action_widget.dart';
-import 'package:bee_kind/widgets/custom_slider.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
 import 'package:bee_kind/widgets/custom_text_field.dart';
 import 'package:bee_kind/widgets/dialogs/vendor_details_dialog.dart';
@@ -119,9 +115,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     final controller = Get.find<BaseViewController>();
     final storeController = Get.find<StoreController>();
 
+    // ignore: unused_local_variable
     final searchFocusNode = FocusNode();
-    final maxFocusNode = FocusNode();
-    final minFocusNode = FocusNode();
 
     return Scaffold(
       body: Stack(
@@ -251,14 +246,21 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                               [],
                                           hintText: "Category",
                                           onChanged: (value) {
-                                            final category = controller
-                                                .categories
-                                                .value
-                                                ?.data
-                                                ?.firstWhere(
-                                                  (c) =>
-                                                      c.categoryName == value,
-                                                );
+                                            // Safely resolve selected category (avoid throwing)
+                                            var category;
+                                            try {
+                                              category = controller
+                                                  .categories
+                                                  .value
+                                                  ?.data
+                                                  ?.firstWhere(
+                                                    (c) =>
+                                                        c.categoryName == value,
+                                                  );
+                                            } catch (e) {
+                                              category = null;
+                                            }
+
                                             controller.updateSelectedCategory(
                                               category?.sId,
                                               category?.categoryName,

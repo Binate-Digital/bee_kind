@@ -40,7 +40,6 @@ class ProfileController extends GetxController {
 
   /// Dropdown / date / time fields
   RxnString selectedGender = RxnString(null);
-  RxnString selectedOffDay = RxnString(null);
   RxnString selectedAddressType = RxnString(null);
 
   List<String> genders = const ["Male", "Female"];
@@ -82,6 +81,10 @@ class ProfileController extends GetxController {
   /// Files
   Rxn<File> profileImage = Rxn(null);
   Rxn<File> businessLicense = Rxn(null);
+
+  /// Network image URLs (for displaying existing images during edit)
+  RxString existingProfileImageUrl = ''.obs;
+  RxString existingBusinessLicenseUrl = ''.obs;
 
   /// Controllers
   final firstNameController = TextEditingController();
@@ -138,9 +141,25 @@ class ProfileController extends GetxController {
       phoneController.text = profileData.phoneNumber?.toString() ?? '';
       emailController.text = profileData.email?.toString() ?? '';
 
+      // Load existing profile picture URL
+      if (profileData.profilePicture != null &&
+          profileData.profilePicture!.isNotEmpty) {
+        String pic = profileData.profilePicture.toString();
+        if (!pic.startsWith('http')) {
+          pic =
+              NetworkStrings.NETWORK_IMAGE_BASE_URL +
+              (pic.startsWith('/') ? pic.substring(1) : pic);
+        }
+        existingProfileImageUrl.value = pic;
+        log(
+          "Loaded existing profile picture URL: ${existingProfileImageUrl.value}",
+        );
+      }
+
       if (isVendor.value) {
         // Load vendor-specific fields
-        businessNameController.text = profileData.businessName?.toString() ?? '';
+        businessNameController.text =
+            profileData.businessName?.toString() ?? '';
         // businessDescription is not in ProfileData, so we can't load it
 
         // Parse and set open/close times
@@ -164,9 +183,12 @@ class ProfileController extends GetxController {
           }
         }
 
-        // Load off days - convert dynamic list to String list
+        // Load off days - convert dynamic list to String list and remove duplicates
         if (profileData.offDays != null) {
-          selectedOffDays.value = profileData.offDays!.map((day) => day.toString()).toList();
+          selectedOffDays.value = profileData.offDays!
+              .map((day) => day.toString())
+              .toSet()
+              .toList();
         } else {
           selectedOffDays.value = [];
         }
@@ -178,18 +200,42 @@ class ProfileController extends GetxController {
         if (profileData.addressName != null) {
           streetAddressController.text = profileData.addressName.toString();
           locationAddress.value = profileData.addressName?.toString() ?? '';
-
         }
 
         // Load location from vendorAddress coordinates if available, combined with addressName
-        if (profileData.vendorAddress != null && profileData.vendorAddress!.coordinates != null) {
+        if (profileData.vendorAddress != null &&
+            profileData.vendorAddress!.coordinates != null) {
           location = {
-            "address": profileData.addressName?.toString() ?? '',
+            "address":
+                profileData.vendorAddress!.address ??
+                profileData.addressName?.toString() ??
+                '',
             "coordinates": profileData.vendorAddress!.coordinates ?? [],
             "type": profileData.vendorAddress!.type?.toString() ?? 'Point',
           };
-          locationAddress.value = profileData.addressName?.toString() ?? '';
-        } else if (profileData.userAddress != null && profileData.userAddress!.isNotEmpty) {
+          locationAddress.value =
+              profileData.vendorAddress!.address ??
+              profileData.addressName?.toString() ??
+              '';
+
+          // Try to extract floor and apartment numbers from previous location data if available
+          // These might be stored in userAddress for vendors or in a different structure
+          if (profileData.userAddress != null &&
+              profileData.userAddress!.isNotEmpty) {
+            final firstAddress = profileData.userAddress!.first;
+            if (firstAddress.floorNumber != null) {
+              floorNumberController.text = firstAddress.floorNumber.toString();
+              location["floorNumber"] = firstAddress.floorNumber.toString();
+            }
+            if (firstAddress.apartmentNumber != null) {
+              apartmentNumberController.text = firstAddress.apartmentNumber
+                  .toString();
+              location["apartmentNumber"] = firstAddress.apartmentNumber
+                  .toString();
+            }
+          }
+        } else if (profileData.userAddress != null &&
+            profileData.userAddress!.isNotEmpty) {
           // Use first user address as fallback
           final firstAddress = profileData.userAddress!.first;
           location = {
@@ -198,23 +244,42 @@ class ProfileController extends GetxController {
             "type": firstAddress.type?.toString() ?? 'Point',
           };
           locationAddress.value = firstAddress.address?.toString() ?? '';
-        } else if (profileData.addressName != null) {
+
+          // Load floor and apartment numbers
+          if (firstAddress.floorNumber != null) {
+            floorNumberController.text = firstAddress.floorNumber.toString();
+            location["floorNumber"] = firstAddress.floorNumber.toString();
+          }
+          if (firstAddress.apartmentNumber != null) {
+            apartmentNumberController.text = firstAddress.apartmentNumber
+                .toString();
+            location["apartmentNumber"] = firstAddress.apartmentNumber
+                .toString();
+          }
+        } else if (profileData.vendorAddress?.address != null ||
+            profileData.addressName != null) {
           // Fallback to just address name if no coordinates available
-          location = {
-            "address": profileData.addressName.toString(),
-            "coordinates": [],
-            "type": 'Point',
-          };
-          locationAddress.value = profileData.addressName.toString();
+          final addr =
+              profileData.vendorAddress?.address ??
+              profileData.addressName.toString();
+          location = {"address": addr, "coordinates": [], "type": 'Point'};
+          locationAddress.value = addr;
         }
 
         // Load business license from documents if available
-        if (profileData.documents != null && profileData.documents!.isNotEmpty) {
-          // In a real implementation, you might want to download and display the license image
-          // For now, we'll just note that documents exist
-          log("Business documents exist: ${profileData.documents}");
+        if (profileData.documents != null &&
+            profileData.documents!.isNotEmpty) {
+          String doc = profileData.documents!.first.toString();
+          if (!doc.startsWith('http')) {
+            doc =
+                NetworkStrings.NETWORK_IMAGE_BASE_URL +
+                (doc.startsWith('/') ? doc.substring(1) : doc);
+          }
+          existingBusinessLicenseUrl.value = doc;
+          log(
+            "Loaded existing business license URL: ${existingBusinessLicenseUrl.value}",
+          );
         }
-
       } else {
         // Load user-specific fields
         firstNameController.text = profileData.firstName?.toString() ?? '';
@@ -225,21 +290,27 @@ class ProfileController extends GetxController {
 
         // Load date of birth
         if (profileData.dateOfBirth != null) {
-          selectedDate.value = DateTime.tryParse(profileData.dateOfBirth.toString());
+          selectedDate.value = DateTime.tryParse(
+            profileData.dateOfBirth.toString(),
+          );
         }
 
         // Load address type - not directly available in ProfileData, use addressName as fallback
         selectedAddressType.value = profileData.addressName?.toString();
 
         // Load apartment and floor numbers from userAddress if available
-        if (profileData.userAddress != null && profileData.userAddress!.isNotEmpty) {
+        if (profileData.userAddress != null &&
+            profileData.userAddress!.isNotEmpty) {
           final firstAddress = profileData.userAddress!.first;
-          apartmentNumberController.text = firstAddress.apartmentNumber?.toString() ?? '';
-          floorNumberController.text = firstAddress.floorNumber?.toString() ?? '';
+          apartmentNumberController.text =
+              firstAddress.apartmentNumber?.toString() ?? '';
+          floorNumberController.text =
+              firstAddress.floorNumber?.toString() ?? '';
         }
 
         // Load location from userAddress if available
-        if (profileData.userAddress != null && profileData.userAddress!.isNotEmpty) {
+        if (profileData.userAddress != null &&
+            profileData.userAddress!.isNotEmpty) {
           final firstAddress = profileData.userAddress!.first;
           location = {
             "address": firstAddress.address?.toString() ?? '',
@@ -251,7 +322,6 @@ class ProfileController extends GetxController {
       }
 
       log("Profile data loaded successfully for edit mode");
-
     } catch (e) {
       log("Error loading profile data for edit: $e");
       // Don't show error to user, just log it
@@ -399,45 +469,66 @@ class ProfileController extends GetxController {
           profilePicture: profileImage.value,
         );
       } else {
-      // --------------------- VENDOR MODEL ---------------------
-      // Ensure phone number is properly formatted (remove any non-digit characters)
-      final cleanedPhoneNumber = phoneController.text.trim().replaceAll(RegExp(r'[^0-9]'), '');
+        // --------------------- VENDOR MODEL ---------------------
+        // Ensure phone number is properly formatted (remove any non-digit characters)
+        final cleanedPhoneNumber = phoneController.text.trim().replaceAll(
+          RegExp(r'[^0-9]'),
+          '',
+        );
 
-      model = VendorProfileDataModel(
-        businessName: businessNameController.text.trim(),
-        businessDescription: businessDescriptionController.text.trim(),
+        // Ensure location object includes floor and apartment numbers for vendor
+        location["floorNumber"] = floorNumberController.text.trim();
+        location["apartmentNumber"] = apartmentNumberController.text.trim();
 
-        openTime: openTime.value != null
-            ? "${openTime.value!.hour.toString().padLeft(2, '0')}:${openTime.value!.minute.toString().padLeft(2, '0')}"
-            : null,
+        model = VendorProfileDataModel(
+          businessName: businessNameController.text.trim(),
+          businessDescription: businessDescriptionController.text.trim(),
 
-        closeTime: closeTime.value != null
-            ? "${closeTime.value!.hour.toString().padLeft(2, '0')}:${closeTime.value!.minute.toString().padLeft(2, '0')}"
-            : null,
+          openTime: openTime.value != null
+              ? "${openTime.value!.hour.toString().padLeft(2, '0')}:${openTime.value!.minute.toString().padLeft(2, '0')}"
+              : null,
 
-        phoneNumber: cleanedPhoneNumber.isNotEmpty ? cleanedPhoneNumber : phoneController.text.trim(),
+          closeTime: closeTime.value != null
+              ? "${closeTime.value!.hour.toString().padLeft(2, '0')}:${closeTime.value!.minute.toString().padLeft(2, '0')}"
+              : null,
 
-        offDays: selectedOffDays,
-        deliveryRadius: currentRadius.value,
+          phoneNumber: cleanedPhoneNumber.isNotEmpty
+              ? cleanedPhoneNumber
+              : phoneController.text.trim(),
 
-        businessLicense: businessLicense.value,
-        profilePicture: profileImage.value,
+          offDays: selectedOffDays,
+          deliveryRadius: currentRadius.value,
 
-        address: streetAddressController.text.trim(),
-        location: location, // map
-      );
+          businessLicense: businessLicense.value,
+          profilePicture: profileImage.value,
 
-      // Debug log to check phone number
-      log("Phone number being sent: ${model.phoneNumber}");
-      log("Phone number controller text: ${phoneController.text}");
-      log("Cleaned phone number: $cleanedPhoneNumber");
+          address: streetAddressController.text.trim(),
+          location: location, // map
+          // Add floor and apartment numbers as separate fields
+          floorNumber: floorNumberController.text.trim(),
+          apartmentNumber: apartmentNumberController.text.trim(),
+        );
+
+        // Debug log to check phone number
+        log("Phone number being sent: ${model.phoneNumber}");
+        log("Phone number controller text: ${phoneController.text}");
+        log("Cleaned phone number: $cleanedPhoneNumber");
       }
 
       // ---------------------------------------------------------
       // CONVERT BASE MAP
       // ---------------------------------------------------------
       final Map<String, dynamic> baseMap = model.toFormDataMap()
-        ..removeWhere((key, value) => value == null);
+        ..removeWhere(
+          (key, value) => value == null || (value is String && value.isEmpty),
+        );
+
+      // Debug: ensure floor/apartment/location are present before sending
+      log('Submitting vendor floorNumber: ${floorNumberController.text}');
+      log(
+        'Submitting vendor apartmentNumber: ${apartmentNumberController.text}',
+      );
+      log('Submitting vendor location map: $location');
 
       // ---------------------------------------------------------
       // BUILD FORMDATA
@@ -446,18 +537,16 @@ class ProfileController extends GetxController {
 
       // ---------------- offDays (Vendor only) ----------------
       if (isVendor.value && selectedOffDays.isNotEmpty) {
-        // Only add offDays if they exist and this is not an edit (to avoid duplication)
-        // For edits, the offDays are already in the model
-        if (!isEdit) {
-          for (final day in selectedOffDays) {
-            formData.fields.add(MapEntry("offDays", day));
-          }
+        // Add offDays for both create and edit - ensure they are sent correctly
+        for (final day in selectedOffDays) {
+          formData.fields.add(MapEntry("offDays", day));
         }
       }
 
       // log("===== FINAL FORMDATA ===== ${jsonEncode(formData)}");
       log("===== FINAL FORMDATA FIELDS ===== ${formData.fields}");
       log("===== FINAL FORMDATA FILES ===== ${formData.files}");
+      log("===== isEdit: $isEdit =====");
 
       // ---------------------------------------------------------
       // API CALL - Use POST for create, PATCH for update
@@ -477,7 +566,11 @@ class ProfileController extends GetxController {
 
       if (response == null) {
         isLoading.value = false;
-        AppDialogs.showToast(isEdit ? "Unable to update profile. Please try again." : "Unable to complete profile. Please try again.");
+        AppDialogs.showToast(
+          isEdit
+              ? "Unable to update profile. Please try again."
+              : "Unable to complete profile. Please try again.",
+        );
         return;
       }
 
@@ -487,20 +580,36 @@ class ProfileController extends GetxController {
       if (data["status"] == true) {
         isLoading.value = false;
         AppDialogs.showToast(
-          data["message"] ?? (isEdit ? "Profile updated successfully" : "Profile submitted successfully"),
+          data["message"] ??
+              (isEdit
+                  ? "Profile updated successfully"
+                  : "Profile submitted successfully"),
         );
 
-        if (isEdit) {
-          // For updates, refresh the profile data
-          try {
-            final baseController = Get.find<BaseViewController>();
-            await baseController.getProfile();
-            log("Profile refreshed successfully after update");
-          } catch (e) {
-            log("Failed to refresh profile after update: $e");
-            // Don't show error to user, just log it
-          }
-        } else {
+        // For both create and edit, refresh the profile data to get updated info
+        try {
+          final baseController = Get.find<BaseViewController>();
+          // Persist submitted floor/apartment into prefs immediately so UI updates
+          await prefs.setString(
+            'floorNumber',
+            floorNumberController.text.trim(),
+          );
+          await prefs.setString(
+            'apartmentNumber',
+            apartmentNumberController.text.trim(),
+          );
+          await baseController.getProfile();
+          log(
+            "Profile refreshed successfully after ${isEdit ? 'update' : 'creation'}",
+          );
+        } catch (e) {
+          log(
+            "Failed to refresh profile after ${isEdit ? 'update' : 'creation'}: $e",
+          );
+          // Don't show error to user, just log it
+        }
+
+        if (!isEdit) {
           await prefs.isProfileComplete(
             data["data"]["user"]["isProfileCompleted"],
           );
@@ -514,7 +623,10 @@ class ProfileController extends GetxController {
         }
       } else {
         isLoading.value = false;
-        AppDialogs.showToast(data["message"] ?? (isEdit ? "Profile update failed" : "Profile submit failed"));
+        AppDialogs.showToast(
+          data["message"] ??
+              (isEdit ? "Profile update failed" : "Profile submit failed"),
+        );
       }
     } catch (e) {
       isLoading.value = false;
@@ -795,6 +907,14 @@ class ProfileController extends GetxController {
         ? BorderRadius.circular(100)
         : BorderRadius.circular(20);
 
+    // Get the network image URL based on which image we're displaying
+    final networkImageUrl = isProfile
+        ? existingProfileImageUrl.value
+        : existingBusinessLicenseUrl.value;
+
+    // Determine if we should show an image (either File or network URL)
+    final hasImage = image != null || networkImageUrl.isNotEmpty;
+
     return Container(
       width: isCircular ? 150 : double.infinity,
       height: isCircular ? 150 : 180,
@@ -807,8 +927,10 @@ class ProfileController extends GetxController {
       ),
       child: ClipRRect(
         borderRadius: isCircular ? BorderRadius.circular(100) : borderRadius,
-        child: image != null
-            ? Image.file(image, fit: BoxFit.cover)
+        child: hasImage
+            ? (image != null
+                  ? Image.file(image, fit: BoxFit.cover)
+                  : Image.network(networkImageUrl, fit: BoxFit.cover))
             : Center(
                 child: isProfile
                     ? Icon(

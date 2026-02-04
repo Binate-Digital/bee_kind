@@ -142,17 +142,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
       // Build FormData
       final formData = dio.FormData();
 
-<<<<<<< Updated upstream
-=======
       final String discountText = discountPriceController.text.trim();
 
       final bool isDiscountAvailable =
           discountText.isNotEmpty &&
-              double.tryParse(discountText) != null &&
-              double.tryParse(discountText)! > 0;
+          double.tryParse(discountText) != null &&
+          double.tryParse(discountText)! > 0;
 
-
->>>>>>> Stashed changes
       // Add text fields
       formData.fields.addAll([
         MapEntry('productName', productNameController.text.trim()),
@@ -164,10 +160,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
         MapEntry('effects', effectsController.text.trim()),
         MapEntry('ingredients', ingredientsController.text.trim()),
         MapEntry('description', descriptionController.text.trim()),
-<<<<<<< Updated upstream
-=======
         MapEntry('isDiscountAvailable', isDiscountAvailable.toString()),
->>>>>>> Stashed changes
       ]);
 
       // Add images
@@ -221,7 +214,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
       if (response.statusCode == 200 && data["status"] == true) {
         AppDialogs.showToast(data["message"] ?? "Product added successfully");
 
-
         setState(() => isLoading = false);
 
         // Clear form
@@ -239,7 +231,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
         // Pop back
         Navigator.pop(context);
-          Get.find<StoreController>().getVendorProducts();
+        Get.find<StoreController>().getVendorProducts();
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to add product");
         setState(() => isLoading = false);

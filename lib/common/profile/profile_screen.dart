@@ -73,17 +73,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             Padding(
               padding: EdgeInsets.symmetric(vertical: 10.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(AssetsPath.phone, width: 25.w),
-                  SizedBox(width: 10.w),
-                  CustomText(
-                    text: prefs.getString("phone") ?? "N/A",
-                    fontSize: 18.sp,
-                  ),
-                ],
-              ),
+              child: Obx(() {
+                final data = baseController.profile.value?.data;
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(AssetsPath.phone, width: 25.w),
+                    SizedBox(width: 10.w),
+                    CustomText(
+                      text: data?.phoneNumber ?? "N/A",
+                      fontSize: 18.sp,
+                    ),
+                  ],
+                );
+              }),
             ),
             if (isVendor) ...[
               SizedBox(height: 20.h),
@@ -138,9 +141,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       false;
                 }
               },
-              isNotification:
-                  true,
-              initialToggleValue: baseController.profile.value?.data?.isNotificationEnabled ??
+              isNotification: true,
+              initialToggleValue:
+                  baseController.profile.value?.data?.isNotificationEnabled ??
                   false,
               image: AssetsPath.notifications,
               text: "Notifications",

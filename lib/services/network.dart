@@ -105,11 +105,7 @@ class Network {
         try {
           log('Network GET response -> data: ${temp.data}');
         } catch (_) {}
-<<<<<<< Updated upstream
-        if (temp.data['message'] != null) {
-=======
         if (temp.data is Map && temp.data['message'] != null) {
->>>>>>> Stashed changes
           final msg = temp.data['message'].toString();
           temp.data['message'] = msg;
         }

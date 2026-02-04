@@ -179,7 +179,11 @@ class AuthController extends GetxController {
               AppDialogs.showToast(
                 loginResponse.message ?? "Something Went Wrong",
               );
-              Get.to(() => OnboardingWebView(url: response.data['data']['onboardingUrl']));
+              Get.to(
+                () => OnboardingWebView(
+                  url: response.data['data']['onboardingUrl'],
+                ),
+              );
             } else {
               Get.to(() => CreateProfileScreen());
             }
@@ -462,7 +466,8 @@ class AuthController extends GetxController {
               log("Social Login - User ID: ${prefs.getUserId()}");
 
               if (!prefs.checkProfile()) {
-                Get.to(() => CreateProfileScreen());
+                // Use offAll to prevent back navigation to undefined state
+                Get.offAll(() => CreateProfileScreen());
               } else {
                 Get.offAll(() => BaseView());
               }

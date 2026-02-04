@@ -367,11 +367,30 @@ class StoreController extends GetxController {
         ).compareTo(DateTime.parse(a.createdAt!));
       });
 
-      ordersList.assignAll(mergedList);
+      // Deduplicate orders by their id to avoid duplicates from multiple
+      // status queries returning the same order.
+      final Map<String, order.OrderData> uniqueMap = {};
+      for (final o in mergedList) {
+        final id = o.sId ?? "";
+        if (id.isNotEmpty) uniqueMap[id] = o;
+      }
+
+      final deduped = uniqueMap.values.toList();
+
+      // Ensure deduped list is sorted as well
+      deduped.sort((a, b) {
+        if (a.createdAt == null) return 1;
+        if (b.createdAt == null) return -1;
+        return DateTime.parse(
+          b.createdAt!,
+        ).compareTo(DateTime.parse(a.createdAt!));
+      });
+
+      completedOrdersList.assignAll(deduped);
       log("Fetched ${mergedList.length} completed/cancelled orders");
     } catch (e) {
       isFetchingOrders.value = false;
-      ordersList.clear();
+      completedOrdersList.clear();
       log("fetchCompletedAndCancelledOrders Exception: $e");
       AppDialogs.showToast("Something went wrong fetching orders");
     }
@@ -490,8 +509,9 @@ class StoreController extends GetxController {
       if (response.data["status"] == true) {
         AppDialogs.showToast("Order placed successfully!");
 
-        // Clear cart
+        // Clear cart and notes
         orderItems!.clear();
+        notesController.clear();
         saveCartToPrefs(prefs.getUserId().toString());
 
         // Navigate success screen
@@ -617,6 +637,11 @@ class StoreController extends GetxController {
 
     // Ensure cart exists
     orderItems ??= <OrderItem>[].obs;
+
+    // If cart is empty (this is a new order), clear the additional notes from previous orders
+    if (orderItems!.isEmpty) {
+      notesController.clear();
+    }
 
     final String? id = item.productId;
     final int qty = item.quantity ?? 0;
@@ -816,7 +841,6 @@ class StoreController extends GetxController {
       }
 
       final data = response.data;
-<<<<<<< Updated upstream
       // API can return different shapes for vendor reviews:
       // - { status: true, message: '...', data: { averageRating, totalReviews, reviews: [...] } }
       // - { status: true, message: 'No reviews found for this product', data: [] }
@@ -838,62 +862,6 @@ class StoreController extends GetxController {
           productReviews.value = ProductReviewsResponseModel.fromJson(data);
           final details = productReviews.value?.data;
           averageRating.value = details?.averageRating ?? 0;
-=======
-      log('Vendor reviews API response: $data');
-
-      try {
-        // For vendor reviews, API returns array directly in "data" field
-        final payload = data["data"];
-
-        if (payload is List) {
-          log('Reviews payload is List with ${payload.length} items');
-          if (payload.isEmpty) {
-            // No reviews found
-            productReviews.value = ProductReviewsResponseModel(
-              status: data["status"],
-              message: data["message"],
-              data: null,
-            );
-            averageRating.value = 0;
-            totalReviews.value = 0;
-            reviewsList?.value = [];
-          } else {
-            // Create reviews model manually since we have array data
-            final reviews = payload
-                .map((review) => Reviews.fromJson(review))
-                .toList();
-            reviewsList?.value = reviews;
-
-            // Calculate average rating and total
-            if (reviews.isNotEmpty) {
-              final totalRating = reviews.fold<int>(
-                0,
-                (sum, review) => sum + (review.rating ?? 0),
-              );
-              averageRating.value = totalRating / reviews.length;
-              totalReviews.value = reviews.length;
-            } else {
-              averageRating.value = 0;
-              totalReviews.value = 0;
-            }
-
-            // Create the response model
-            productReviews.value = ProductReviewsResponseModel(
-              status: data["status"],
-              message: data["message"],
-              data: ProductReviews(
-                averageRating: averageRating.value,
-                totalReviews: totalReviews.value,
-                reviews: reviews,
-              ),
-            );
-          }
-        } else if (payload is Map) {
-          // Handle object shape if ever returned
-          productReviews.value = ProductReviewsResponseModel.fromJson(data);
-          final details = productReviews.value?.data;
-          averageRating.value = (details?.averageRating ?? 0).toDouble();
->>>>>>> Stashed changes
           totalReviews.value = details?.totalReviews ?? 0;
           reviewsList?.value = details?.reviews ?? [];
         } else {
@@ -903,11 +871,7 @@ class StoreController extends GetxController {
             message: data["message"],
             data: null,
           );
-<<<<<<< Updated upstream
-          averageRating.value = 0;
-=======
           averageRating.value = 0.0;
->>>>>>> Stashed changes
           totalReviews.value = 0;
           reviewsList?.value = [];
         }
@@ -922,8 +886,6 @@ class StoreController extends GetxController {
     }
   }
 
-<<<<<<< Updated upstream
-=======
   /// Add a review for a product (user side)
   Future<bool> addReview({
     required String orderId,
@@ -966,7 +928,6 @@ class StoreController extends GetxController {
     }
   }
 
->>>>>>> Stashed changes
   Future<void> addReplyToReview(
     String? reviewId,
     String reply,
@@ -1103,8 +1064,19 @@ class StoreController extends GetxController {
         storeDetail.value = StoreDetailResponseModel.fromJson(data);
         storeData.value = storeDetail.value?.data;
 
-        allProducts = storeData.value?.products ?? [];
-        allPopularProducts = storeData.value?.popularProducts ?? [];
+        // Filter out products where isAvailable is false (vendor marked as not available)
+        allProducts = (storeData.value?.products ?? [])
+            .where((p) => p.isAvailable == true)
+            .toList();
+        allPopularProducts = (storeData.value?.popularProducts ?? [])
+            .where((p) => p.isAvailable == true)
+            .toList();
+
+        // Also update the storeData to reflect filtered products
+        if (storeData.value != null) {
+          storeData.value!.products = allProducts;
+          storeData.value!.popularProducts = allPopularProducts;
+        }
 
         Navigator.push(
           context,
@@ -1736,8 +1708,6 @@ class StoreController extends GetxController {
     }
   }
 
-<<<<<<< Updated upstream
-=======
   /// Fetch all active orders for the "Current" tab: accepted, ready-for-pickup, dispatched
   Future<void> fetchCurrentTabOrders(BuildContext context) async {
     try {
@@ -1799,15 +1769,11 @@ class StoreController extends GetxController {
     }
   }
 
->>>>>>> Stashed changes
   /// Fetch a single vendor order by ID
   Future<void> fetchVendorOrder(String orderId, BuildContext context) async {
     try {
       showLoadingDialog(context);
-<<<<<<< Updated upstream
-=======
       log('Fetching order details for ID: $orderId');
->>>>>>> Stashed changes
 
       final response = await network.getRequest(
         endPoint: "${NetworkStrings.vendorGetOrder}/$orderId",
@@ -1826,12 +1792,6 @@ class StoreController extends GetxController {
 
       if (data["status"] == true && data["data"] != null) {
         try {
-<<<<<<< Updated upstream
-          selectedVendorOrder.value = vendorOrder.VendorOrder.fromJson(
-            data["data"],
-          );
-          log('Vendor order fetched: ${selectedVendorOrder.value?.orderId}');
-=======
           Map<String, dynamic> responseData = data["data"];
 
           log('Data Keys: ${responseData.keys.toList()}');
@@ -1865,7 +1825,6 @@ class StoreController extends GetxController {
           log(
             'Refined Parsed User ProfilePicture: ${selectedVendorOrder.value?.user?.profilePicture}',
           );
->>>>>>> Stashed changes
         } catch (e) {
           log('Failed to parse vendor order: $e');
           AppDialogs.showToast(data["message"] ?? "Failed to load order");
@@ -1874,22 +1833,14 @@ class StoreController extends GetxController {
         AppDialogs.showToast(data["message"] ?? "Order not found");
       }
     } catch (e) {
-<<<<<<< Updated upstream
-      Navigator.pop(context);
-=======
       if (context.mounted) Navigator.pop(context);
->>>>>>> Stashed changes
       log("fetchVendorOrder Exception: $e");
       AppDialogs.showToast("Error fetching order details");
     }
   }
 
   /// Change vendor order status with optional driver details
-<<<<<<< Updated upstream
-  Future<void> changeVendorOrderStatus(
-=======
   Future<bool> changeVendorOrderStatus(
->>>>>>> Stashed changes
     String orderId,
     String newStatus,
     BuildContext context, {
@@ -1907,6 +1858,9 @@ class StoreController extends GetxController {
         body["driverDetail"] = driverDetail;
       }
 
+      // Debug: log payload being sent so we can verify driverDetail keys/values
+      log('changeVendorOrderStatus - request body: $body');
+
       final response = await network.patchRequest(
         endPoint: NetworkStrings.vendorChangeOrderStatus,
         data: body,
@@ -1914,47 +1868,33 @@ class StoreController extends GetxController {
         isToast: false,
       );
 
+      // Debug: log raw response for troubleshooting missing driverDetail
+      log('changeVendorOrderStatus - response: ${response?.data}');
+
       Navigator.pop(context);
 
       if (response == null) {
         AppDialogs.showToast("Unable to update order status");
-<<<<<<< Updated upstream
-        return;
-=======
         return false;
->>>>>>> Stashed changes
       }
 
       final data = response.data;
 
       if (data["status"] == true) {
         AppDialogs.showToast("Order status updated successfully");
-<<<<<<< Updated upstream
-        // Refresh orders list
-        await fetchVendorOrders(context: context);
-        // also refresh pending orders
-        await fetchPendingOrders(context: context);
-=======
         // Do not refresh lists here. Let the UI handle it to ensure the correct tab is refreshed.
         return true;
->>>>>>> Stashed changes
       } else {
         AppDialogs.showToast(
           data["message"] ?? "Failed to update order status",
         );
-<<<<<<< Updated upstream
-=======
         return false;
->>>>>>> Stashed changes
       }
     } catch (e) {
       Navigator.pop(context);
       log("changeVendorOrderStatus Exception: $e");
       AppDialogs.showToast("Error updating order status");
-<<<<<<< Updated upstream
-=======
       return false;
->>>>>>> Stashed changes
     }
   }
 

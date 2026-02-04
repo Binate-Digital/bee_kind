@@ -1,8 +1,8 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-// import 'dart:convert';
 
 class VendorProfileDataModel {
   String? businessName;
@@ -23,6 +23,10 @@ class VendorProfileDataModel {
   String? address;
   Map<String, dynamic>? location;
 
+  // Add floor and apartment number fields for vendors
+  String? floorNumber;
+  String? apartmentNumber;
+
   VendorProfileDataModel({
     this.businessName,
     this.businessDescription,
@@ -35,10 +39,24 @@ class VendorProfileDataModel {
     this.profilePicture,
     this.address,
     this.location,
+    this.floorNumber,
+    this.apartmentNumber,
   });
 
   Map<String, dynamic> toFormDataMap() {
     log("LOCATION IN VENDOR PROFILE MODEL: $location");
+
+    // Convert location Map to JSON string for FormData
+    String? locationJson;
+    if (location != null) {
+      try {
+        locationJson = jsonEncode(location);
+        log("LOCATION JSON STRING: $locationJson");
+      } catch (e) {
+        log("Error encoding location to JSON: $e");
+      }
+    }
+
     return {
       "businessName": businessName,
       "businessDescription": businessDescription,
@@ -48,11 +66,17 @@ class VendorProfileDataModel {
 
       "offDays": offDays,
 
-      "radius": deliveryRadius,
+      "deliveryRadius": deliveryRadius,
 
       "address": address,
 
-      "location": location,
+      // Send floor and apartment numbers as separate fields for proper backend storage
+      "floorNumber": floorNumber,
+      "apartmentNumber": apartmentNumber,
+
+      // Send location as JSON string for FormData compatibility
+      if (locationJson != null) "location": locationJson,
+
       if (businessLicense != null)
         "businessLicense": MultipartFile.fromFile(
           businessLicense!.path,

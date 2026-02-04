@@ -5,7 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NotificationsWidget extends StatelessWidget {
-  const NotificationsWidget({super.key});
+  const NotificationsWidget({super.key, this.title, this.message, this.time});
+
+  final String? title;
+  final String? message;
+  final String? time;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +50,7 @@ class NotificationsWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CustomText(
-                            text: "Lorem Ipsum",
+                            text: title ?? "Notification",
                             fontSize: 18.sp,
                             fontFamily: "Raleway",
                             weight: FontWeight.bold,
@@ -55,7 +59,7 @@ class NotificationsWidget extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: CustomText(
-                              text: "Lorem ipsum dolor sit amet consectetur",
+                              text: message ?? "No message",
                               fontSize: 16.sp,
                               fontFamily: "Raleway",
                               fontColor: AppColors.blackColor,

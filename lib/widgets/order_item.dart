@@ -30,7 +30,7 @@ class OrderItem extends StatelessWidget {
 
   final String? productName;
   final int? quantity;
-  final int? price;
+  final double? price;
   final String? status;
   final String? imageUrl;
 
@@ -131,7 +131,9 @@ class OrderItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               CustomText(
-                text: price != null ? "\$$price" : "\$0.00",
+                text: price != null
+                    ? "\$${price!.toStringAsFixed(2)}"
+                    : "\$0.00",
                 fontSize: 20.sp,
                 fontColor: AppColors.yellow2,
                 weight: FontWeight.bold,

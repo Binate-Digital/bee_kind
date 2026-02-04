@@ -26,7 +26,9 @@ class CreateProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProfileController controller = Get.put(ProfileController());
-    final BaseViewController controller1 = Get.put(BaseViewController());
+    Get.put(
+      BaseViewController(),
+    ); // Initialize BaseViewController for dependencies
 
     // Load existing profile data if in edit mode
     if (isEdit) {
@@ -38,7 +40,7 @@ class CreateProfileScreen extends StatelessWidget {
     return Obx(
       () => AppBarBaseView(
         title: isEdit ? "Edit Profile" : "Create Profile",
-        isLeading: true,
+        isLeading: isEdit,
         // button: Container(
         //   color: AppColors.whiteColor,
         //   height: 100.h,
@@ -313,26 +315,19 @@ class CreateProfileScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: CustomText(
-                                  text: isEdit == true
-                                      ? Get.find<BaseViewController>()
-                                                        .address !=
-                                                    null &&
-                                                Get.find<BaseViewController>()
-                                                        .address !=
-                                                    ""
-                                            ? Get.find<BaseViewController>()
-                                                  .address
-                                            : "Location"
-                                      : controller
+                                child: Obx(
+                                  () => CustomText(
+                                    text:
+                                        controller
                                             .locationAddress
                                             .value
                                             .isNotEmpty
-                                      ? controller.locationAddress.value
-                                      : "Location",
-                                  textAlign: TextAlign.start,
-                                  fontColor: AppColors.yellow2,
-                                  fontSize: 18.sp,
+                                        ? controller.locationAddress.value
+                                        : "Location",
+                                    textAlign: TextAlign.start,
+                                    fontColor: AppColors.yellow2,
+                                    fontSize: 18.sp,
+                                  ),
                                 ),
                               ),
                               Icon(Icons.location_on, color: AppColors.yellow2),
@@ -494,8 +489,13 @@ class CreateProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CustomDropdown(
-                          items: controller.days,
-                          initialValue: controller.selectedOffDay.value,
+                          items: controller.days
+                              .where(
+                                (day) =>
+                                    !controller.selectedOffDays.contains(day),
+                              )
+                              .toList(),
+                          initialValue: null,
                           onChanged: (value) {
                             if (value != null &&
                                 !controller.selectedOffDays.contains(value)) {

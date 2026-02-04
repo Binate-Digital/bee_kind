@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:bee_kind/models/response_models/store_detail_response_model.dart';
 
 class LiveTracking extends StatefulWidget {
   const LiveTracking({super.key, required this.orderId});
@@ -246,18 +247,46 @@ class _LiveTrackingState extends State<LiveTracking> {
     }
   }
 
+  /// Fetch store detail and return phone number if available
+  Future<String?> _fetchStorePhone(String? storeId) async {
+    if (storeId == null || storeId.isEmpty) return null;
+
+    try {
+      final response = await network.getRequest(
+        endPoint: "${NetworkStrings.getStoreDetail}/$storeId",
+        isHeaderRequire: true,
+        isToast: false,
+      );
+
+      if (response == null) return null;
+
+      final model = StoreDetailResponseModel.fromJson(response.data);
+      final phone = model.data?.store?.phoneNumber?.toString();
+      return (phone == null || phone.isEmpty) ? null : phone;
+    } catch (e) {
+      log("fetchStorePhone Exception: $e");
+      return null;
+    }
+  }
+
   /// ---------------------------------------------------
   /// Map order status → step index (1–3)
+  /// Step 1: Ready for pick up (accepted, pending)
+  /// Step 2: Dispatched (ready-for-pickup, dispatched, shipped, in transit)
+  /// Step 3: Delivered (completed, delivered)
   /// ---------------------------------------------------
   int _stepFromStatus(String? status) {
-    final s = (status ?? "").toLowerCase();
+    final s = (status ?? "").toLowerCase().replaceAll('_', '-');
 
     if (s.contains("delivered") || s.contains("completed")) {
       return 3;
     } else if (s.contains("shipped") ||
-        s.contains("out_for_delivery") ||
-        s.contains("in_delivery") ||
-        s.contains("in transit")) {
+        s.contains("out-for-delivery") ||
+        s.contains("in-delivery") ||
+        s.contains("in-transit") ||
+        s.contains("in transit") ||
+        s.contains("dispatched") ||
+        s.contains("ready-for-pickup")) {
       return 2;
     }
     // pending / accepted / preparing / default
@@ -357,66 +386,84 @@ class _LiveTrackingState extends State<LiveTracking> {
 
               SizedBox(height: 20.h),
 
-              /// CANCEL ORDER
-              GestureDetector(
-                onTap: () => cancelOrderDialog(context, widget.orderId),
-                child: CustomText(
-                  text: "Cancel Order",
-                  underlined: true,
-                  fontSize: 23.sp,
-                  weight: FontWeight.bold,
+              /// CANCEL ORDER (only show if not rejected or cancelled)
+              if (order.status?.toLowerCase() != 'rejected' &&
+                  order.status?.toLowerCase() != 'cancelled' &&
+                  order.status?.toLowerCase() != 'completed' &&
+                  order.status?.toLowerCase() != 'dispatched')
+                GestureDetector(
+                  onTap: () => cancelOrderDialog(context, widget.orderId),
+                  child: CustomText(
+                    text: "Cancel Order",
+                    underlined: true,
+                    fontSize: 23.sp,
+                    weight: FontWeight.bold,
+                  ),
                 ),
-              ),
 
               SizedBox(height: 30.h),
 
               /// ORDER SUMMARY / CONTACT
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Left
-                  Container(
-                    width: 250.w,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomText(
-                          text:
-                              "Driver's Name: ${_order?.driverDetail?.driverName ?? 'N/A'}",
-                          fontSize: 18.sp,
-                        ),
-                        SizedBox(height: 10.h),
-                        CustomText(
-                          text:
-                              "Car: ${_order?.driverDetail?.make != null && _order?.driverDetail?.color != null ? '${_order?.driverDetail?.color} ${_order?.driverDetail?.make}' : 'Not available'}",
-                          fontSize: 16.sp,
-                        ),
-                        SizedBox(height: 10.h),
-                        CustomText(
-                          text:
-                              "Phone: ${_order?.driverDetail?.phoneNumber ?? 'Not available!'}",
-                          fontSize: 16.sp,
-                          fontColor: AppColors.yellow2,
-                          weight: FontWeight.bold,
-                        ),
-                      ],
+              if (currentStep >= 2)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Left
+                    Container(
+                      width: 250.w,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomText(
+                            text:
+                                "Driver's Name: ${_order?.driverDetail?.driverName ?? 'N/A'}",
+                            fontSize: 18.sp,
+                          ),
+                          SizedBox(height: 10.h),
+                          CustomText(
+                            text:
+                                "Car: ${_order?.driverDetail?.make != null && _order?.driverDetail?.color != null ? '${_order?.driverDetail?.color} ${_order?.driverDetail?.make}' : 'Not available'}",
+                            fontSize: 16.sp,
+                          ),
+                          SizedBox(height: 10.h),
+                          CustomText(
+                            text:
+                                "Phone: ${_order?.driverDetail?.phoneNumber ?? 'Not available!'}",
+                            fontSize: 16.sp,
+                            fontColor: AppColors.yellow2,
+                            weight: FontWeight.bold,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
 
-                  // Right
-                  CustomButton(
-                    width: 100.w,
-                    text: "Call",
-                    onTap: () {
-                      if (_order?.driverDetail?.phoneNumber != null) {
-                        launchCaller(_order!.driverDetail!.phoneNumber!);
-                      } else {
-                        launchCaller("+1 919-555-8247");
-                      }
-                    },
-                  ),
-                ],
-              ),
+                    // Right
+                    CustomButton(
+                      width: 100.w,
+                      text: "Call",
+                      onTap: () async {
+                        // Prefer vendor/store phone from store detail API
+                        final vendorPhone = await _fetchStorePhone(
+                          order.storeId,
+                        );
+
+                        if (vendorPhone != null && vendorPhone.isNotEmpty) {
+                          await launchCaller(vendorPhone);
+                          return;
+                        }
+
+                        // Fallback to driver phone if vendor phone not available
+                        if (_order?.driverDetail?.phoneNumber != null) {
+                          await launchCaller(
+                            _order!.driverDetail!.phoneNumber!,
+                          );
+                        } else {
+                          await launchCaller("+1 919-555-8247");
+                        }
+                      },
+                    ),
+                  ],
+                ),
 
               SizedBox(height: 30.h),
               Container(color: AppColors.blackColor, height: 0.5.w),

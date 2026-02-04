@@ -1,5 +1,7 @@
 import 'package:bee_kind/controllers/store_controller.dart';
+import 'package:bee_kind/core/user/store/product_categories_list.dart';
 import 'package:bee_kind/core/user/store/selected_product.dart';
+import 'package:bee_kind/models/response_models/get_products_by_category_response_model.dart';
 import 'package:bee_kind/models/response_models/store_detail_response_model.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
@@ -18,7 +20,21 @@ class StoreScreen extends GetView<StoreController> {
 
   @override
   Widget build(BuildContext context) {
-    controller.setStoreData(data);
+    // Set initial data if provided
+    if (data != null) {
+      controller.setStoreData(data);
+    }
+
+    // Use Obx to reactively update when store data changes
+    return Obx(() {
+      // Get data from controller's reactive variable
+      final storeData = controller.storeData.value ?? data;
+
+      return _buildScaffold(context, storeData);
+    });
+  }
+
+  Widget _buildScaffold(BuildContext context, StoreDetail? data) {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size(30.w, 340.h),
@@ -117,6 +133,7 @@ class StoreScreen extends GetView<StoreController> {
                                     child: CustomText(
                                       text:
                                           data?.store?.vendorAddress?.address ??
+                                          data?.store?.addressName ??
                                           "Address not available",
                                       fontSize: 16.sp,
                                       maxLines: 2,
@@ -310,7 +327,7 @@ class StoreScreen extends GetView<StoreController> {
                                           p?.isDiscountAvailable ?? false,
                                       isAvailable: p?.isAvailable ?? false,
                                       quantity: p?.quantity,
-                                          ),
+                                    ),
                                   ),
                                 );
                               },
@@ -357,13 +374,58 @@ class StoreScreen extends GetView<StoreController> {
                     itemCount: data?.categories?.length ?? 0,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (context, index) {
+                      final category = data?.categories?[index];
                       return GestureDetector(
-                        onTap: () => controller.getProductsByCategory(
-                          data?.categories?[index].sId,
-                          data?.categories?[index].categoryName,
-                          context,
-                          false,
-                        ),
+                        onTap: () {
+                          // Filter current store's products by this category
+                          final categoryProducts =
+                              data?.products
+                                  ?.where(
+                                    (p) => p.categoryId?.sId == category?.sId,
+                                  )
+                                  .toList() ??
+                              [];
+
+                          // Convert Products to ProductByCategoryData for the list screen
+                          final convertedProducts = categoryProducts
+                              .map(
+                                (p) => ProductByCategoryData(
+                                  sId: p.sId,
+                                  productImages: p.productImages,
+                                  productName: p.productName,
+                                  categoryId: p.categoryId?.sId,
+                                  quantity: p.quantity,
+                                  price: p.price,
+                                  afterDiscountPrice: p.afterDiscountPrice,
+                                  isDiscountAvailable: p.isDiscountAvailable,
+                                  effects: p.effects,
+                                  ingredients: p.ingredients,
+                                  description: p.description,
+                                  user: p.user,
+                                  isDeleted: p.isDeleted,
+                                  isAvailable: p.isAvailable,
+                                  inventoryStatus: p.inventoryStatus,
+                                  createdAt: p.createdAt,
+                                  updatedAt: p.updatedAt,
+                                  iV: p.iV,
+                                  businessName: data?.store?.businessName,
+                                  businessId: data?.store?.sId,
+                                ),
+                              )
+                              .toList();
+
+                          // Navigate to category products list with filtered products
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CategoryWiseProductsList(
+                                fromHome: false,
+                                products: convertedProducts,
+                                categoryName: category?.categoryName,
+                              ),
+                            ),
+                          );
+                        },
                         child: cat.Categories(
                           image: data?.categories?[index].categoryImage,
                         ),
@@ -411,14 +473,14 @@ class StoreScreen extends GetView<StoreController> {
                       ),
                     );
                   },
-                              child: Product(
-                                stockStatus: p?.inventoryStatus,
-                                isDiscountAvailable: p?.isDiscountAvailable ?? false,
-                                productName: p?.productName,
-                                price: p?.price,
-                                afterDiscountPrice: p?.afterDiscountPrice,
-                                productImages: p?.productImages,
-                              ),
+                  child: Product(
+                    stockStatus: p?.inventoryStatus,
+                    isDiscountAvailable: p?.isDiscountAvailable ?? false,
+                    productName: p?.productName,
+                    price: p?.price,
+                    afterDiscountPrice: p?.afterDiscountPrice,
+                    productImages: p?.productImages,
+                  ),
                 );
               },
             ),

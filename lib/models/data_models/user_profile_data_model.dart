@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:dio/dio.dart';
@@ -50,7 +51,18 @@ class UserProfileDataModel {
   }
 
   Map<String, dynamic> toFormDataMap() {
-    final map = {
+    // Convert location Map to JSON string for FormData
+    String? locationJson;
+    if (location != null) {
+      try {
+        locationJson = jsonEncode(location);
+        log("USER LOCATION JSON STRING: $locationJson");
+      } catch (e) {
+        log("Error encoding user location to JSON: $e");
+      }
+    }
+
+    final map = <String, dynamic>{
       "firstName": firstName,
       "lastName": lastName,
       "phoneNumber": phoneNumber,
@@ -61,7 +73,8 @@ class UserProfileDataModel {
       "appartmentNumber": appartmentNumber,
       "floorNumber": floorNumber,
       "address": address,
-      "location": location,
+      // Send location as JSON string for FormData compatibility
+      if (locationJson != null) "location": locationJson,
     };
 
     // Only include image if valid local file

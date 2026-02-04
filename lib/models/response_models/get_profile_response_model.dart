@@ -221,16 +221,18 @@ class ProfileData {
 class VendorAddress {
   dynamic type;
   List<dynamic>? coordinates;
+  String? address;
 
-  VendorAddress({this.type, this.coordinates});
+  VendorAddress({this.type, this.coordinates, this.address});
 
   VendorAddress.fromJson(Map<String, dynamic> json) {
     type = json['type'];
     coordinates = json['coordinates']?.cast<dynamic>();
+    address = json['address'];
   }
 
   Map<String, dynamic> toJson() {
-    return {"type": type, "coordinates": coordinates};
+    return {"type": type, "coordinates": coordinates, "address": address};
   }
 }
 

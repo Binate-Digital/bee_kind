@@ -1,6 +1,6 @@
 name: bee_kind
 description: "A new Flutter project."
-publish_to: 'none' 
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -15,7 +15,7 @@ dependencies:
   otp_pin_field: ^1.4.1
   image_picker:
   # map_location_picker:
-  intl: 
+  intl:
   dio:
   shared_preferences:
   place_picker:
@@ -46,12 +46,11 @@ dependencies:
   firebase_crashlytics: ^5.0.5
   keyboard_actions: ^4.2.1
   flutter_local_notifications: ^19.5.0
-  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  webview_flutter_android: 
+  webview_flutter_android:
 
   flutter_lints: ^5.0.0
 

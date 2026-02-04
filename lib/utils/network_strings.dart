@@ -4,8 +4,8 @@ class NetworkStrings {
   ///BASE URL
   static const String baseUrl =
       "https://beekind-backend.deployment-uat.com/api/v1/";
-      // "https://3dsr3m62-5000.uks1.devtunnels.ms/api/v1/";
-      // "https://3dsr3m62-5000.uks1.devtunnels.ms/api/v1/";
+  // "https://3dsr3m62-5000.uks1.devtunnels.ms/api/v1/";
+  // "https://3dsr3m62-5000.uks1.devtunnels.ms/api/v1/";
   // static const String baseUrl =
   //     "https://3dsr3m62-5000.uks1.devtunnels.ms/api/v1/";
 
@@ -66,10 +66,7 @@ class NetworkStrings {
   static const String getProductsByCategory = "user/products-by-category";
   static const String getSingleProduct = "user/product";
   static const String getProductReviews = "user/product-reviews";
-<<<<<<< Updated upstream
-=======
   static const String addReview = "user/add-review";
->>>>>>> Stashed changes
   static const String getVendorProductReviews = "vendor/get-reviews";
   static const String addReplyToReview = "vendor/add-reply";
   static const String deleteReview = "vendor/delete-review";

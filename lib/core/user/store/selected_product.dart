@@ -54,54 +54,72 @@ class SelectedProduct extends StatefulWidget {
   State<SelectedProduct> createState() => _SelectedProductState();
 }
 
-class _SelectedProductState extends State<SelectedProduct> {
+class _SelectedProductState extends State<SelectedProduct>
+    with WidgetsBindingObserver {
   final controller = Get.find<StoreController>();
+  bool _hasFetched = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((val) async {
-      log("product id: ${widget.productId}");
+    WidgetsBinding.instance.addObserver(this);
+  }
 
-      if (widget.productId != null) {
-        if (widget.isVendor) {
-<<<<<<< Updated upstream
-=======
-          log("Fetching vendor product details for ID: ${widget.productId}");
->>>>>>> Stashed changes
-          await controller.fetchVendorProduct(
-            widget.productId,
-            context,
-            navigate: false,
-          );
-          // Fetch vendor-specific reviews
-<<<<<<< Updated upstream
-          await controller.fetchVendorProductReviews(widget.productId, context);
-        } else {
-=======
-          log("Fetching vendor reviews for product ID: ${widget.productId}");
-          await controller.fetchVendorProductReviews(widget.productId, context);
-        } else {
-          log("Fetching user product details for ID: ${widget.productId}");
->>>>>>> Stashed changes
-          await controller.fetchSingleProduct(
-            widget.productId,
-            context,
-            navigate: false,
-          );
-          await controller.fetchProductReviews(widget.productId, context);
-        }
-<<<<<<< Updated upstream
-=======
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasFetched) {
+      _hasFetched = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _fetchProductData();
+      });
+    }
+  }
 
-        // Debug: Check if reviews are loaded
-        log("Reviews list after fetch: ${controller.reviewsList?.length ?? 0}");
-        log(
-          "Product reviews model: ${controller.productReviews.value?.toJson()}",
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh product data when app resumes to get latest availability status
+    if (state == AppLifecycleState.resumed) {
+      _fetchProductData();
+    }
+  }
+
+  Future<void> _fetchProductData() async {
+    log("product id: ${widget.productId}");
+
+    if (widget.productId != null) {
+      if (widget.isVendor) {
+        log("Fetching vendor product details for ID: ${widget.productId}");
+        await controller.fetchVendorProduct(
+          widget.productId,
+          context,
+          navigate: false,
         );
->>>>>>> Stashed changes
+        // Fetch vendor-specific reviews
+        log("Fetching vendor reviews for product ID: ${widget.productId}");
+        await controller.fetchVendorProductReviews(widget.productId, context);
+      } else {
+        log("Fetching user product details for ID: ${widget.productId}");
+        await controller.fetchSingleProduct(
+          widget.productId,
+          context,
+          navigate: false,
+        );
+        await controller.fetchProductReviews(widget.productId, context);
       }
-    });
+
+      // Debug: Check if reviews are loaded
+      log("Reviews list after fetch: ${controller.reviewsList?.length ?? 0}");
+      log(
+        "Product reviews model: ${controller.productReviews.value?.toJson()}",
+      );
+    }
   }
 
   @override
@@ -309,13 +327,20 @@ class _SelectedProductState extends State<SelectedProduct> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Image.asset(AssetsPath.star, width: 18.w),
-                          SizedBox(width: 10.w),
-                          CustomText(text: "4.8   52 Reviews"),
-                        ],
-                      ),
+                      Obx(() {
+                        final avgRating = controller.averageRating.value;
+                        final totalReviews = controller.totalReviews.value;
+                        return Row(
+                          children: [
+                            Image.asset(AssetsPath.star, width: 18.w),
+                            SizedBox(width: 10.w),
+                            CustomText(
+                              text:
+                                  "${avgRating.toStringAsFixed(1)}   $totalReviews Reviews",
+                            ),
+                          ],
+                        );
+                      }),
 
                       if (!widget.isVendor)
                         Obx(() {
@@ -338,10 +363,25 @@ class _SelectedProductState extends State<SelectedProduct> {
                       if (!widget.isVendor)
                         Obx(() {
                           final sp = controller.singleProduct.value?.data;
-                          return CustomText(
-                            text:
-                                "${sp?.quantity ?? widget.quantity ?? 0} products left",
-                          );
+                          final inventoryStatus =
+                              (sp?.inventoryStatus ??
+                                      widget.inventoryStatus ??
+                                      "In Stock")
+                                  .toString()
+                                  .toLowerCase();
+
+                          final qty = sp?.quantity ?? widget.quantity ?? 0;
+
+                          // Treat as out of stock if status indicates it OR quantity is zero
+                          final isOutOfStock =
+                              inventoryStatus.contains('out') ||
+                              inventoryStatus.contains('sold') ||
+                              qty <= 0;
+
+                          if (!isOutOfStock) {
+                            return CustomText(text: "${qty} products left");
+                          }
+                          return SizedBox.shrink();
                         }),
                     ],
                   ),
@@ -505,53 +545,86 @@ class _SelectedProductState extends State<SelectedProduct> {
               SizedBox(height: 30.h),
 
               if (!widget.isVendor)
-               CustomButton(
-                    text: "Add To Cart",
-                    gradientColors:
-                        widget.isAvailable == true &&
-                            controller.quantityCount.value > 0
-                        ? [AppColors.yellow1, AppColors.yellow2]
-                        : [
-                            AppColors.whiteColor,
-                            AppColors.shimmerHighlightColor,
-                          ],
-                    onTap:
-                        widget.isAvailable && controller.quantityCount.value > 0
-                        ? () {
-                            double unitPrice =
-                                (widget.hasDiscount
-                                    ? double.tryParse(
-                                        widget.afterDiscountPrice.toString(),
-                                      )
-                                    : double.tryParse(
-                                        widget.price.toString(),
-                                      )) ??
-                                0;
+                Obx(() {
+                  // Get the real-time isAvailable from singleProduct or use widget.isAvailable as fallback
+                  final isProductAvailable =
+                      controller.singleProduct.value?.data?.isAvailable ??
+                      widget.isAvailable;
+                  final inventoryStatus =
+                      controller.singleProduct.value?.data?.inventoryStatus ??
+                      widget.inventoryStatus ??
+                      "In Stock";
+                  final canAddToCart =
+                      isProductAvailable && controller.quantityCount.value > 0;
 
-                            int qty = controller.quantityCount.value;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (!isProductAvailable)
+                        CustomText(
+                          text:
+                              "This product is currently unavailable. Please check back later.",
+                          fontColor: AppColors.errorColor,
+                          fontSize: 14.sp,
+                          textAlign: TextAlign.center,
+                        )
+                      else if (inventoryStatus.toLowerCase().contains("out"))
+                        CustomText(
+                          text:
+                              "Inventory status: $inventoryStatus. You may add to cart once it restocks.",
+                          fontColor: AppColors.errorColor,
+                          fontSize: 14.sp,
+                          textAlign: TextAlign.center,
+                        ),
+                      SizedBox(height: 10.h),
+                      CustomButton(
+                        text: "Add To Cart",
+                        gradientColors: canAddToCart
+                            ? [AppColors.yellow1, AppColors.yellow2]
+                            : [
+                                AppColors.whiteColor,
+                                AppColors.shimmerHighlightColor,
+                              ],
+                        onTap: canAddToCart
+                            ? () {
+                                double unitPrice =
+                                    (widget.hasDiscount
+                                        ? double.tryParse(
+                                            widget.afterDiscountPrice
+                                                .toString(),
+                                          )
+                                        : double.tryParse(
+                                            widget.price.toString(),
+                                          )) ??
+                                    0;
 
-                            controller
-                                .addItems(
-                                  OrderItem(
-                                    productId: widget.productId,
-                                    productName: widget.productName,
-                                    productImage: widget.productImages?.first,
-                                    unitPrice: unitPrice,
-                                    quantity: qty,
-                                  ),
-                                )
-                                .then((value) {
-                                  controller.baseController.changeTab(1);
-                                  Get.until((route) => route.isFirst);
-                                });
+                                int qty = controller.quantityCount.value;
 
-                            log(
-                              "Cart total now: ${controller.calculateTotalCartPrice()}",
-                            );
-                          }
-                        : null,
-                  ),
+                                controller
+                                    .addItems(
+                                      OrderItem(
+                                        productId: widget.productId,
+                                        productName: widget.productName,
+                                        productImage:
+                                            widget.productImages?.first,
+                                        unitPrice: unitPrice,
+                                        quantity: qty,
+                                      ),
+                                    )
+                                    .then((value) {
+                                      controller.baseController.changeTab(1);
+                                      Get.until((route) => route.isFirst);
+                                    });
 
+                                log(
+                                  "Cart total now: ${controller.calculateTotalCartPrice()}",
+                                );
+                              }
+                            : null,
+                      ),
+                    ],
+                  );
+                }),
 
               SizedBox(height: 30.h),
 

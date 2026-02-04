@@ -10,11 +10,6 @@ class VendorOrdersResponseModel {
     message = json['message'];
     if (json['data'] != null) {
       data = <VendorOrder>[];
-<<<<<<< Updated upstream
-      json['data'].forEach((v) {
-        data!.add(VendorOrder.fromJson(v));
-      });
-=======
       var dataField = json['data'];
       if (dataField is List) {
         // Handle array response
@@ -32,7 +27,6 @@ class VendorOrdersResponseModel {
           data!.add(VendorOrder.fromJson(v));
         });
       }
->>>>>>> Stashed changes
     }
   }
 
@@ -58,26 +52,14 @@ class VendorOrder {
   double? totalPrice;
   double? totalAmount;
   String? paymentStatus;
-<<<<<<< Updated upstream
-  String? deliveryAddress;
-  String? phoneNumber;
-=======
-  // userAddress comes as an object from API, but we might want to store it as string or keep object
-  // For now, let's map the address string to deliveryAddress for UI compatibility
   String? deliveryAddress;
   UserAddress? userAddress;
   String? phoneNumber;
-  // properties that might come from API
   DriverDetail? driverDetail;
->>>>>>> Stashed changes
   String? createdAt;
   String? updatedAt;
   UserInfo? user;
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
   VendorOrder({
     this.sId,
     this.orderId,
@@ -90,13 +72,9 @@ class VendorOrder {
     this.totalAmount,
     this.paymentStatus,
     this.deliveryAddress,
-<<<<<<< Updated upstream
-    this.phoneNumber,
-=======
     this.userAddress,
     this.phoneNumber,
     this.driverDetail,
->>>>>>> Stashed changes
     this.createdAt,
     this.updatedAt,
     this.user,
@@ -120,9 +98,6 @@ class VendorOrder {
               : double.tryParse(json['totalAmount'].toString()))
         : null;
     paymentStatus = json['paymentStatus'];
-<<<<<<< Updated upstream
-    deliveryAddress = json['userAddress']['address'];
-=======
 
     // Handle both direct string and nested object for address
     if (json['userAddress'] != null && json['userAddress'] is Map) {
@@ -136,7 +111,6 @@ class VendorOrder {
       driverDetail = DriverDetail.fromJson(json['driverDetail']);
     }
 
->>>>>>> Stashed changes
     phoneNumber = json['phoneNumber'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
@@ -148,9 +122,6 @@ class VendorOrder {
       });
     }
 
-<<<<<<< Updated upstream
-    user = json['user'] != null ? UserInfo.fromJson(json['user']) : null;
-=======
     // Parse user from different possible locations
     if (json['user'] != null) {
       user = UserInfo.fromJson(json['user']);
@@ -160,7 +131,6 @@ class VendorOrder {
     } else {
       user = null;
     }
->>>>>>> Stashed changes
   }
 
   Map<String, dynamic> toJson() {
@@ -175,15 +145,12 @@ class VendorOrder {
     data['totalAmount'] = totalAmount;
     data['paymentStatus'] = paymentStatus;
     data['deliveryAddress'] = deliveryAddress;
-<<<<<<< Updated upstream
-=======
     if (userAddress != null) {
       data['userAddress'] = userAddress!.toJson();
     }
     if (driverDetail != null) {
       data['driverDetail'] = driverDetail!.toJson();
     }
->>>>>>> Stashed changes
     data['phoneNumber'] = phoneNumber;
     data['createdAt'] = createdAt;
     data['updatedAt'] = updatedAt;
@@ -200,8 +167,6 @@ class VendorOrder {
   }
 }
 
-<<<<<<< Updated upstream
-=======
 class DriverDetail {
   String? driverName;
   String? phoneNumber;
@@ -280,7 +245,6 @@ class UserAddress {
   }
 }
 
->>>>>>> Stashed changes
 class OrderItem {
   String? productId;
   String? productName;
@@ -331,10 +295,6 @@ class UserInfo {
   String? name;
   String? email;
   String? phoneNumber;
-<<<<<<< Updated upstream
-
-  UserInfo({this.name, this.email, this.phoneNumber});
-=======
   String? firstName;
   String? lastName;
   String? profilePicture;
@@ -347,20 +307,11 @@ class UserInfo {
     this.lastName,
     this.profilePicture,
   });
->>>>>>> Stashed changes
 
   UserInfo.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     email = json['email'];
     phoneNumber = json['phoneNumber'];
-<<<<<<< Updated upstream
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'name': name, 'email': email, 'phoneNumber': phoneNumber};
-  }
-}
-=======
     firstName = json['firstName'];
     lastName = json['lastName'];
     profilePicture = json['profilePicture'];
@@ -377,10 +328,6 @@ class UserInfo {
     };
   }
 }
-
-// class VendorOrdersResponseModel {
-//   bool? status;
-//   String? message;
 //   List<VendorOrder>? data;
 
 //   VendorOrdersResponseModel({this.status, this.message, this.data});
@@ -566,4 +513,3 @@ class UserInfo {
 //     return {'name': name, 'email': email, 'phoneNumber': phoneNumber};
 //   }
 // }
->>>>>>> Stashed changes

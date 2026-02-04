@@ -7,18 +7,27 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-class OrdersHistoryScreen extends StatelessWidget {
+class OrdersHistoryScreen extends StatefulWidget {
   const OrdersHistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.find<StoreController>();
+  State<OrdersHistoryScreen> createState() => _OrdersHistoryScreenState();
+}
 
-    // Load completed and cancelled orders
+class _OrdersHistoryScreenState extends State<OrdersHistoryScreen> {
+  final controller = Get.find<StoreController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Load completed and cancelled orders once when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchCompletedAndCancelledOrders();
     });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return AppBarBaseView(
       title: "Orders History",
       body: Obx(() {
@@ -28,7 +37,7 @@ class OrdersHistoryScreen extends StatelessWidget {
           );
         }
 
-        if (controller.ordersList.isEmpty) {
+        if (controller.completedOrdersList.isEmpty) {
           return Center(
             child: Text(
               "No orders found",
@@ -40,16 +49,22 @@ class OrdersHistoryScreen extends StatelessWidget {
         return ListView.builder(
           physics: BouncingScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 20.w),
-          itemCount: controller.ordersList.length,
+          itemCount: controller.completedOrdersList.length,
           shrinkWrap: false,
           itemBuilder: (context, index) {
-            final order = controller.ordersList[index];
+            final order = controller.completedOrdersList[index];
             final firstItem = order.items?.isNotEmpty == true
                 ? order.items!.first
                 : null;
 
-            print("controller.ordersList.length");
-            print(controller.ordersList.length);
+            // Calculate total items count in order
+            final totalItemsCount =
+                order.items?.fold<int>(
+                  0,
+                  (sum, item) => sum + (item.quantity ?? 1),
+                ) ??
+                0;
+
             return GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -64,9 +79,22 @@ class OrdersHistoryScreen extends StatelessWidget {
                 hideDate: false,
 
                 // ---- Pass API Data Here ----
-                productName: firstItem?.productName,
-                quantity: firstItem?.quantity,
-                price: double.tryParse("${controller.ordersList[index].totalAmount ?? 0}"),
+                productName: order.items != null && order.items!.length > 1
+                    ? "${order.items!.length} Products"
+                    : firstItem?.productName,
+                quantity: totalItemsCount,
+                // Compute price client-side to avoid relying on backend totalAmount
+                price: () {
+                  final items = order.items ?? [];
+                  double itemsTotal = 0.0;
+                  for (final it in items) {
+                    final double price = (it.price ?? 0).toDouble();
+                    final int qty = it.quantity ?? 0;
+                    itemsTotal += price * qty;
+                  }
+                  final double delivery = (order.deliverCharges ?? 0.0);
+                  return itemsTotal + delivery;
+                }(),
                 status: order.status,
                 imageUrl: firstItem?.productImage,
 

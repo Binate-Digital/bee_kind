@@ -481,10 +481,7 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
           ),
         ),
       ),
-    ).then((_) {
-      // If dismissed by swipe down, go back
-      Navigator.pop(context);
-    });
+    );
   }
 
   @override

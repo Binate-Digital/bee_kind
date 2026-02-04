@@ -1,3 +1,19 @@
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
+int? _parseInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is String) return int.tryParse(value);
+  if (value is double) return value.toInt();
+  return null;
+}
+
 class OrdersResponseModel {
   bool? status;
   String? message;
@@ -31,8 +47,8 @@ class OrderData {
   String? userId;
   String? storeId;
   List<Items>? items;
-  int? totalAmount;
-  int? deliverCharges;
+  double? totalAmount;
+  double? deliverCharges;
   String? status;
   bool? isDeleted;
   dynamic additionalNotes;
@@ -78,25 +94,17 @@ class OrderData {
       items = [];
     }
 
-    totalAmount = json['totalAmount'] is int
-        ? json['totalAmount']
-        : int.tryParse(json['totalAmount']?.toString() ?? "");
+    totalAmount = _parseDouble(json['totalAmount']);
 
-    deliverCharges = json['deliverCharges'] is int
-        ? json['deliverCharges']
-        : int.tryParse(json['deliverCharges']?.toString() ?? "");
+    deliverCharges = _parseDouble(json['deliverCharges']);
 
     status = json['status']?.toString();
     isDeleted = json['isDeleted'] as bool?;
     additionalNotes = json['additionalNotes'];
 
-    storeRevenue = json['storeRevenue'] is int
-        ? json['storeRevenue']
-        : int.tryParse(json['storeRevenue']?.toString() ?? "");
+    storeRevenue = _parseInt(json['storeRevenue']);
 
-    platformRevenue = json['platformRevenue'] is int
-        ? json['platformRevenue']
-        : int.tryParse(json['platformRevenue']?.toString() ?? "");
+    platformRevenue = _parseInt(json['platformRevenue']);
 
     // SAFE STATUS HISTORY
     statusHistory = json['statusHistory'] is List
@@ -106,10 +114,10 @@ class OrderData {
     createdAt = json['createdAt']?.toString();
     updatedAt = json['updatedAt']?.toString();
 
-    iV = json['__v'] is int
-        ? json['__v']
-        : int.tryParse(json['__v']?.toString() ?? "");
+    iV = _parseInt(json['__v']);
   }
+
+  // removed instance helper; using module-level helpers above
 
   Map<String, dynamic> toJson() {
     return {
@@ -188,7 +196,7 @@ class Items {
   String? productId;
   String? productName;
   int? quantity;
-  int? price;
+  double? price;
   String? productImage;
   String? sId;
 
@@ -209,9 +217,7 @@ class Items {
         ? json['quantity']
         : int.tryParse(json['quantity']?.toString() ?? "");
 
-    price = json['price'] is int
-        ? json['price']
-        : int.tryParse(json['price']?.toString() ?? "");
+    price = _parseDouble(json['price']);
 
     productImage = json['productImage']?.toString();
     sId = json['_id']?.toString();

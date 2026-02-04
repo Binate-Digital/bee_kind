@@ -1,21 +1,6 @@
-<<<<<<< Updated upstream
-=======
-// import 'package:bee_kind/controllers/store_controller.dart';
-// import 'package:bee_kind/utils/app_colors.dart';
-// import 'package:bee_kind/widgets/custom_text.dart';
-// import 'package:bee_kind/widgets/popular_products.dart';
-// import 'package:bee_kind/widgets/sales_info.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:get/get.dart';
-// import 'package:intl/intl.dart';
-// import 'package:syncfusion_flutter_charts/charts.dart';
-
->>>>>>> Stashed changes
 import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/widgets/custom_text.dart';
-import 'package:bee_kind/widgets/popular_products.dart';
 import 'package:bee_kind/widgets/sales_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -35,15 +20,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final storeController = Get.find<StoreController>();
 
-  final storeController = Get.find<StoreController>();
-
   @override
   void initState() {
     super.initState();
-<<<<<<< Updated upstream
-    _generateWeeklyData();
-=======
->>>>>>> Stashed changes
     _fetchVendorStats();
   }
 
@@ -57,10 +36,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void goToPreviousMonth() {
     setState(() {
       _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
-<<<<<<< Updated upstream
-      _generateWeeklyData();
-=======
->>>>>>> Stashed changes
       _fetchVendorStats();
     });
   }
@@ -68,19 +43,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void goToNextMonth() {
     setState(() {
       _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
-<<<<<<< Updated upstream
-      _generateWeeklyData();
-=======
->>>>>>> Stashed changes
       _fetchVendorStats();
     });
-  }
-
-  // ================== Parse Week Range (e.g. "Week 1") ==================
-  List<DateTime> _extractDateRange(String weekLabel) {
-    // Since we're using API data with simple "Week X" labels,
-    // we can't extract exact date ranges. Return empty list to disable daily modal.
-    return [];
   }
 
   // ================== Show Daily Sales Modal ==================
@@ -293,51 +257,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const SizedBox(height: 20),
 
                     // Weekly Sales Chart
-<<<<<<< Updated upstream
-                    SfCartesianChart(
-                      plotAreaBorderWidth: 0,
-                      primaryXAxis: CategoryAxis(
-                        labelRotation: -35,
-                        labelStyle: const TextStyle(fontSize: 12),
-                        majorGridLines: const MajorGridLines(width: 0.5),
-                        axisLine: const AxisLine(width: 1),
-                        majorTickLines: const MajorTickLines(size: 4),
-                      ),
-                      primaryYAxis: NumericAxis(
-                        isVisible: true,
-                        labelFormat: '\${value}',
-                        majorGridLines: const MajorGridLines(width: 0.4),
-                        axisLine: const AxisLine(width: 1),
-                        maximum: getChartMaxY(weeklySalesData),
-                      ),
-                      tooltipBehavior: TooltipBehavior(enable: true),
-
-                      series: <CartesianSeries<SalesData, String>>[
-                        ColumnSeries<SalesData, String>(
-                          dataSource: weeklySalesData,
-                          xValueMapper: (SalesData data, _) => data.label,
-                          yValueMapper: (SalesData data, _) => data.sales,
-                          borderRadius: BorderRadius.circular(8),
-                          spacing: 0.3,
-                          pointColorMapper: (_, __) => AppColors.yellow2,
-                          dataLabelSettings: const DataLabelSettings(
-                            isVisible: true,
-                            labelAlignment: ChartDataLabelAlignment.outer,
-                            textStyle: TextStyle(
-                              fontSize: 12,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          onPointTap: (ChartPointDetails details) {
-                            final selectedWeek =
-                                weeklySalesData[details.pointIndex!];
-                            _showDailySales(context, selectedWeek);
-                          },
-                        ),
-                      ],
-                    ),
-=======
                     Obx(() {
                       final stats = storeController.vendorStatsModel.value;
                       final weeklySales = stats?.weeklySales ?? [];
@@ -404,7 +323,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ],
                       );
                     }),
->>>>>>> Stashed changes
 
                     SizedBox(height: 20.h),
 
@@ -455,11 +373,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         }),
                       ],
                     ),
-<<<<<<< Updated upstream
-                    SizedBox(height: 30.h),
-=======
                     SizedBox(height: 60.h),
->>>>>>> Stashed changes
                     // Padding(
                     //   padding: EdgeInsets.symmetric(horizontal: 20.w),
                     //   child: Row(

@@ -1,6 +1,5 @@
 import 'package:bee_kind/controllers/store_controller.dart';
 import 'package:bee_kind/firebase_options.dart';
-import 'package:bee_kind/services/firebase_messaging_service.dart';
 import 'package:bee_kind/services/push_notification_service.dart';
 import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/splash/splash_screen.dart';

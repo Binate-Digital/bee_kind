@@ -221,7 +221,7 @@ class _SelectedCompletedOrderScreenState
           productId: item.productId,
           productName: item.productName,
           quantity: item.quantity,
-          unitPrice: ((item.price ?? 0) * (item.quantity ?? 1)).toDouble(), // Total price for the quantity
+          unitPrice: (item.price ?? 0).toDouble(), // Per-unit price
           productImage: item.productImage,
         );
 
@@ -245,7 +245,8 @@ class _SelectedCompletedOrderScreenState
 
       // Set additional notes from original order
       if (_order!.additionalNotes != null) {
-        storeController.notesController.text = _order!.additionalNotes.toString();
+        storeController.notesController.text = _order!.additionalNotes
+            .toString();
       }
 
       // Close loading dialog
@@ -269,8 +270,7 @@ class _SelectedCompletedOrderScreenState
     }
   }
 
-
-String? selectedProductId;
+  String? selectedProductId;
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -285,18 +285,31 @@ String? selectedProductId;
     if (errorMessage != null || _order == null) {
       return Scaffold(
         appBar: AppBar(title: const Text("Completed Order")),
-        body: Center(
-          child: Text(errorMessage ?? "Order not found"),
-        ),
+        body: Center(child: Text(errorMessage ?? "Order not found")),
       );
     }
 
     final order = _order!;
-    final firstItem = order.items?.isNotEmpty == true ? order.items!.first : null;
     final formattedDate = order.createdAt != null
         ? DateFormat("dd-MM-yyyy").format(DateTime.parse(order.createdAt!))
         : "--";
     final currentStep = _stepFromStatus(order.status);
+
+    // Calculate total from items + delivery charges to ensure displayed
+    // total matches itemized values (handles backend discrepancies).
+    final double itemsTotal = (order.items ?? []).fold(0.0, (sum, item) {
+      final double price = (item.price ?? 0).toDouble();
+      final int qty = item.quantity ?? 0;
+      return sum + (price * qty);
+    });
+
+    final double delivery = (order.deliverCharges ?? 0.0);
+    final double computedTotal = itemsTotal + delivery;
+
+    // Diagnostic log to compare backend vs computed total
+    log(
+      "Order ${order.sId} - backend total: ${order.totalAmount}, computed total: $computedTotal, itemsTotal: $itemsTotal, delivery: $delivery",
+    );
 
     return AppBarBaseView(
       title: "Completed Order",
@@ -313,11 +326,14 @@ String? selectedProductId;
                 gradientColors: [AppColors.whiteColor, AppColors.whiteColor],
               ),
             if (_isCompletedOrder) SizedBox(height: 20.h),
-            
+
             // Only show Leave a Review button for completed orders
             if (_isCompletedOrder)
               CustomButton(
                 onTap: () {
+                  // Set initial selected product for review modal
+                  String? modalSelectedProductId = selectedProductId;
+
                   showModalBottomSheet(
                     isDismissible: true,
                     isScrollControlled: true,
@@ -334,7 +350,9 @@ String? selectedProductId;
                           return Padding(
                             padding: EdgeInsets.only(
                               top: 30.h,
-                              bottom: MediaQuery.of(context).viewInsets.bottom + 30.h,
+                              bottom:
+                                  MediaQuery.of(context).viewInsets.bottom +
+                                  30.h,
                               left: 20.w,
                               right: 20.w,
                             ),
@@ -347,8 +365,62 @@ String? selectedProductId;
                                   fontSize: 22.sp,
                                 ),
                                 SizedBox(height: 20.h),
+
+                                // Product selection dropdown for multiple products
+                                if (_order?.items != null &&
+                                    _order!.items!.length > 1) ...[
+                                  CustomText(
+                                    text: "Select product to review:",
+                                    fontSize: 14.sp,
+                                    fontColor: AppColors.blackColor.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: AppColors.yellow2,
+                                        width: 1.5,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10.r),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        value: modalSelectedProductId,
+                                        hint: CustomText(
+                                          text: "Select a product",
+                                          fontSize: 14.sp,
+                                        ),
+                                        items: _order!.items!.map((item) {
+                                          return DropdownMenuItem<String>(
+                                            value: item.productId,
+                                            child: CustomText(
+                                              text:
+                                                  item.productName ?? "Product",
+                                              fontSize: 14.sp,
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          setModalState(() {
+                                            modalSelectedProductId = value;
+                                            selectedProductId = value;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 15.h),
+                                ],
+
                                 CustomText(
-                                  text: "Please give your rating & also your review...",
+                                  text:
+                                      "Please give your rating & also your review...",
                                   fontSize: 18.sp,
                                 ),
                                 Padding(
@@ -363,9 +435,10 @@ String? selectedProductId;
                                     borderColor: Colors.grey,
                                     allowHalfRating: true,
                                     starCount: 5,
-                                    onRatingChanged: (rate) => setModalState(() {
-                                      rating = rate;
-                                    }),
+                                    onRatingChanged: (rate) =>
+                                        setModalState(() {
+                                          rating = rate;
+                                        }),
                                   ),
                                 ),
                                 Padding(
@@ -402,53 +475,54 @@ String? selectedProductId;
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _order?.items?.length ?? 0,
+                itemBuilder: (context, index) {
+                  final item = _order!.items![index];
+                  final bool isSelected = selectedProductId == item.productId;
 
-            ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _order?.items?.length ?? 0,
-            itemBuilder: (context, index) {
-              final item = _order!.items![index];
-              final bool isSelected = selectedProductId == item!.productId;
-
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    selectedProductId = item.productId; // assign selected product id
-                  });
-
-
-                },
-                child: Container(
-                  // margin: const EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppColors.yellow1   // selected border color
-                          : Colors.transparent,      // default
-                      width: 2,
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedProductId =
+                            item.productId; // assign selected product id
+                      });
+                    },
+                    child: Container(
+                      // margin: const EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors
+                                    .yellow1 // selected border color
+                              : Colors.transparent, // default
+                          width: 2,
+                        ),
+                      ),
+                      child: CompletedOrderItem(
+                        hideDate: true,
+                        productName: item.productName,
+                        quantity: item.quantity,
+                        price: double.tryParse("${item.price ?? 0}"),
+                        status: order.status,
+                        imageUrl: item.productImage,
+                      ),
                     ),
-                  ),
-                  child: CompletedOrderItem(
-                    hideDate: true,
-                    productName: item.productName,
-                    quantity: item.quantity,
-                    price: double.tryParse("${item.price ?? 0}"),
-                    status: order.status,
-                    imageUrl: item.productImage,
-                  ),
-                ),
-              );
-            },
-          ),
+                  );
+                },
+              ),
 
-            SizedBox(height: 20.h),
+              SizedBox(height: 20.h),
               HorizontalStepper(
                 currentStep: currentStep,
                 steps: _steps,
                 activeColor: AppColors.blackColor,
-                inactiveColor: _isCompletedOrder ? AppColors.whiteColor : Colors.grey,
+                inactiveColor: _isCompletedOrder
+                    ? AppColors.whiteColor
+                    : Colors.grey,
               ),
               SizedBox(height: 10.h),
               // Status labels
@@ -479,10 +553,7 @@ String? selectedProductId;
                 fontSize: 18.sp,
               ),
               SizedBox(height: 10.h),
-              CustomText(
-                text: "Placed On: $formattedDate",
-                fontSize: 18.sp,
-              ),
+              CustomText(text: "Placed On: $formattedDate", fontSize: 18.sp),
               SizedBox(height: 20.h),
               CustomText(
                 text: "Delivery Address",
@@ -512,7 +583,9 @@ String? selectedProductId;
                 ),
                 SizedBox(height: 10.h),
                 CustomText(
-                  text: order.storeAddress?.address ?? "Store address not available",
+                  text:
+                      order.storeAddress?.address ??
+                      "Store address not available",
                   fontSize: 18.sp,
                 ),
               ],
@@ -524,7 +597,8 @@ String? selectedProductId;
               ),
               SizedBox(height: 10.h),
               CustomText(
-                text: order.additionalNotes?.toString() ?? "No additional notes",
+                text:
+                    order.additionalNotes?.toString() ?? "No additional notes",
                 maxLines: 3,
                 textAlign: TextAlign.start,
                 fontSize: 18.sp,
@@ -541,7 +615,7 @@ String? selectedProductId;
                     fontSize: 18.sp,
                   ),
                   CustomText(
-                    text: "\$${order.deliverCharges ?? 0}",
+                    text: "\$${delivery.toStringAsFixed(2)}",
                     fontSize: 18.sp,
                   ),
                 ],
@@ -556,7 +630,7 @@ String? selectedProductId;
                     fontSize: 22.sp,
                   ),
                   CustomText(
-                    text: "\$${order.totalAmount ?? 0}",
+                    text: "\$${computedTotal.toStringAsFixed(2)}",
                     fontSize: 20.sp,
                     fontColor: AppColors.yellow2,
                     weight: FontWeight.bold,

@@ -14,6 +14,7 @@ class Product extends StatelessWidget {
     this.afterDiscountPrice,
     this.productName,
     this.productImages,
+    this.rating,
   });
   final String? stockStatus;
   final bool isDiscountAvailable;
@@ -21,6 +22,7 @@ class Product extends StatelessWidget {
   final int? afterDiscountPrice;
   final String? productName;
   final List<String>? productImages;
+  final double? rating;
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +111,7 @@ class Product extends StatelessWidget {
                     children: [
                       Image.asset(AssetsPath.star, width: 15.w),
                       CustomText(
-                        text: "4.8",
+                        text: rating?.toStringAsFixed(1) ?? "0.0",
                         fontSize: 15.sp,
                         fontColor: AppColors.blackColor,
                       ),
