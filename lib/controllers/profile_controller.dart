@@ -21,6 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:place_picker/entities/location_result.dart';
 import 'package:place_picker/widgets/place_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../widgets/webview_flutter_widget.dart';
 
 class ProfileController extends GetxController {
   final prefs = SharedPrefs();
@@ -465,7 +468,8 @@ class ProfileController extends GetxController {
 
           address: selectedAddressType.value,
           // location: location, // map
-          location: location, // map
+          location: location,
+          // map
           profilePicture: profileImage.value,
         );
       } else {
@@ -485,11 +489,13 @@ class ProfileController extends GetxController {
           businessDescription: businessDescriptionController.text.trim(),
 
           openTime: openTime.value != null
-              ? "${openTime.value!.hour.toString().padLeft(2, '0')}:${openTime.value!.minute.toString().padLeft(2, '0')}"
+              ? "${openTime.value!.hour.toString().padLeft(2, '0')}:${openTime
+              .value!.minute.toString().padLeft(2, '0')}"
               : null,
 
           closeTime: closeTime.value != null
-              ? "${closeTime.value!.hour.toString().padLeft(2, '0')}:${closeTime.value!.minute.toString().padLeft(2, '0')}"
+              ? "${closeTime.value!.hour.toString().padLeft(2, '0')}:${closeTime
+              .value!.minute.toString().padLeft(2, '0')}"
               : null,
 
           phoneNumber: cleanedPhoneNumber.isNotEmpty
@@ -503,7 +509,8 @@ class ProfileController extends GetxController {
           profilePicture: profileImage.value,
 
           address: streetAddressController.text.trim(),
-          location: location, // map
+          location: location,
+          // map
           // Add floor and apartment numbers as separate fields
           floorNumber: floorNumberController.text.trim(),
           apartmentNumber: apartmentNumberController.text.trim(),
@@ -520,7 +527,8 @@ class ProfileController extends GetxController {
       // ---------------------------------------------------------
       final Map<String, dynamic> baseMap = model.toFormDataMap()
         ..removeWhere(
-          (key, value) => value == null || (value is String && value.isEmpty),
+              (key, value) =>
+          value == null || (value is String && value.isEmpty),
         );
 
       // Debug: ensure floor/apartment/location are present before sending
@@ -554,84 +562,106 @@ class ProfileController extends GetxController {
 
       final response = isEdit
           ? await network.patchRequest(
-              endPoint: NetworkStrings.updateProfile,
-              data: formData,
-              isHeaderRequire: true,
-            )
+        endPoint: NetworkStrings.updateProfile,
+        data: formData,
+        isHeaderRequire: true,
+      )
           : await network.postRequest(
-              endPoint: NetworkStrings.completeProfile,
-              data: formData,
-              isHeaderRequire: true,
+        endPoint: NetworkStrings.completeProfile,
+        data: formData,
+        isHeaderRequire: true,
+      );
+
+      if (isEdit == false) {
+
+        _launchURL(response?.data['data']['onboardingUrl']);
+        // Get.to(
+        //       () => OnboardingWebView(
+        //     url: response?.data['data']['onboardingUrl'],
+        //   ),
+        // );
+      }
+      else {
+        if (response == null) {
+          isLoading.value = false;
+          AppDialogs.showToast(
+            isEdit
+                ? "Unable to update profile. Please try again."
+                : "Unable to complete profile. Please try again.",
+          );
+          return;
+        }
+
+        final data = response.data;
+        log("${isEdit ? "Update" : "Create"} Profile Response: $data");
+
+        if (data["status"] == true) {
+          isLoading.value = false;
+          AppDialogs.showToast(
+            data["message"] ??
+                (isEdit
+                    ? "Profile updated successfully"
+                    : "Profile submitted successfully"),
+          );
+
+          // For both create and edit, refresh the profile data to get updated info
+          try {
+            final baseController = Get.find<BaseViewController>();
+            // Persist submitted floor/apartment into prefs immediately so UI updates
+            await prefs.setString(
+              'floorNumber',
+              floorNumberController.text.trim(),
             );
+            await prefs.setString(
+              'apartmentNumber',
+              apartmentNumberController.text.trim(),
+            );
+            await baseController.getProfile();
+            log(
+              "Profile refreshed successfully after ${isEdit ? 'update' : 'creation'}",
+            );
+          } catch (e) {
+            log(
+              "Failed to refresh profile after ${isEdit ? 'update' : 'creation'}: $e",
+            );
+            // Don't show error to user, just log it
+          }
 
-      if (response == null) {
-        isLoading.value = false;
-        AppDialogs.showToast(
-          isEdit
-              ? "Unable to update profile. Please try again."
-              : "Unable to complete profile. Please try again.",
-        );
-        return;
-      }
+          if (!isEdit) {
+            await prefs.isProfileComplete(
+              data["data"]["user"]["isProfileCompleted"],
+            );
+            log("IS PROFILE COMPLETE: ${prefs.checkProfile()}");
+          }
 
-      final data = response.data;
-      log("${isEdit ? "Update" : "Create"} Profile Response: $data");
-
-      if (data["status"] == true) {
-        isLoading.value = false;
-        AppDialogs.showToast(
-          data["message"] ??
-              (isEdit
-                  ? "Profile updated successfully"
-                  : "Profile submitted successfully"),
-        );
-
-        // For both create and edit, refresh the profile data to get updated info
-        try {
-          final baseController = Get.find<BaseViewController>();
-          // Persist submitted floor/apartment into prefs immediately so UI updates
-          await prefs.setString(
-            'floorNumber',
-            floorNumberController.text.trim(),
-          );
-          await prefs.setString(
-            'apartmentNumber',
-            apartmentNumberController.text.trim(),
-          );
-          await baseController.getProfile();
-          log(
-            "Profile refreshed successfully after ${isEdit ? 'update' : 'creation'}",
-          );
-        } catch (e) {
-          log(
-            "Failed to refresh profile after ${isEdit ? 'update' : 'creation'}: $e",
-          );
-          // Don't show error to user, just log it
-        }
-
-        if (!isEdit) {
-          await prefs.isProfileComplete(
-            data["data"]["user"]["isProfileCompleted"],
-          );
-          log("IS PROFILE COMPLETE: ${prefs.checkProfile()}");
-        }
-
-        if (!isEdit) {
-          Get.offAll(() => BaseView());
+          if (!isEdit) {
+            Get.offAll(() => BaseView());
+          } else {
+            Get.back();
+          }
         } else {
-          Get.back();
+          isLoading.value = false;
+          AppDialogs.showToast(
+            data["message"] ??
+                (isEdit ? "Profile update failed" : "Profile submit failed"),
+          );
         }
-      } else {
-        isLoading.value = false;
-        AppDialogs.showToast(
-          data["message"] ??
-              (isEdit ? "Profile update failed" : "Profile submit failed"),
-        );
       }
-    } catch (e) {
+    }
+    catch (e) {
       isLoading.value = false;
       log("CreateProfile Exception: $e");
       AppDialogs.showToast("Something went wrong. Please try again.");
+
+    }
+  }
+
+
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
     }
   }
 

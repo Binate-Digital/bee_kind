@@ -20,11 +20,13 @@ class _OnboardingWebViewState extends State<OnboardingWebView> {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.white)
+
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {},
           onPageFinished: (url) {},
           onWebResourceError: (error) {},
+
         ),
       )
       ..loadRequest(Uri.parse(widget.url));
@@ -37,7 +39,7 @@ class _OnboardingWebViewState extends State<OnboardingWebView> {
         centerTitle: true,
         title: const Text("Vendor Onboarding",style: TextStyle(color: Colors.black),),
       ),
-      body: WebViewWidget(controller: _controller),
+      body: WebViewWidget(controller: _controller,),
     );
   }
 }

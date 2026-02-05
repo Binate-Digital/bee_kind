@@ -1,9 +1,9 @@
 PODS:
-  - AppAuth (2.0.0):
-    - AppAuth/Core (= 2.0.0)
-    - AppAuth/ExternalUserAgent (= 2.0.0)
-  - AppAuth/Core (2.0.0)
-  - AppAuth/ExternalUserAgent (2.0.0):
+  - AppAuth (1.7.6):
+    - AppAuth/Core (= 1.7.6)
+    - AppAuth/ExternalUserAgent (= 1.7.6)
+  - AppAuth/Core (1.7.6)
+  - AppAuth/ExternalUserAgent (1.7.6):
     - AppAuth/Core
   - AppCheckCore (11.2.0):
     - GoogleUtilities/Environment (~> 8.0)
@@ -90,6 +90,8 @@ PODS:
     - nanopb (~> 3.30910.0)
     - PromisesSwift (~> 2.1)
   - Flutter (1.0.0)
+  - flutter_local_notifications (0.0.1):
+    - Flutter
   - fluttertoast (0.0.2):
     - Flutter
   - geocoding_ios (1.0.5):
@@ -104,9 +106,10 @@ PODS:
     - Google-Maps-iOS-Utils (< 7.0, >= 5.0)
     - GoogleMaps (< 10.0, >= 8.4)
   - google_sign_in_ios (0.0.1):
+    - AppAuth (>= 1.7.4)
     - Flutter
     - FlutterMacOS
-    - GoogleSignIn (~> 9.0)
+    - GoogleSignIn (~> 8.0)
     - GTMSessionFetcher (>= 3.4.0)
   - GoogleDataTransport (10.1.0):
     - nanopb (~> 3.30910.0)
@@ -114,10 +117,10 @@ PODS:
   - GoogleMaps (9.4.0):
     - GoogleMaps/Maps (= 9.4.0)
   - GoogleMaps/Maps (9.4.0)
-  - GoogleSignIn (9.0.0):
-    - AppAuth (~> 2.0)
+  - GoogleSignIn (8.0.0):
+    - AppAuth (< 2.0, >= 1.7.3)
     - AppCheckCore (~> 11.0)
-    - GTMAppAuth (~> 5.0)
+    - GTMAppAuth (< 5.0, >= 4.1.1)
     - GTMSessionFetcher/Core (~> 3.3)
   - GoogleUtilities/AppDelegateSwizzler (8.1.0):
     - GoogleUtilities/Environment
@@ -143,8 +146,8 @@ PODS:
   - GoogleUtilities/UserDefaults (8.1.0):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - GTMAppAuth (5.0.0):
-    - AppAuth/Core (~> 2.0)
+  - GTMAppAuth (4.1.1):
+    - AppAuth/Core (~> 1.7)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher (3.5.0):
     - GTMSessionFetcher/Full (= 3.5.0)
@@ -242,6 +245,7 @@ DEPENDENCIES:
   - firebase_crashlytics (from `.symlinks/plugins/firebase_crashlytics/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
+  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
@@ -306,6 +310,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
     :path: Flutter
+  flutter_local_notifications:
+    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
   geocoding_ios:
@@ -336,14 +342,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
-  AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
+  AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
-  connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
+  connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d
   Firebase: f07b15ae5a6ec0f93713e30b923d9970d144af3e
-  firebase_auth: 9225db04db5d8e3b46dc8940e04bc6aec6833e27
-  firebase_core: f1aafb21c14f497e5498f7ffc4dc63cbb52b2594
-  firebase_crashlytics: c039028126cb45e32f4c217aa392408b0963d081
-  firebase_messaging: c17a29984eafce4b2997fe078bb0a9e0b06f5dde
+  firebase_auth: 4816610b91e98ca2f48df6c62e0247036e0856ff
+  firebase_core: e6b8bb503b7d1d9856e698d4f193f7b414e6bf1f
+  firebase_crashlytics: 5991a84e0a09733ab69e204664afc87d1cb3ce07
+  firebase_messaging: fc7b6af84f4cd885a4999f51ea69ef20f380d70d
   FirebaseAppCheckInterop: f734c802f21fe1da0837708f0f9a27218c8a4ed0
   FirebaseAuth: 4a2aed737c84114a9d9b33d11ae1b147d6b94889
   FirebaseAuthInterop: 858e6b754966e70740a4370dd1503dfffe6dbb49
@@ -356,30 +362,31 @@ SPEC CHECKSUMS:
   FirebaseRemoteConfigInterop: 1e31ec72b89c9924367c59bfb5ec9ab60d1d6766
   FirebaseSessions: ba7c7a7ca8696a8d540eb3fe3800fbe98c79786d
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
-  geocoding_ios: 33776c9ebb98d037b5e025bb0e7537f6dd19646e
-  geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
+  flutter_local_notifications: ff50f8405aaa0ccdc7dcfb9022ca192e8ad9688f
+  fluttertoast: 21eecd6935e7064cc1fcb733a4c5a428f3f24f0f
+  geocoding_ios: eafacae6ad11a1eb56681f7d11df602a5fd49416
+  geolocator_apple: 66b711889fd333205763b83c9dcf0a57a28c7afd
   Google-Maps-iOS-Utils: 0a484b05ed21d88c9f9ebbacb007956edd508a96
-  google_maps_flutter_ios: 0291eb2aa252298a769b04d075e4a9d747ff7264
-  google_sign_in_ios: 00dfa94252eb10278b64828c81bcb7158a81a53a
+  google_maps_flutter_ios: e31555a04d1986ab130f2b9f24b6cdc861acc6d3
+  google_sign_in_ios: 7411fab6948df90490dc4620ecbcabdc3ca04017
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleMaps: 0608099d4870cac8754bdba9b6953db543432438
-  GoogleSignIn: c7f09cfbc85a1abf69187be091997c317cc33b77
+  GoogleSignIn: ce8c89bb9b37fb624b92e7514cc67335d1e277e4
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
-  GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
+  GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
-  image_picker_ios: e0ece4aa2a75771a7de3fa735d26d90817041326
+  image_picker_ios: 4f2f91b01abdb52842a8e277617df877e40f905b
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
-  otp_pin_field: d7876d051dc3061287d586940de50e9c7012069d
-  path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
-  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  otp_pin_field: 0f0935fafc56252e6a48a5a045ac689b6bad3857
+  path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
+  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
-  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
-  sign_in_with_apple: c5dcc141574c8c54d5ac99dd2163c0c72ad22418
+  shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
+  sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
   Stripe: a4b6584549bac3698733ed564e55b0b067cfda8a
-  stripe_ios: b720131bae6025a497bf7bb030e238a1a2781f18
+  stripe_ios: 333911eec3379d06d757c16807628ef637916e8c
   StripeApplePay: c8b005f1b5a242c455f76b42eda08660e9e33102
   StripeCore: 9a87da02c7fefc9b965218210a0902acd71157ab
   StripeFinancialConnections: 331ece5b6446dbf6eac62b94f8e365d0af9e000a
@@ -387,8 +394,8 @@ SPEC CHECKSUMS:
   StripePaymentSheet: 7bc20a0ab10d91acc06dc449ab61bb2cf221b0f4
   StripePaymentsUI: 1590647b3f635a58fb0e7058d86d3e9ff89250d4
   StripeUICore: a63d95d604e70a5895f9d6b09c49a46757e86353
-  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
-  webview_flutter_wkwebview: 8ebf4fded22593026f7dbff1fbff31ea98573c8d
+  url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
+  webview_flutter_wkwebview: 29eb20d43355b48fe7d07113835b9128f84e3af4
 
 PODFILE CHECKSUM: 930fe77043de00503cfe35a8664633f868aec48f
 

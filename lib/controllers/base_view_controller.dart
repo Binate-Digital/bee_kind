@@ -892,6 +892,9 @@ class BaseViewController extends GetxController {
         isHeaderRequire: true,
       );
 
+
+      getProfile();
+
       await _handleUpdateResponse(response, body, context);
     } catch (e) {
       AppDialogs.showToast("Something went wrong while updating profile.");

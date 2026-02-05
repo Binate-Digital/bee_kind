@@ -49,8 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             SizedBox(height: 20.h),
             Obx(() {
-              final profilePicture =
-                  baseController.profile.value?.data?.profilePicture;
+              final profilePicture = baseController.profile.value?.data?.profilePicture;
               return UserAvatarWidget(
                 selectedImgPath: profilePicture,
                 placeHolder: AssetsPath.dummy,

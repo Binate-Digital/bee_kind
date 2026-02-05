@@ -283,13 +283,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       width: 400.w,
                       onTap: () async {
                         // Validations
+
+
+                        print(formKey.currentState!.validate());
+                        print(selectedDate);
+                        print(selectedGender);
                         if (formKey.currentState!.validate()) {
-                          if (selectedDate == null) {
-                            setState(
-                              () => dateError = "Please select Date of Birth",
-                            );
-                            return;
-                          }
+                          // if (selectedDate == null) {
+                          //   print("selectedDateselectedDate${selectedDate}");
+                          //   setState(
+                          //     () => dateError = "Please select Date of Birth",
+                          //   );
+                          //   return;
+                          // }
                           if (selectedGender == null) {
                             setState(
                               () => genderError = "Please select Gender",
