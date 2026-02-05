@@ -15,7 +15,7 @@ import 'package:get/get.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //test
+  //test1
   Stripe.publishableKey = NetworkStrings.STRIPE_KEY;
 
   SystemChrome.setSystemUIOverlayStyle(
