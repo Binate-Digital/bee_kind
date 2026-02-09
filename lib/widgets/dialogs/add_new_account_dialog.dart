@@ -182,6 +182,9 @@ Future<Map<String, dynamic>?> addNewAccountDialog(BuildContext context) async {
                           },
                         );
 
+
+                        print("cardTokencardToken${cardToken}");
+
                         Navigator.pop(context);
                       },
                     ),

@@ -75,11 +75,14 @@ class CreateProfileScreen extends StatelessWidget {
                       isProfile: true,
                     ),
                   ),
-                  CustomText(
-                    text: controller.isVendor.value
-                        ? "Upload Business Logo"
-                        : "Upload Image",
-                    fontSize: 22.sp,
+                  GestureDetector(
+                    onTap: (){controller.loadProfileDataForEdit();},
+                    child: CustomText(
+                      text: controller.isVendor.value
+                          ? "Upload Business Logo"
+                          : "Upload Image",
+                      fontSize: 22.sp,
+                    ),
                   ),
                   SizedBox(height: 30.h),
 
@@ -110,6 +113,9 @@ class CreateProfileScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 10.h),
                   ],
+
+
+
 
                   /// -------------------- VENDOR FIELDS --------------------
                   if (controller.isVendor.value) ...[

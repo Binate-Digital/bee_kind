@@ -25,7 +25,7 @@ class VendorProfileDataModel {
 
   // Add floor and apartment number fields for vendors
   String? floorNumber;
-  String? apartmentNumber;
+  String? officeUnit;
 
   VendorProfileDataModel({
     this.businessName,
@@ -40,7 +40,7 @@ class VendorProfileDataModel {
     this.address,
     this.location,
     this.floorNumber,
-    this.apartmentNumber,
+    this.officeUnit,
   });
 
   Map<String, dynamic> toFormDataMap() {
@@ -72,7 +72,7 @@ class VendorProfileDataModel {
 
       // Send floor and apartment numbers as separate fields for proper backend storage
       "floorNumber": floorNumber,
-      "apartmentNumber": apartmentNumber,
+      "officeUnit": officeUnit,
 
       // Send location as JSON string for FormData compatibility
       if (locationJson != null) "location": locationJson,

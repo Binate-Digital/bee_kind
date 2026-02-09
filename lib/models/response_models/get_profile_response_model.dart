@@ -33,6 +33,7 @@ class ProfileData {
   bool? ageVerified;
 
   dynamic businessName;
+  dynamic businessDescription;
   dynamic openTime;
   dynamic closeTime;
   List<dynamic>? offDays;
@@ -76,6 +77,7 @@ class ProfileData {
     this.dateOfBirth,
     this.ageVerified,
     this.businessName,
+    this.businessDescription,
     this.openTime,
     this.closeTime,
     this.offDays,
@@ -118,6 +120,7 @@ class ProfileData {
     ageVerified = json['ageVerified'];
 
     businessName = json['businessName'];
+    businessDescription = json['businessDescription'];
     openTime = json['openTime'];
     closeTime = json['closeTime'];
 
@@ -189,6 +192,7 @@ class ProfileData {
       "ageVerified": ageVerified,
 
       "businessName": businessName,
+      "businessDescription": businessDescription,
       "openTime": openTime,
       "closeTime": closeTime,
       "offDays": offDays,
@@ -222,17 +226,21 @@ class VendorAddress {
   dynamic type;
   List<dynamic>? coordinates;
   String? address;
+  String? officeUnit;
+  String? floorNumber;
 
-  VendorAddress({this.type, this.coordinates, this.address});
+  VendorAddress({this.type, this.coordinates, this.address,this.officeUnit,this.floorNumber});
 
   VendorAddress.fromJson(Map<String, dynamic> json) {
     type = json['type'];
     coordinates = json['coordinates']?.cast<dynamic>();
     address = json['address'];
+    officeUnit = json['officeUnit'];
+    floorNumber = json['floorNumber'];
   }
 
   Map<String, dynamic> toJson() {
-    return {"type": type, "coordinates": coordinates, "address": address};
+    return {"type": type, "coordinates": coordinates, "address": address,"officeUnit":officeUnit,"floorNumber":floorNumber};
   }
 }
 

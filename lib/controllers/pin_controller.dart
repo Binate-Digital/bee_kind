@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:bee_kind/auth/reset_password_screen.dart';
 import 'package:bee_kind/common/create_profile_screen.dart';
+import 'package:bee_kind/controllers/profile_controller.dart';
 import 'package:bee_kind/models/data_models/otp_verification_data_model.dart';
 import 'package:bee_kind/models/response_models/otp_verification_response_model.dart';
 import 'package:bee_kind/services/network.dart';
@@ -144,6 +145,8 @@ class PinController extends GetxController {
           );
 
           if (isAccountCreate) {
+            ProfileController profileController=Get.put(ProfileController());
+            profileController.resetProfileForm();
             Get.offAll(() => CreateProfileScreen());
           } else {
             Get.offAll(() => const ResetPasswordScreen());

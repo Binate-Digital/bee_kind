@@ -17,19 +17,28 @@ class _OnboardingWebViewState extends State<OnboardingWebView> {
   void initState() {
     super.initState();
 
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white)
+    // Initialize the WebViewPlatform (this is required in version 4.0.1)
+    // WebViewWidget.platform = SurfaceAndroidWebView();
 
+    // Create the WebViewController
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted) // Enable JavaScript
+      ..setBackgroundColor(Colors.white) // Set background color
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {},
           onPageFinished: (url) {},
           onWebResourceError: (error) {},
-
         ),
-      )
-      ..loadRequest(Uri.parse(widget.url));
+      );
+
+    // Load the URL with custom headers
+    _controller.loadRequest(
+      Uri.parse(widget.url),
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile Safari/604.1',
+      },
+    );
   }
 
   @override
@@ -37,9 +46,12 @@ class _OnboardingWebViewState extends State<OnboardingWebView> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Vendor Onboarding",style: TextStyle(color: Colors.black),),
+        title: const Text(
+          "Vendor Onboarding",
+          style: TextStyle(color: Colors.black),
+        ),
       ),
-      body: WebViewWidget(controller: _controller,),
+      body: WebViewWidget(controller: _controller), // WebView widget
     );
   }
 }

@@ -120,6 +120,41 @@ class ProfileController extends GetxController {
     }
   }
 
+  void resetProfileForm() {
+    firstNameController.clear();
+    lastNameController.clear();
+    businessNameController.clear();
+    businessDescriptionController.clear();
+    // emailController.clear();
+    phoneController.clear();
+    streetAddressController.clear();
+    apartmentNumberController.clear();
+    floorNumberController.clear();
+
+    selectedGender.value = null;
+    selectedAddressType.value = null;
+    selectedDate.value = null;
+    openTime.value = null;
+    closeTime.value = null;
+
+    location = {};
+    locationAddress.value = '';
+    selectedOffDays.clear();
+    currentRadius.value = 50.0;
+    profileImage.value = null;
+    businessLicense.value = null;
+
+    // Reset errors
+    dateError.value = '';
+    genderError.value = '';
+    addressError.value = '';
+    locationAddressError.value = '';
+    openTimeError.value = '';
+    closeTimeError.value = '';
+    licenseError.value = '';
+    addresstypeError.value = '';
+  }
+
   /// Load existing profile data for edit mode
   Future<void> loadProfileDataForEdit() async {
     try {
@@ -151,7 +186,7 @@ class ProfileController extends GetxController {
         if (!pic.startsWith('http')) {
           pic =
               NetworkStrings.NETWORK_IMAGE_BASE_URL +
-              (pic.startsWith('/') ? pic.substring(1) : pic);
+                  (pic.startsWith('/') ? pic.substring(1) : pic);
         }
         existingProfileImageUrl.value = pic;
         log(
@@ -161,8 +196,8 @@ class ProfileController extends GetxController {
 
       if (isVendor.value) {
         // Load vendor-specific fields
-        businessNameController.text =
-            profileData.businessName?.toString() ?? '';
+        businessNameController.text = profileData.businessName?.toString() ?? '';
+        businessDescriptionController.text=profileData.businessDescription?.toString() ??"";
         // businessDescription is not in ProfileData, so we can't load it
 
         // Parse and set open/close times
@@ -210,7 +245,7 @@ class ProfileController extends GetxController {
             profileData.vendorAddress!.coordinates != null) {
           location = {
             "address":
-                profileData.vendorAddress!.address ??
+            profileData.vendorAddress!.address ??
                 profileData.addressName?.toString() ??
                 '',
             "coordinates": profileData.vendorAddress!.coordinates ?? [],
@@ -218,22 +253,21 @@ class ProfileController extends GetxController {
           };
           locationAddress.value =
               profileData.vendorAddress!.address ??
-              profileData.addressName?.toString() ??
-              '';
+                  profileData.addressName?.toString() ??
+                  '';
 
           // Try to extract floor and apartment numbers from previous location data if available
           // These might be stored in userAddress for vendors or in a different structure
-          if (profileData.userAddress != null &&
-              profileData.userAddress!.isNotEmpty) {
-            final firstAddress = profileData.userAddress!.first;
+          if (profileData.vendorAddress != null ) {
+            final firstAddress = profileData.vendorAddress!;
             if (firstAddress.floorNumber != null) {
               floorNumberController.text = firstAddress.floorNumber.toString();
               location["floorNumber"] = firstAddress.floorNumber.toString();
             }
-            if (firstAddress.apartmentNumber != null) {
-              apartmentNumberController.text = firstAddress.apartmentNumber
+            if (firstAddress.officeUnit != null) {
+              apartmentNumberController.text = firstAddress.officeUnit
                   .toString();
-              location["apartmentNumber"] = firstAddress.apartmentNumber
+              location["apartmentNumber"] = firstAddress.officeUnit
                   .toString();
             }
           }
@@ -264,7 +298,7 @@ class ProfileController extends GetxController {
           // Fallback to just address name if no coordinates available
           final addr =
               profileData.vendorAddress?.address ??
-              profileData.addressName.toString();
+                  profileData.addressName.toString();
           location = {"address": addr, "coordinates": [], "type": 'Point'};
           locationAddress.value = addr;
         }
@@ -276,7 +310,7 @@ class ProfileController extends GetxController {
           if (!doc.startsWith('http')) {
             doc =
                 NetworkStrings.NETWORK_IMAGE_BASE_URL +
-                (doc.startsWith('/') ? doc.substring(1) : doc);
+                    (doc.startsWith('/') ? doc.substring(1) : doc);
           }
           existingBusinessLicenseUrl.value = doc;
           log(
@@ -408,7 +442,7 @@ class ProfileController extends GetxController {
 
       final response = await network.getRequest(
         endPoint:
-            'auth/verification-status/$sessionId', // Adjust endpoint as needed
+        'auth/verification-status/$sessionId', // Adjust endpoint as needed
         isHeaderRequire: true,
       );
 
@@ -431,9 +465,9 @@ class ProfileController extends GetxController {
   }
 
   Future<void> handleCreateProfile(
-    BuildContext context, {
-    bool isEdit = false,
-  }) async {
+      BuildContext context, {
+        bool isEdit = false,
+      }) async {
     // if (!validateForm(context, isEdit: isEdit)) {
     //   log("Validation Failed");
     //   return;
@@ -453,6 +487,18 @@ class ProfileController extends GetxController {
       // SELECT MODEL BASED ON USER OR VENDOR
       // ---------------------------------------------------------
       dynamic model;
+
+      final profilePictureFile = profileImage.value != null
+          ? await dio.MultipartFile.fromFile(profileImage.value!.path, filename: 'profile_picture.jpg')
+          : null;
+
+      print("profilePictureFile${profilePictureFile}");
+
+      final businessLicenseFile = businessLicense.value != null
+          ? await dio.MultipartFile.fromFile(businessLicense.value!.path, filename: 'business_license.pdf')
+          : null;
+      print("businessLicenseFile${businessLicenseFile}");
+
 
       if (!isVendor.value) {
         // --------------------- USER MODEL ---------------------
@@ -513,7 +559,7 @@ class ProfileController extends GetxController {
           // map
           // Add floor and apartment numbers as separate fields
           floorNumber: floorNumberController.text.trim(),
-          apartmentNumber: apartmentNumberController.text.trim(),
+          officeUnit: apartmentNumberController.text.trim(),
         );
 
         // Debug log to check phone number
@@ -531,6 +577,14 @@ class ProfileController extends GetxController {
           value == null || (value is String && value.isEmpty),
         );
 
+      if (profilePictureFile != null) {
+        baseMap['profilePicture'] = profilePictureFile;
+      }
+      if (businessLicenseFile != null) {
+        baseMap['businessLicense'] = businessLicenseFile;
+      }
+
+      print("businessLicenseFile${businessLicenseFile}");
       // Debug: ensure floor/apartment/location are present before sending
       log('Submitting vendor floorNumber: ${floorNumberController.text}');
       log(
@@ -560,8 +614,11 @@ class ProfileController extends GetxController {
       // API CALL - Use POST for create, PATCH for update
       // ---------------------------------------------------------
 
+
+      print("responseresponse${isEdit}");
       final response = isEdit
-          ? await network.patchRequest(
+          ?
+      await network.patchRequest(
         endPoint: NetworkStrings.updateProfile,
         data: formData,
         isHeaderRequire: true,
@@ -574,78 +631,78 @@ class ProfileController extends GetxController {
 
       if (isEdit == false) {
 
-        _launchURL(response?.data['data']['onboardingUrl']);
-        // Get.to(
-        //       () => OnboardingWebView(
-        //     url: response?.data['data']['onboardingUrl'],
-        //   ),
-        // );
+        // _launchURL(response?.data['data']['onboardingUrl']);
+        Get.to(
+              () => OnboardingWebView(
+            url: response?.data['data']['onboardingUrl'],
+          ),
+        );
       }
       else {
-        if (response == null) {
-          isLoading.value = false;
-          AppDialogs.showToast(
-            isEdit
-                ? "Unable to update profile. Please try again."
-                : "Unable to complete profile. Please try again.",
+      if (response == null) {
+        isLoading.value = false;
+        AppDialogs.showToast(
+          isEdit
+              ? "Unable to update profile. Please try again."
+              : "Unable to complete profile. Please try again.",
+        );
+        return;
+      }
+
+      final data = response.data;
+      log("${isEdit ? "Update" : "Create"} Profile Response: $data");
+
+      if (data["status"] == true) {
+        isLoading.value = false;
+        AppDialogs.showToast(
+          data["message"] ??
+              (isEdit
+                  ? "Profile updated successfully"
+                  : "Profile submitted successfully"),
+        );
+
+        // For both create and edit, refresh the profile data to get updated info
+        try {
+          final baseController = Get.find<BaseViewController>();
+          // Persist submitted floor/apartment into prefs immediately so UI updates
+          await prefs.setString(
+            'floorNumber',
+            floorNumberController.text.trim(),
           );
-          return;
+          await prefs.setString(
+            'apartmentNumber',
+            apartmentNumberController.text.trim(),
+          );
+          await baseController.getProfile();
+          log(
+            "Profile refreshed successfully after ${isEdit ? 'update' : 'creation'}",
+          );
+        } catch (e) {
+          log(
+            "Failed to refresh profile after ${isEdit ? 'update' : 'creation'}: $e",
+          );
+          // Don't show error to user, just log it
         }
 
-        final data = response.data;
-        log("${isEdit ? "Update" : "Create"} Profile Response: $data");
-
-        if (data["status"] == true) {
-          isLoading.value = false;
-          AppDialogs.showToast(
-            data["message"] ??
-                (isEdit
-                    ? "Profile updated successfully"
-                    : "Profile submitted successfully"),
+        if (!isEdit) {
+          await prefs.isProfileComplete(
+            data["data"]["user"]["isProfileCompleted"],
           );
+          log("IS PROFILE COMPLETE: ${prefs.checkProfile()}");
+        }
 
-          // For both create and edit, refresh the profile data to get updated info
-          try {
-            final baseController = Get.find<BaseViewController>();
-            // Persist submitted floor/apartment into prefs immediately so UI updates
-            await prefs.setString(
-              'floorNumber',
-              floorNumberController.text.trim(),
-            );
-            await prefs.setString(
-              'apartmentNumber',
-              apartmentNumberController.text.trim(),
-            );
-            await baseController.getProfile();
-            log(
-              "Profile refreshed successfully after ${isEdit ? 'update' : 'creation'}",
-            );
-          } catch (e) {
-            log(
-              "Failed to refresh profile after ${isEdit ? 'update' : 'creation'}: $e",
-            );
-            // Don't show error to user, just log it
-          }
-
-          if (!isEdit) {
-            await prefs.isProfileComplete(
-              data["data"]["user"]["isProfileCompleted"],
-            );
-            log("IS PROFILE COMPLETE: ${prefs.checkProfile()}");
-          }
-
-          if (!isEdit) {
-            Get.offAll(() => BaseView());
-          } else {
-            Get.back();
-          }
+        if (!isEdit) {
+          Get.offAll(() => BaseView());
         } else {
-          isLoading.value = false;
-          AppDialogs.showToast(
-            data["message"] ??
-                (isEdit ? "Profile update failed" : "Profile submit failed"),
-          );
+          Get.back();
         }
+      } else {
+        isLoading.value = false;
+        AppDialogs.showToast(
+          data["message"] ??
+              (isEdit ? "Profile update failed" : "Profile submit failed"),
+        );
+      }
       }
     }
     catch (e) {
@@ -716,9 +773,9 @@ class ProfileController extends GetxController {
 
   /// Pick open/close time
   Future<void> pickTime(
-    BuildContext context, {
-    required bool isOpenTime,
-  }) async {
+      BuildContext context, {
+        required bool isOpenTime,
+      }) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -959,33 +1016,33 @@ class ProfileController extends GetxController {
         borderRadius: isCircular ? BorderRadius.circular(100) : borderRadius,
         child: hasImage
             ? (image != null
-                  ? Image.file(image, fit: BoxFit.cover)
-                  : Image.network(networkImageUrl, fit: BoxFit.cover))
+            ? Image.file(image, fit: BoxFit.cover)
+            : Image.network(networkImageUrl, fit: BoxFit.cover))
             : Center(
-                child: isProfile
-                    ? Icon(
-                        Icons.camera_alt_rounded,
-                        size: 40,
-                        color: AppColors.yellow2,
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.insert_drive_file,
-                            size: 40,
-                            color: AppColors.yellow2,
-                          ),
-                          const SizedBox(height: 8),
-                          CustomText(
-                            text: placeholderText,
-                            fontColor: AppColors.yellow2,
-                            fontSize: 14,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
+          child: isProfile
+              ? Icon(
+            Icons.camera_alt_rounded,
+            size: 40,
+            color: AppColors.yellow2,
+          )
+              : Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.insert_drive_file,
+                size: 40,
+                color: AppColors.yellow2,
               ),
+              const SizedBox(height: 8),
+              CustomText(
+                text: placeholderText,
+                fontColor: AppColors.yellow2,
+                fontSize: 14,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
