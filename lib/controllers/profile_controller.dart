@@ -629,17 +629,19 @@ class ProfileController extends GetxController {
         isHeaderRequire: true,
       );
 
-      if (isEdit == false) {
-
-        // _launchURL(response?.data['data']['onboardingUrl']);
-        Get.to(
-              () => OnboardingWebView(
-            url: response?.data['data']['onboardingUrl'],
-          ),
-        );
-      }
-      else {
+      // if (isEdit == false) {
+      //
+      //   // _launchURL(response?.data['data']['onboardingUrl']);
+      //   Get.to(
+      //         () => StripeOnboardingWebView(
+      //           onboardingUrl: response?.data['data']['onboardingUrl'],
+      //     ),
+      //   );
+      // }
+      // else {
       if (response == null) {
+
+        // hhfhfj@gh.com
         isLoading.value = false;
         AppDialogs.showToast(
           isEdit
@@ -703,7 +705,7 @@ class ProfileController extends GetxController {
               (isEdit ? "Profile update failed" : "Profile submit failed"),
         );
       }
-      }
+      // }
     }
     catch (e) {
       isLoading.value = false;

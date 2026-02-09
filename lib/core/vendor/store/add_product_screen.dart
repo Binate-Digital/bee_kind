@@ -199,6 +199,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
               isHeaderRequire: true,
             );
 
+
+
       if (!mounted) return;
       Navigator.pop(context); // Close loading dialog
 

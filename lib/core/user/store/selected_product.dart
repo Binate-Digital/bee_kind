@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../utils/app_dialogs.dart' show AppDialogs;
+
 class SelectedProduct extends StatefulWidget {
   const SelectedProduct({
     super.key,
@@ -587,7 +589,13 @@ class _SelectedProductState extends State<SelectedProduct>
                               ],
                         onTap: canAddToCart
                             ? () {
-                                double unitPrice =
+
+                          final sp = controller.singleProduct.value?.data;
+
+                          final qtytocheck = sp?.quantity ?? widget.quantity ?? 0;
+
+
+                          double unitPrice =
                                     (widget.hasDiscount
                                         ? double.tryParse(
                                             widget.afterDiscountPrice
@@ -597,24 +605,46 @@ class _SelectedProductState extends State<SelectedProduct>
                                             widget.price.toString(),
                                           )) ??
                                     0;
+                                print("dljfdsfbdlfn${unitPrice}");
 
+
+                                print("widget.hasDiscount${widget.hasDiscount}");
+                                print("widget.afterDiscountPrice.toString()${widget.afterDiscountPrice.toString()}");
+                                print("widget.price.toString(),${widget.price.toString()}");
                                 int qty = controller.quantityCount.value;
 
-                                controller
-                                    .addItems(
-                                      OrderItem(
-                                        productId: widget.productId,
-                                        productName: widget.productName,
-                                        productImage:
-                                            widget.productImages?.first,
-                                        unitPrice: unitPrice,
-                                        quantity: qty,
-                                      ),
-                                    )
-                                    .then((value) {
-                                      controller.baseController.changeTab(1);
-                                      Get.until((route) => route.isFirst);
-                                    });
+                                print("qtyqty${qty}");
+                          print("qtytocheckqtytocheck${qtytocheck}");
+
+                                if(qtytocheck>=qty){
+
+                                  controller
+                                      .addItems(
+                                        OrderItem(
+                                          productId: widget.productId,
+                                          productName: widget.productName,
+                                          productImage:
+                                              widget.productImages?.first,
+                                          unitPrice: unitPrice,
+                                          quantity: qty,
+                                        ),
+                                      )
+                                      .then((value) {
+                                        controller.baseController.changeTab(1);
+                                        Get.until((route) => route.isFirst);
+                                      });
+                                  print("less");
+                                }
+                                else{
+
+                                  AppDialogs.showToast(
+                                       "Only ${qtytocheck} items are available in stock. Please reduce the quantity to continue.",
+                                  );
+                                  print("moew");
+                                }
+
+
+
 
                                 log(
                                   "Cart total now: ${controller.calculateTotalCartPrice()}",

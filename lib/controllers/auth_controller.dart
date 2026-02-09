@@ -121,12 +121,32 @@ class AuthController extends GetxController {
 
   void toggleLoginPasswordVisibility() => loginObscure.toggle();
 
+  Future<String?> regenerateFcmToken() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    await messaging.deleteToken();   // delete old
+    newToken = await messaging.getToken();
+
+    print("Regenerated Token: $newToken");
+    
+    return newToken;
+  }
+
+
   void handleSignIn() async {
     if (!loginFormKey.currentState!.validate()) return;
 
     try {
       isLoading.value = true;
-      final token = await FirebaseMessaging.instance.getToken();
+
+
+          FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+                   await messaging.deleteToken();   
+
+                          final token = await FirebaseMessaging.instance.getToken();
+
+      print("FCMtokenFCMtoken${token}");
 
       final model = LoginDataModel(
         email: loginEmailCtrl.text.trim(),
@@ -180,8 +200,8 @@ class AuthController extends GetxController {
                 loginResponse.message ?? "Something Went Wrong",
               );
               Get.to(
-                () => OnboardingWebView(
-                  url: response.data['data']['onboardingUrl'],
+                () => StripeOnboardingWebView(
+                   onboardingUrl: response.data['data']['onboardingUrl'],
                 ),
               );
             } else {
@@ -264,6 +284,8 @@ class AuthController extends GetxController {
 
   RxBool resetIsObscure = true.obs;
   RxBool resetIsAlsoObscure = true.obs;
+
+  String? newToken;
 
   void toggleResetPasswordVisibility() => resetIsObscure.toggle();
 

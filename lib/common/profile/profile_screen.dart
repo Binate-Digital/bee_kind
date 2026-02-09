@@ -119,15 +119,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               image: AssetsPath.person,
               text: "Edit Profile",
             ),
-            SizedBox(height: 20.h),
-            ProfileOption(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => AddressScreen()),
-              ),
-              image: AssetsPath.location,
-              text: "Address",
-            ),
+
+            prefs.getString("role")=="user"?
+                Column(
+                  children: [
+                    SizedBox(height: 20.h),
+                    ProfileOption(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => AddressScreen()),
+                      ),
+                      image: AssetsPath.location,
+                      text: "Address",
+                    ),
+                  ],
+                ):SizedBox(),
+
             SizedBox(height: 20.h),
             ProfileOption(
               onTap: () {

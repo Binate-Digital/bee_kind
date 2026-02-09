@@ -20,20 +20,19 @@ class StoreScreen extends GetView<StoreController> {
 
   @override
   Widget build(BuildContext context) {
+
+    print("sdlnnd");
+    controller.setStoreData(data);
     // Set initial data if provided
-    if (data != null) {
+    if (data != null && controller.storeData.value == null) {
       controller.setStoreData(data);
     }
 
-    // Use Obx to reactively update when store data changes
     return Obx(() {
-      // Get data from controller's reactive variable
       final storeData = controller.storeData.value ?? data;
-
       return _buildScaffold(context, storeData);
     });
   }
-
   Widget _buildScaffold(BuildContext context, StoreDetail? data) {
     return Scaffold(
       appBar: PreferredSize(
@@ -132,8 +131,7 @@ class StoreScreen extends GetView<StoreController> {
                                     padding: EdgeInsets.only(left: 11.h),
                                     child: CustomText(
                                       text:
-                                          data?.store?.vendorAddress?.address ??
-                                          data?.store?.addressName ??
+                                          data?.store?.vendorAddress?.address ?? data?.store?.addressName ??
                                           "Address not available",
                                       fontSize: 16.sp,
                                       maxLines: 2,
@@ -296,7 +294,7 @@ class StoreScreen extends GetView<StoreController> {
               ],
             ),
             SizedBox(height: 10.h),
-
+            data != null && data!.popularProducts!.isNotEmpty?
             SizedBox(
               height: 195.h,
               child: Align(
@@ -347,6 +345,13 @@ class StoreScreen extends GetView<StoreController> {
                     : Center(
                         child: CustomText(text: "Products Not Available!"),
                       ),
+              ),
+            ):Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: SizedBox(
+                child: Center(
+                  child: CustomText(text: "Products Not Available!"),
+                ),
               ),
             ),
 

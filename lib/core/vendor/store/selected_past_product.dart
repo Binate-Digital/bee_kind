@@ -651,6 +651,8 @@ class _SelectedOrderState extends State<SelectedOrder> {
                 CustomButton(
                   text: text,
                   onTap: () async {
+
+                    print("currentStepcurrentStep${currentStep}");
                     if (currentStep == 0) {
                       // Case: Ready for Pickup -> Needs Driver Details
                       final driverDetails =

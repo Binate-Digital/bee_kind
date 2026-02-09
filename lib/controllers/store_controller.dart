@@ -647,6 +647,10 @@ class StoreController extends GetxController {
     final int qty = item.quantity ?? 0;
     final double unitPrice = item.unitPrice ?? 0;
 
+
+    print("idid${id}");
+    print("qtyqty${qty}");
+    print("unitPriceunitPrice${unitPrice}");
     if (id == null || qty <= 0 || unitPrice <= 0) {
       AppDialogs.showToast("Invalid product information");
       return;

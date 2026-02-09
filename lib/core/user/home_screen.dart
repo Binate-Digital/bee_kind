@@ -20,6 +20,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../widgets/custom_slider.dart';
+
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
 
@@ -122,27 +124,31 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       body: Stack(
         children: [
           // FULL SCREEN MAP
-          SizedBox.expand(
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target:
-                    controller.currentLatLng.value ??
-                    const LatLng(24.870912, 67.0826496),
-                zoom: 10,
-              ),
-              markers: controller.markers.value,
-              circles: controller.circles.value,
-              onMapCreated: (ctrl) {
-                controller.mapController = ctrl;
-                // The map will be positioned by updateMapToSelectedAddress() called in initState
-              },
-              myLocationEnabled: false,
-              myLocationButtonEnabled: true,
-              zoomControlsEnabled: true,
-              mapToolbarEnabled: false,
-              compassEnabled: false,
-              buildingsEnabled: true,
-            ),
+          GetBuilder<BaseViewController>(
+            builder: (controller) {
+              return SizedBox.expand(
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target:
+                        controller.currentLatLng.value ??
+                        const LatLng(24.870912, 67.0826496),
+                    zoom: 10,
+                  ),
+                  markers: controller.markers.value,
+                  circles: controller.circles.value,
+                  onMapCreated: (ctrl) {
+                    controller.mapController = ctrl;
+                    // The map will be positioned by updateMapToSelectedAddress() called in initState
+                  },
+                  myLocationEnabled: false,
+                  myLocationButtonEnabled: true,
+                  zoomControlsEnabled: true,
+                  mapToolbarEnabled: false,
+                  compassEnabled: false,
+                  buildingsEnabled: true,
+                ),
+              );
+            }
           ),
 
           // TOP SEARCH BAR
@@ -292,6 +298,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                           ],
                                         ),
                                         SizedBox(height: 20.h),
+                                        Padding(
+                                          padding: EdgeInsets.only(top: 30.h),
+                                          child: CustomSliderWidget(
+                                            min: controller.filterminRadius,
+                                            max: controller.filtermaxRadius,
+                                            initialValue: controller.currentRadius.value,
+                                            unit: "mi",
+                                            onChanged: (value) =>
+                                            controller.currentRadius.value = value,
+                                          ),
+                                        ),
                                         CustomButton(
                                           onTap: () {
                                             Get.back();
