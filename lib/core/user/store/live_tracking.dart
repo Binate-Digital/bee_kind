@@ -120,6 +120,8 @@ class _LiveTrackingState extends State<LiveTracking> {
         errorMessage = null;
       });
 
+
+      print("dslbnds${widget.orderId}");
       final response = await network.getRequest(
         endPoint: "${NetworkStrings.getSingleOrder}/${widget.orderId}",
         isHeaderRequire: true,
@@ -354,12 +356,207 @@ class _LiveTrackingState extends State<LiveTracking> {
     return AppBarBaseView(
       title: estimatedTimeText ?? "Calculating ETA...",
       button: _buildTopContent(context, order, currentStep),
-      body: _buildMapAndBottomContent(
-        order,
-        userAddress,
-        storeAddress,
-        firstItem,
+      body:
+      CustomGoogleMap(
+        onMapCreated: (controller) => mapController = controller,
+        initialCameraPosition: CameraPosition(
+          target:
+          pickupLatLng ?? const LatLng(24.861714457432807, 67.07000228675905),
+          zoom: 14,
+        ),
+        markers: _markers,
+        circles: const {},
+        polylines: _polylines,
+        myLocationEnabled: false,
+        myLocationButtonEnabled: true,
+        zoomControlsEnabled: false,
+        mapToolbarEnabled: false,
+        compassEnabled: true,
+        buildingsEnabled: true,
+        widget: Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 10.h),
+
+              /// PICKUP (store)
+              // LocationBar(onTap: () {}, address: pickupAddress, isPickup: true),
+
+              // Container(
+              //   margin: EdgeInsets.only(left: 330.w),
+              //   width: 2.w,
+              //   height: 30.h,
+              //   child: VerticalDottedLine(
+              //     color: AppColors.yellow2,
+              //     strokeWidth: 2,
+              //     dashWidth: 2,
+              //     dashSpace: 3,
+              //     roundedDots: true,
+              //   ),
+              // ),
+
+              /// DROPOFF (user)
+              // LocationBar(onTap: () {}, address: dropoffAddress, isPickup: false),
+
+              /// ORDER SUMMARY CARD
+              ///
+              ///
+
+
+
+              Container(
+                // height: 150,
+                child: ListView.builder(
+                  itemCount: order.items?.length??0,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                  return Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                    margin: EdgeInsets.symmetric(vertical: 10.h),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.blackColor.withValues(alpha: 0.15),
+                          blurRadius: 25.r,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                      color: AppColors.whiteColor,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        /// IMAGE
+                        /// IMAGE
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20.r),
+                          child: Container(
+                            width: 100.w,
+                            height: 100.h,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20.r),
+                              border: Border.all(color: AppColors.yellow2, width: 1.w),
+                              color: AppColors.whiteColor,
+                              image: DecorationImage(
+                                image:
+                                (order.items?[index].productImage != null )
+                                    ?
+                                  NetworkImage(order.items![index].productImage.toString())
+                                    : const AssetImage(AssetsPath.product),
+                                fit: BoxFit.cover, // 🔥 FULL FILL
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // ClipRRect(
+                        //   borderRadius: BorderRadius.circular(20.r),
+                        //   child: Container(
+                        //     width: 100.w,
+                        //     height: 100.h,
+                        //     decoration: BoxDecoration(
+                        //       borderRadius: BorderRadius.circular(20.r),
+                        //       border: Border.all(color: AppColors.yellow2, width: 1.w),
+                        //       color: AppColors.whiteColor,
+                        //       image: DecorationImage(
+                        //         image: imageUrl != null && imageUrl!.isNotEmpty
+                        //             ? NetworkImage(imageUrl!)
+                        //             : AssetImage(AssetsPath.product) as ImageProvider,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+
+                        /// MIDDLE TEXT
+                        Container(
+                          width: 100.w,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CustomText(
+                                text: order.items![index].productName ?? "N/A",
+                                fontSize:  18.sp,
+                                weight: FontWeight.bold,
+                              ),
+                              SizedBox(height: 10.h),
+                              CustomText(text: "Qty: ${order.items![index].quantity ?? '--'}", fontSize: 18.sp),
+                              SizedBox(height: 10.h),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.lightGreenAccent,
+                                  borderRadius: BorderRadius.circular(30.r),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: CustomText(text: order.status ?? "N/A", fontSize: 12.sp),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(width: 35.w),
+
+                        /// PRICE + BUTTON
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            CustomText(
+                              text: order.items![index].price != null
+                                  ? "\$${order.items![index].price!.toStringAsFixed(2)}"
+                                  : "\$0.00",
+                              fontSize: 20.sp,
+                              fontColor: AppColors.yellow2,
+                              weight: FontWeight.bold,
+                            ),
+                            SizedBox(height: 10.h),
+                            // hideButton
+                            //     ?
+                            SizedBox(width: 100.w)
+                                // :
+                            // CustomButton(
+                            //   onTap: onTap,
+                            //   text: "Track Order",
+                            //   width: 100.w,
+                            //   height: 40.h,
+                            //   fontSize: 13.sp,
+                            //   horizontalPadding: 10.w,
+                            //   verticalPadding: 5.h,
+                            // ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },),
+              )
+
+
+              // OrderItem(
+              //   hideButton: true,
+              //   onTap: () {},
+              //   verticalPadding: 45.h,
+              //   horizontalPadding: 45.w,
+              //   productName: firstItem?.productName,
+              //   quantity: firstItem?.quantity,
+              //   price: firstItem?.price,
+              //   status: order.status,
+              //   imageUrl: firstItem?.productImage,
+              // ),
+            ],
+          ),
+        ),
       ),
+
+      // _buildMapAndBottomContent(
+      //   order,
+      //   userAddress,
+      //   storeAddress,
+      //   firstItem,
+      // ),
     );
   }
 

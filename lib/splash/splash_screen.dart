@@ -19,8 +19,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    PushNotificationService.initialize();
-    _getFCMToken();
+    // PushNotificationService.initialize();
+    // _getFCMToken();
     Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,

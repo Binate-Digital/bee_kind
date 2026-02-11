@@ -9,6 +9,7 @@ class UserProfileDataModel {
   String? phoneNumber;
   String? dateOfBirth;
   String? gender;
+  String? deviceToken;
 
   String? flatNumber;
   String? suiteNumber;
@@ -26,6 +27,7 @@ class UserProfileDataModel {
     this.phoneNumber,
     this.dateOfBirth,
     this.gender,
+    this.deviceToken,
     this.flatNumber,
     this.suiteNumber,
     this.appartmentNumber,
@@ -68,6 +70,7 @@ class UserProfileDataModel {
       "phoneNumber": phoneNumber,
       "dateOfBirth": dateOfBirth,
       "gender": gender,
+      "deviceToken": deviceToken,
       "flatNumber": flatNumber,
       "suiteNumber": suiteNumber,
       "appartmentNumber": appartmentNumber,

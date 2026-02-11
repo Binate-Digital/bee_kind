@@ -92,7 +92,9 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 return GestureDetector(
                   onTap: () {}, // If you want whole tile tap as well
                   child: OrderItem(
-                    onTap: () => Navigator.push(
+                    onTap: () =>
+
+                        Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => LiveTracking(orderId: order.sId ?? ""),

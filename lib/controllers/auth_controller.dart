@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:bee_kind/auth/pin_screen.dart';
 import 'package:bee_kind/auth/sign_in_screen.dart';
@@ -19,7 +20,9 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../utils/global.dart';
 import '../widgets/webview_flutter_widget.dart';
+import 'firebase_services.dart';
 
 class AuthController extends GetxController {
   final SharedPrefs prefs = SharedPrefs();
@@ -121,6 +124,31 @@ class AuthController extends GetxController {
 
   void toggleLoginPasswordVisibility() => loginObscure.toggle();
 
+
+
+
+  Future<void> debugFcm() async {
+    final messaging = FirebaseMessaging.instance;
+
+    if (Platform.isIOS) {
+      final settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      print("iOS permission: ${settings.authorizationStatus}");
+
+      // Try to read APNs token
+      final apns = await messaging.getAPNSToken();
+      print("APNs token: $apns");
+    }
+
+    final fcm = await messaging.getToken();
+    print("FCM token: $fcm");
+  }
+
+
   Future<String?> regenerateFcmToken() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
@@ -133,82 +161,85 @@ class AuthController extends GetxController {
   }
 
 
-  void handleSignIn() async {
-    if (!loginFormKey.currentState!.validate()) return;
+    void handleSignIn() async {
+      if (!loginFormKey.currentState!.validate()) return;
 
-    try {
-      isLoading.value = true;
+      try {
+        isLoading.value = true;
 
 
-          FirebaseMessaging messaging = FirebaseMessaging.instance;
+        final token = await PushTokenService.getFcmTokenSafe();
+        print("FCM token: $token");
 
-                   await messaging.deleteToken();   
+        print("FCMtokenFCMtoken${token}");
 
-                          final token = await FirebaseMessaging.instance.getToken();
+        final model = LoginDataModel(
+          email: loginEmailCtrl.text.trim(),
+          password: loginPasswordCtrl.text.trim(),
+          role: role,
+          deviceToken: Global.fcmToken.toString(),
+        );
 
-      print("FCMtokenFCMtoken${token}");
+        log("Login body: ${model.toJson()}");
 
-      final model = LoginDataModel(
-        email: loginEmailCtrl.text.trim(),
-        password: loginPasswordCtrl.text.trim(),
-        role: role,
-        deviceToken: token.toString(),
-      );
+        final response = await network.postRequest(
+          endPoint: NetworkStrings.login,
+          data: model.toJson(),
+        );
 
-      log("Login body: ${model.toJson()}");
+        final loginResponse = LoginResponseModel.fromJson(response?.data);
 
-      final response = await network.postRequest(
-        endPoint: NetworkStrings.login,
-        data: model.toJson(),
-      );
+        if (response != null && response.statusCode == NetworkStrings.success) {
+          log("Login Response Parsed: ${loginResponse.toJson()}");
 
-      final loginResponse = LoginResponseModel.fromJson(response?.data);
+          if (loginResponse.status == true) {
+            print("loginResponse.message");
+            print(loginResponse.message);
+            //Save user data locally
+            await prefs.setGlobalEmail(loginResponse.data?.email ?? "");
+            await prefs.setuserId(loginResponse.data?.sId ?? "");
+            await prefs.isProfileComplete(
+              loginResponse.data?.isProfileCompleted ?? false,
+            );
 
-      if (response != null && response.statusCode == NetworkStrings.success) {
-        log("Login Response Parsed: ${loginResponse.toJson()}");
+            log("Is Profile Complete Sign In: ${prefs.checkProfile()}");
+            await prefs.setuserToken(loginResponse.data?.userAuthToken ?? "");
+            log("token is during sign in: ${prefs.getUserToken()}");
+            log("user Id: ${prefs.getUserId()}");
+            log(
+              "Stored user data -> "
+              "Email: ${loginResponse.data?.email}, "
+              "Role: ${loginResponse.data?.role}, "
+              "isProfileCompleted: ${loginResponse.data?.isProfileCompleted}"
+              "Token: ${loginResponse.data?.userAuthToken}",
+            );
+            //
+            isLoading.value = false;
+            //
 
-        if (loginResponse.status == true) {
-          print("loginResponse.message");
-          print(loginResponse.message);
-          //Save user data locally
-          await prefs.setGlobalEmail(loginResponse.data?.email ?? "");
-          await prefs.setuserId(loginResponse.data?.sId ?? "");
-          await prefs.isProfileComplete(
-            loginResponse.data?.isProfileCompleted ?? false,
-          );
-
-          log("Is Profile Complete Sign In: ${prefs.checkProfile()}");
-          await prefs.setuserToken(loginResponse.data?.userAuthToken ?? "");
-          log("token is during sign in: ${prefs.getUserToken()}");
-          log("user Id: ${prefs.getUserId()}");
-          log(
-            "Stored user data -> "
-            "Email: ${loginResponse.data?.email}, "
-            "Role: ${loginResponse.data?.role}, "
-            "isProfileCompleted: ${loginResponse.data?.isProfileCompleted}"
-            "Token: ${loginResponse.data?.userAuthToken}",
-          );
-          //
-          isLoading.value = false;
-          //
-
-          print("loginResponse.data?.stripeCustomerId");
-          print(loginResponse.data?.stripeCustomerId);
-          if (!prefs.checkProfile()) {
-            if (loginResponse.message == "Vendor onboarding required") {
-              AppDialogs.showToast(
-                loginResponse.message ?? "Something Went Wrong",
-              );
-              Get.to(
-                () => StripeOnboardingWebView(
-                   onboardingUrl: response.data['data']['onboardingUrl'],
-                ),
-              );
+            print("loginResponse.data?.stripeCustomerId");
+            print(loginResponse.data?.stripeCustomerId);
+            if (!prefs.checkProfile()) {
+              if (loginResponse.message == "Vendor onboarding required") {
+                AppDialogs.showToast(
+                  loginResponse.message ?? "Something Went Wrong",
+                );
+                Get.to(
+                  () => StripeOnboardingWebView(
+                     onboardingUrl: response.data['data']['onboardingUrl'],
+                  ),
+                );
+              } else {
+                Get.to(() => CreateProfileScreen());
+              }
             } else {
-              Get.to(() => CreateProfileScreen());
+              Get.offAll(() => BaseView());
             }
           } else {
-            Get.offAll(() => BaseView());
+            isLoading.value = false;
+            AppDialogs.showToast(
+              loginResponse.message ?? "Login failed. Check credentials.",
+            );
           }
         } else {
           isLoading.value = false;
@@ -216,17 +247,11 @@ class AuthController extends GetxController {
             loginResponse.message ?? "Login failed. Check credentials.",
           );
         }
-      } else {
+      } catch (e) {
+        log("Login exception: $e");
         isLoading.value = false;
-        AppDialogs.showToast(
-          loginResponse.message ?? "Login failed. Check credentials.",
-        );
       }
-    } catch (e) {
-      log("Login exception: $e");
-      isLoading.value = false;
     }
-  }
 
   // ---------------- FORGOT PASSWORD ----------------
   final forgotEmailCtrl = TextEditingController();

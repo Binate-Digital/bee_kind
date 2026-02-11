@@ -21,6 +21,7 @@ class VendorProfileDataModel {
   File? profilePicture;
 
   String? address;
+  String? deviceToken;
   Map<String, dynamic>? location;
 
   // Add floor and apartment number fields for vendors
@@ -38,6 +39,7 @@ class VendorProfileDataModel {
     this.businessLicense,
     this.profilePicture,
     this.address,
+    this.deviceToken,
     this.location,
     this.floorNumber,
     this.officeUnit,
@@ -69,6 +71,7 @@ class VendorProfileDataModel {
       "deliveryRadius": deliveryRadius,
 
       "address": address,
+      "deviceToken": deviceToken,
 
       // Send floor and apartment numbers as separate fields for proper backend storage
       "floorNumber": floorNumber,

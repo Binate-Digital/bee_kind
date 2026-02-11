@@ -1,7 +1,26 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'global.dart';
+
 class Validation {
+
+  static getFCMToken() async {
+
+    final _firebaseMessaging = FirebaseMessaging.instance;
+    String? apnsToken =  await _firebaseMessaging.getAPNSToken();
+    print('APNS Token: $apnsToken');
+    print("getFCMTokengetFCMToken");
+    await FirebaseMessaging.instance.getToken().then((value) async {
+
+      await Future.delayed(Duration(seconds: 2));
+      Global.fcmToken = value;
+      print("FCM Token => $value");
+    }).catchError((error) {
+      print("FCM Token Error => $error");
+    });
+  }
   // Phone number regex (basic international format)
   static final RegExp phoneRegex = RegExp(
     r'^\+?\d{0,3}?[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}$',
@@ -231,4 +250,5 @@ class USPhoneNumberFormatter extends TextInputFormatter {
       selection: TextSelection.collapsed(offset: cursorPosition),
     );
   }
+
 }

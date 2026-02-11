@@ -23,6 +23,7 @@ import 'package:place_picker/entities/location_result.dart';
 import 'package:place_picker/widgets/place_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../utils/global.dart';
 import '../widgets/webview_flutter_widget.dart';
 
 class ProfileController extends GetxController {
@@ -511,6 +512,8 @@ class ProfileController extends GetxController {
           // dateOfBirth: selectedDate.value?.toIso8601String(),
           appartmentNumber: apartmentNumberController.text.trim(),
           floorNumber: floorNumberController.text.trim(),
+          deviceToken: Global.fcmToken,
+
 
           address: selectedAddressType.value,
           // location: location, // map
@@ -560,6 +563,7 @@ class ProfileController extends GetxController {
           // Add floor and apartment numbers as separate fields
           floorNumber: floorNumberController.text.trim(),
           officeUnit: apartmentNumberController.text.trim(),
+            deviceToken: Global.fcmToken
         );
 
         // Debug log to check phone number
@@ -615,15 +619,23 @@ class ProfileController extends GetxController {
       // ---------------------------------------------------------
 
 
-      print("responseresponse${isEdit}");
+      print("responseresponse${(isVendor.value)}");
       final response = isEdit
           ?
+      // null
+
+
+
+
       await network.patchRequest(
         endPoint: NetworkStrings.updateProfile,
         data: formData,
         isHeaderRequire: true,
       )
-          : await network.postRequest(
+          :
+
+          // null;
+      await network.postRequest(
         endPoint: NetworkStrings.completeProfile,
         data: formData,
         isHeaderRequire: true,
