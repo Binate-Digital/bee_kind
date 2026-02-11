@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:otp_pin_field/otp_pin_field.dart';
-import '../../controllers/pin_controller.dart'; // adjust import path
+import '../../controllers/pin_controller.dart';
+import '../services/shared_prefs_services.dart'; // adjust import path
 
 class PinScreen extends StatelessWidget {
   const PinScreen({super.key, this.isAccountCreate = false});
@@ -26,10 +27,17 @@ class PinScreen extends StatelessWidget {
             children: [
               Padding(
                 padding: EdgeInsets.only(bottom: 25.h),
-                child: CustomText(
-                  text: "Verification",
-                  fontSize: 22.sp,
-                  weight: FontWeight.bold,
+                child: GestureDetector(
+
+                  onTap: (){
+                    final SharedPrefs prefs = SharedPrefs();
+                    print(prefs.getUserToken());
+                  },
+                  child: CustomText(
+                    text: "Verification",
+                    fontSize: 22.sp,
+                    weight: FontWeight.bold,
+                  ),
                 ),
               ),
 

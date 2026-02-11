@@ -9,6 +9,7 @@ import 'package:bee_kind/services/network.dart';
 import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/app_dialogs.dart';
+import 'package:bee_kind/utils/global.dart';
 import 'package:bee_kind/utils/network_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -138,7 +139,10 @@ class PinController extends GetxController {
         if (responseData.status == true) {
           isLoading.value = false;
 
-          prefs.setuserToken(responseData.data?.userAuthToken ?? "");
+
+
+          Global.access_token =responseData.data?.userAuthToken ?? "";
+          // prefs.setuserToken(responseData.data?.userAuthToken ?? "");
           log("USER AUTH TOKEN: ${prefs.getUserToken()}");
           AppDialogs.showToast(
             responseData.message ?? "OTP verified successfully",
@@ -146,7 +150,7 @@ class PinController extends GetxController {
 
           if (isAccountCreate) {
 
-            Get.offAll(() => CreateProfileScreen());
+            Get.offAll(() => CreateProfileScreen(Token: responseData.data?.userAuthToken ?? "",));
           } else {
             Get.offAll(() => const ResetPasswordScreen());
           }

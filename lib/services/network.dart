@@ -187,6 +187,63 @@ class Network {
     return response;
   }
 
+
+
+
+  Future<Response?> postRequestiWthoutHeader({
+    required String endPoint,
+    dynamic data,
+    dynamic token="",
+    Map<String, dynamic>? queryParameters,
+    VoidCallback? onFailure,
+    bool isToast = true,
+    int connectTimeOut = 50000,
+    bool isErrorToast = true,
+    bool isHeaderRequire = false,
+    Function(int, int)? progress,
+  }) async {
+    Response? response;
+
+    if (await _connectivityManager!.isInternetConnected()) {
+      try {
+        _dio?.options.connectTimeout = Duration(milliseconds: connectTimeOut);
+
+        final temp = await _dio!.patch(
+          NetworkStrings.baseUrl + endPoint,
+          data: data,
+          queryParameters: queryParameters,
+          cancelToken: _cancelRequestToken,
+          onSendProgress: progress,
+          options: Options(
+            headers: await _setHeader1(isHeaderRequire: isHeaderRequire,token: token),
+            sendTimeout: Duration(milliseconds: connectTimeOut),
+            receiveTimeout: Duration(milliseconds: connectTimeOut),
+          ),
+        );
+
+        if (temp.data is Map && temp.data['message'] != null) {
+          final msg = temp.data['message'].toString();
+          temp.data['message'] = msg;
+        }
+
+        response = temp;
+      } on DioException catch (e) {
+        _validateException(
+          response: e.response,
+          message: e.message,
+          onFailure: onFailure,
+          isToast: isToast,
+          isErrorToast: isErrorToast,
+        );
+        debugPrint("$endPoint PATCH Dio: ${e.message}");
+      }
+    } else {
+      _noInternetConnection(onFailure: onFailure, isErrorToast: isErrorToast);
+    }
+
+    return response;
+  }
+
   ////////////////// Post Request /////////////////////////
   Future<Response?> postRequest({
     // required BuildContext context,
@@ -236,6 +293,62 @@ class Network {
     }
     return response;
   }
+
+
+
+
+  Future<Response?> postRequestWithoutHeader({
+    // required BuildContext context,
+    required String endPoint,
+    dynamic data,
+    dynamic token="",
+    Map<String, dynamic>? queryParameters,
+    VoidCallback? onFailure,
+    bool isToast = true,
+    int connectTimeOut = 50000,
+    bool isErrorToast = true,
+    bool isHeaderRequire = false,
+    Function(int, int)? progress,
+  }) async {
+    Response? response;
+    if (await _connectivityManager!.isInternetConnected()) {
+      try {
+        _dio?.options.connectTimeout = Duration(milliseconds: connectTimeOut);
+        final temp = await _dio!.post(
+          NetworkStrings.baseUrl + endPoint,
+          data: data,
+          cancelToken: _cancelRequestToken,
+          onSendProgress: progress,
+          queryParameters: queryParameters,
+          options: Options(
+            headers: await await _setHeader1(isHeaderRequire: isHeaderRequire,token: token),
+            sendTimeout: Duration(milliseconds: connectTimeOut),
+            receiveTimeout: Duration(milliseconds: connectTimeOut),
+          ),
+        );
+        if (temp.data is Map && temp.data['message'] != null) {
+          final msg = temp.data['message'].toString();
+          temp.data['message'] = msg;
+        }
+        response = temp;
+      } on DioException catch (e) {
+        _validateException(
+          response: e.response,
+          message: e.message,
+          onFailure: onFailure,
+          isToast: isToast,
+          isErrorToast: isErrorToast,
+        );
+        debugPrint("$endPoint Dio: ${e.message}");
+      }
+    } else {
+      _noInternetConnection(onFailure: onFailure, isErrorToast: isErrorToast);
+    }
+    return response;
+  }
+
+
+
 
   ////////////////// Post Request Raw Data /////////////////////////
   Future<Response?> postRequestRawData({
@@ -385,6 +498,19 @@ class Network {
     SharedPrefs prefs = SharedPrefs();
     String? token = prefs.getUserToken();
     log("token is inside header: $token");
+    if (isHeaderRequire) {
+      return {
+        'Accept': NetworkStrings.accept,
+        'Authorization': "Bearer $token",
+      };
+    } else {
+      return {'Accept': NetworkStrings.accept};
+    }
+  }
+
+
+  _setHeader1({required bool isHeaderRequire,token}) async {
+
     if (isHeaderRequire) {
       return {
         'Accept': NetworkStrings.accept,

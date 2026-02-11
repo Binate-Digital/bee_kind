@@ -14,10 +14,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../controllers/profile_controller.dart';
 import '../controllers/base_view_controller.dart';
+import '../services/shared_prefs_services.dart' show SharedPrefs;
 
 class CreateProfileScreen extends StatelessWidget {
-  CreateProfileScreen({super.key, this.isEdit = false});
+  CreateProfileScreen({super.key, this.isEdit = false, required this.Token});
 
+  final String Token;
   final bool isEdit;
 
   final focusNode = FocusNode();
@@ -26,9 +28,9 @@ class CreateProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProfileController controller = Get.put(ProfileController());
-    Get.put(
-      BaseViewController(),
-    ); // Initialize BaseViewController for dependencies
+    // Get.put(
+    //   BaseViewController(),
+    // ); // Initialize BaseViewController for dependencies
 
     // Load existing profile data if in edit mode
     if (isEdit) {
@@ -76,7 +78,8 @@ class CreateProfileScreen extends StatelessWidget {
                     ),
                   ),
                   GestureDetector(
-                    onTap: (){controller.loadProfileDataForEdit();},
+                    onTap: (){ final SharedPrefs prefs = SharedPrefs();
+                    print(prefs.getUserToken());},
                     child: CustomText(
                       text: controller.isVendor.value
                           ? "Upload Business Logo"
@@ -593,7 +596,7 @@ class CreateProfileScreen extends StatelessWidget {
                       child: CustomButton(
                         onTap: () => controller.handleCreateProfile(
                           context,
-                          isEdit: isEdit,
+                          isEdit: isEdit, token: Token,
                         ),
                         text: isEdit ? "Update Profile" : "Create Profile",
                         borderColor: AppColors.blackColor,
@@ -708,6 +711,7 @@ class CreateProfileScreen extends StatelessWidget {
                         onTap: () => controller.handleCreateProfile(
                           context,
                           isEdit: isEdit,
+                             token: Token,
                         ),
                         text: isEdit ? "Edit Profile" : "Continue",
                         borderColor: AppColors.blackColor,

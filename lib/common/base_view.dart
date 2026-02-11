@@ -64,10 +64,13 @@ class BaseView extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
                 child: GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => NotificationsScreen()),
-                  ),
+                  onTap: () {
+                   controller. getNotifications();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => NotificationsScreen()),
+                    );
+                  } ,
                   child: Image.asset(AssetsPath.notifications),
                 ),
               ),

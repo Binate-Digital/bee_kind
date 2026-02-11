@@ -59,6 +59,8 @@ class NotificationsWidget extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: CustomText(
+                              overflow: TextOverflow.visible,
+                              textAlign: TextAlign.start,
                               text: message ?? "No message",
                               fontSize: 16.sp,
                               fontFamily: "Raleway",

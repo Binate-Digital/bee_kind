@@ -34,6 +34,8 @@
   import 'package:bee_kind/utils/app_colors.dart';
   import 'package:intl/intl.dart';
 
+import '../models/response_models/notification_model.dart';
+
   class BaseViewController extends GetxController {
     final prefs = SharedPrefs();
     final network = Network();
@@ -50,6 +52,7 @@
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     final Rxn<GetProfileResponseModel> profile = Rxn<GetProfileResponseModel>();
+    final Rxn<GetNotificationsResponseModel> notifications = Rxn<GetNotificationsResponseModel>();
 
     Rxn<GetProductsByCategoriesResponseModel> productsByCategory =
         Rxn<GetProductsByCategoriesResponseModel>();
@@ -813,6 +816,60 @@
         AppDialogs.showToast("Something went wrong while fetching profile.");
       }
     }
+
+
+    Future<void> getNotifications() async {
+      try {
+        isLoading.value = true;
+        dev.log("Fetching profile...");
+
+        final response = await network.getRequest(
+          endPoint: NetworkStrings.notifications,
+          isHeaderRequire: true,
+          isToast: false,
+        );
+
+        if (response == null) {
+          AppDialogs.showToast("Unable to fetch profile");
+          isLoading.value = false;
+          return;
+        }
+
+        final data = response.data;
+
+        if (data["status"] == true && data["data"] != null) {
+          notifications.value = GetNotificationsResponseModel.fromJson(data);
+
+          update();
+          // String firstName = profile.value?.data?.firstName ?? "";
+          // String lastName = profile.value?.data?.lastName ?? "";
+          // String cellNo = profile.value?.data?.phoneNumber ?? "";
+          // String picture = profile.value?.data?.profilePicture ?? "";
+          // Normalize picture URL: if backend returns a relative path (e.g. "uploads/.." or "/uploads/.."),
+          // prefix it with the configured NETWORK_IMAGE_BASE_URL so widgets treating it as network image
+          // will load correctly.
+
+
+
+
+          // Save floor/apartment from first userAddress (if present) so UI reading prefs updates
+
+        } else {
+          update();
+
+          AppDialogs.showToast(data["message"] ?? "Failed to fetch notification");
+        }
+
+        isLoading.value = false;
+      } catch (e) {
+        isLoading.value = false;
+        dev.log("GetProfile Exception: $e");
+        AppDialogs.showToast("Something went wrong while fetching profile.");
+        update();
+
+      }
+    }
+
 
     /// Toggle vendor hide-profile setting
     Future<void> toggleHideProfile(BuildContext context) async {

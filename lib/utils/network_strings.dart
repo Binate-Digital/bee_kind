@@ -38,6 +38,7 @@ class NetworkStrings {
   static const String updateProfile = "auth/update-profile";
   static const String deleteAccount = "auth/delete-account";
   static const String verifyVeriff = 'auth/create-veriff-session';
+  static const String notifications = 'auth/get-notifications';
   static const String USER_SUCCESS_URL =
       'https://beekind-backend.deployment-uat.com/api/v1/veriff/callback';
 

@@ -111,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => isVendor
-                        ? CreateProfileScreen(isEdit: true)
+                        ? CreateProfileScreen(isEdit: true, Token: prefs.getUserToken().toString(),)
                         : EditProfileScreen(),
                   ),
                 );

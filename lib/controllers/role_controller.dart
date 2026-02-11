@@ -36,7 +36,7 @@ class RoleController extends GetxController {
         if (hasCompletedProfile) {
           Get.offAll(() => BaseView());
         } else {
-          Get.offAll(() => CreateProfileScreen());
+          Get.offAll(() => CreateProfileScreen(Token: prefs.getUserToken().toString(),));
         }
       } else {
         Get.offAll(() => const RoleTypeScreen());

@@ -468,6 +468,7 @@ class ProfileController extends GetxController {
   Future<void> handleCreateProfile(
       BuildContext context, {
         bool isEdit = false,
+        required String token
       }) async {
     // if (!validateForm(context, isEdit: isEdit)) {
     //   log("Validation Failed");
@@ -631,27 +632,34 @@ class ProfileController extends GetxController {
         endPoint: NetworkStrings.updateProfile,
         data: formData,
         isHeaderRequire: true,
+        // token: token
       )
           :
 
           // null;
-      await network.postRequest(
+      await network.postRequestWithoutHeader(
         endPoint: NetworkStrings.completeProfile,
         data: formData,
         isHeaderRequire: true,
+        token: token
       );
 
-      // if (isEdit == false) {
-      //
-      //   // _launchURL(response?.data['data']['onboardingUrl']);
-      //   Get.to(
-      //         () => StripeOnboardingWebView(
-      //           onboardingUrl: response?.data['data']['onboardingUrl'],
-      //     ),
-      //   );
-      // }
-      // else {
+
+      //prefs.getRole()prefs.getRole()user
+
+      print("isEditisEdit${isEdit}   prefs.getRole()prefs.getRole()${prefs.getRole()}");
+      if (isEdit == false&&  prefs.getRole()=="vendor") {
+
+        // _launchURL(response?.data['data']['onboardingUrl']);
+        Get.to(
+              () => StripeOnboardingWebView(
+                onboardingUrl: response?.data['data']['onboardingUrl'],
+          ),
+        );
+      }
+      else {
       if (response == null) {
+
 
         // hhfhfj@gh.com
         isLoading.value = false;
@@ -662,6 +670,8 @@ class ProfileController extends GetxController {
         );
         return;
       }
+
+      prefs.setuserToken(Global.access_token??"");
 
       final data = response.data;
       log("${isEdit ? "Update" : "Create"} Profile Response: $data");
@@ -717,7 +727,7 @@ class ProfileController extends GetxController {
               (isEdit ? "Profile update failed" : "Profile submit failed"),
         );
       }
-      // }
+      }
     }
     catch (e) {
       isLoading.value = false;

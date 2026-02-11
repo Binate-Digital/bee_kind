@@ -15,7 +15,7 @@ class Validation {
     await FirebaseMessaging.instance.getToken().then((value) async {
 
       await Future.delayed(Duration(seconds: 2));
-      Global.fcmToken = value;
+        Global.fcmToken = value;
       print("FCM Token => $value");
     }).catchError((error) {
       print("FCM Token Error => $error");

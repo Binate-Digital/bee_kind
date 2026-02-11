@@ -11,7 +11,7 @@ class CustomText extends StatelessWidget {
   final double fontSize, lineSpacing, letterSpacing;
   final int? maxLines;
   final TextOverflow overflow;
-  const CustomText({
+  const   CustomText({
     super.key,
     this.text,
     this.fontColor = Colors.black,

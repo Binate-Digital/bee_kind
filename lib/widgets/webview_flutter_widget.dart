@@ -1,7 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart' show Get;
+import 'package:get/get_instance/src/extension_instance.dart' show Inst;
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../common/base_view.dart';
+import '../controllers/base_view_controller.dart' show BaseViewController;
+import '../services/shared_prefs_services.dart' show SharedPrefs;
+import '../utils/global.dart';
 
 class StripeOnboardingWebView extends StatefulWidget {
   final String onboardingUrl;
@@ -56,11 +64,15 @@ class _StripeOnboardingWebViewState extends State<StripeOnboardingWebView> {
             });
           },
           onPageStarted: (url) {
+
             setState(() => _isLoading = true);
+            print("onPageStartedonPageStartedonPageStarted$url");
             _handleStripeRedirects(url);
           },
           onPageFinished: (url) {
             setState(() => _isLoading = false);
+
+            print("uonPageFinishedonPageFinished#$url");
             _handleStripeRedirects(url);
           },
           onWebResourceError: (error) {
@@ -71,12 +83,25 @@ class _StripeOnboardingWebViewState extends State<StripeOnboardingWebView> {
 
             // Handle Stripe redirects (return/refresh) if present
             if (_handleStripeRedirects(url)) {
+
+              print("urlurlurlurl$url");
               return NavigationDecision.prevent;
             }
+            print("urlurlurlurl$url");
 
             // Allow normal http/https inside the webview (this is the core of originWhitelist-like behavior)
-            if (url.startsWith("https://") || url.startsWith("http://")) {
-              return NavigationDecision.navigate;
+            if (url.startsWith("https://beekind-backend.deployment-uat.com/stripe/onboarding/success") || url.startsWith("http://beekind-backend.deployment-uat.com/stripe/onboarding/success")) {
+
+              final SharedPrefs prefs = SharedPrefs();
+
+              prefs.setuserToken(Global.access_token??"");
+
+              Get.offAll(() => BaseView());
+
+              final baseController = Get.find<BaseViewController>();
+
+              await baseController.getProfile();
+
             }
 
             // Open other schemes externally: mailto:, tel:, intent:, whatsapp:, etc.

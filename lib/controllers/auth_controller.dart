@@ -219,6 +219,12 @@ class AuthController extends GetxController {
 
             print("loginResponse.data?.stripeCustomerId");
             print(loginResponse.data?.stripeCustomerId);
+
+
+            Global.access_token=loginResponse.data?.userAuthToken;
+
+
+            print("Global.access_tokenGlobal.access_token${Global.access_token}");
             if (!prefs.checkProfile()) {
               if (loginResponse.message == "Vendor onboarding required") {
                 AppDialogs.showToast(
@@ -230,7 +236,7 @@ class AuthController extends GetxController {
                   ),
                 );
               } else {
-                Get.to(() => CreateProfileScreen());
+                Get.to(() => CreateProfileScreen(Token: prefs.getUserToken().toString(),));
               }
             } else {
               Get.offAll(() => BaseView());
@@ -419,7 +425,7 @@ class AuthController extends GetxController {
         isLoading.value = false;
 
         // Navigate directly to Create Profile screen (skip OTP verification for Google)
-        Get.offAll(() => CreateProfileScreen());
+        Get.offAll(() => CreateProfileScreen(Token: prefs.getUserToken().toString(),));
       } else {
         isLoading.value = false;
         AppDialogs.showToast("Failed to get email from Google account");
@@ -514,7 +520,7 @@ class AuthController extends GetxController {
 
               if (!prefs.checkProfile()) {
                 // Use offAll to prevent back navigation to undefined state
-                Get.offAll(() => CreateProfileScreen());
+                Get.offAll(() => CreateProfileScreen(Token: prefs.getUserToken().toString(),));
               } else {
                 Get.offAll(() => BaseView());
               }
