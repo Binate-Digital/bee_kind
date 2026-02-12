@@ -44,7 +44,7 @@ class ProductByCategoryData {
   bool? isDeleted;
   String? businessName;
   String? businessId;
-  int? deliveryRadius;
+  num? deliveryRadius;
   String? updatedAt;
   bool? isAvailable;
   String? inventoryStatus;
@@ -107,11 +107,8 @@ class ProductByCategoryData {
     isDeleted = json['isDeleted'];
     businessName = json["businessName"];
     businessId = json["businessId"];
-    deliveryRadius = json["deliveryRadius"] != null
-        ? (json["deliveryRadius"] is int
-              ? json["deliveryRadius"]
-              : (json["deliveryRadius"] as num).toInt())
-        : null;
+    final dr = json["deliveryRadius"];
+    deliveryRadius = (dr is num) ? dr : null;
     updatedAt = json['updatedAt'];
     isAvailable = json['isAvailable'];
     inventoryStatus = json['inventoryStatus'];

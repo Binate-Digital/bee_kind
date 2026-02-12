@@ -160,6 +160,7 @@ Future<bool?> orderCompleteConfirmationDialog(BuildContext context) async {
                         if (selectedOption == "Yes") {
                           Navigator.pop(context, true); // ✅ Confirmed
                         } else {
+                          Navigator.pop(context);
                           // ❌ Not confirmed
                         }
                       },

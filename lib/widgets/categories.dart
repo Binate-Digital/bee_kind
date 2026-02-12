@@ -13,7 +13,7 @@ class Categories extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 130.w,
+      width: 100.w,
       child: Column(
         children: [
           UserAvatarWidget(

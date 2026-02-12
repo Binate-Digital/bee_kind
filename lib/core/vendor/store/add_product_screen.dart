@@ -313,24 +313,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   keyboardType: TextInputType.number,
                 ),
                 if (widget.isEdit ?? false)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20.h),
-                    child: GestureDetector(
-                      onTap: () => showDiscountDialog(context),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Icon(Icons.add_circle, color: AppColors.yellow2),
-                          SizedBox(width: 10.w),
-                          CustomText(
-                            text: "Add Discounted Price",
-                            fontSize: 18.sp,
-                            weight: FontWeight.bold,
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
+            SizedBox(height: 10.h)
                 else
                   SizedBox(height: 10.h),
                 CustomTextField(

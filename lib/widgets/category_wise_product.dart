@@ -112,12 +112,15 @@ class CategoryWiseProduct extends StatelessWidget {
                     )
                   : SizedBox(),
               SizedBox(height: 55.h),
+
+
               fromHome
                   ? CustomText(
-                      text: "${product?.deliveryRadius ?? 0} Miles Away",
+                      text: "${product?.deliveryRadius?.toStringAsFixed(1) ?? 0.toStringAsFixed(1)} Miles Away",
                       fontSize: 16.sp,
                       fontColor: AppColors.yellow2,
                       weight: FontWeight.bold,
+
                     )
                   : SizedBox(width: 85.w),
             ],

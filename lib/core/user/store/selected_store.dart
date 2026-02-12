@@ -313,6 +313,7 @@ class StoreScreen extends GetView<StoreController> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => SelectedProduct(
+                                      productImages: p?.productImages,
                                       productId: p?.sId,
                                       productName: p?.productName,
                                       ingredients: p?.ingredients,
@@ -456,8 +457,12 @@ class StoreScreen extends GetView<StoreController> {
               ),
               itemBuilder: (context, index) {
                 final p = data!.products?[index];
+
+                // print("ldfndln${data!.products?[index].productImages}");
                 return GestureDetector(
                   onTap: () {
+                    print("ldfndln${data!.products?[index].productImages}");
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(

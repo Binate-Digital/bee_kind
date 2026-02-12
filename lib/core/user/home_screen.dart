@@ -121,6 +121,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     final searchFocusNode = FocusNode();
 
     return Scaffold(
+
+
       body: Stack(
         children: [
           // FULL SCREEN MAP
@@ -452,7 +454,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                               context,
                             ),
                             child: Container(
-                              margin: EdgeInsets.only(right: 15.w),
+                              // width: 40,
+                              // color: Colors.red,
+                              margin: EdgeInsets.only(right: 10.w),
                               child: Categories(
                                 name: category?.categoryName,
                                 image: category?.categoryImage,

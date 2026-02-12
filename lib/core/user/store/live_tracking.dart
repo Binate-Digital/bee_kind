@@ -151,6 +151,8 @@ class _LiveTrackingState extends State<LiveTracking> {
       final order = model.data!.order!;
       final statusTimeline = model.data!.statusTimeline ?? [];
 
+      print("statusTimelinestatusTimeline${statusTimeline}");
+
       // Init map-related data
       _setupLocationsFromOrder(order);
       await _loadMapMarkersAndPolyline();
@@ -251,6 +253,8 @@ class _LiveTrackingState extends State<LiveTracking> {
 
   /// Fetch store detail and return phone number if available
   Future<String?> _fetchStorePhone(String? storeId) async {
+
+    print("_fetchStorePhone_fetchStorePhone");
     if (storeId == null || storeId.isEmpty) return null;
 
     try {
@@ -300,6 +304,8 @@ class _LiveTrackingState extends State<LiveTracking> {
   /// ---------------------------------------------------
   List<String> get _progressSteps {
     if (_statusTimeline.isNotEmpty) {
+
+      print("fkldsnfldnsf${_statusTimeline}");
       return _statusTimeline.map((e) => e.toString()).toList();
     }
 
@@ -645,7 +651,7 @@ class _LiveTrackingState extends State<LiveTracking> {
                         );
 
                         if (vendorPhone != null && vendorPhone.isNotEmpty) {
-                          await launchCaller(vendorPhone);
+                          await launchCaller(_order!.driverDetail!.phoneNumber!,);
                           return;
                         }
 

@@ -282,6 +282,7 @@ import '../models/response_models/notification_model.dart';
 
 
     Future<void> fetchStores() async {
+      print("fetchStoresfetchStoresfetchStores");
       showWindow.value = false;
       dev.log(
         "latitude: ${currentLatLng.value?.latitude} longitude: ${currentLatLng.value?.longitude}",
@@ -647,6 +648,7 @@ import '../models/response_models/notification_model.dart';
         updateMapToSelectedAddress();
       }
     }
+    // updateMapToSelectedAddress
 
     Future<void> updateMapToSelectedAddress() async {
       // Always use current location for the red pin

@@ -168,10 +168,7 @@ class AuthController extends GetxController {
         isLoading.value = true;
 
 
-        final token = await PushTokenService.getFcmTokenSafe();
-        print("FCM token: $token");
 
-        print("FCMtokenFCMtoken${token}");
 
         final model = LoginDataModel(
           email: loginEmailCtrl.text.trim(),

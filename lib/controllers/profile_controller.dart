@@ -235,6 +235,9 @@ class ProfileController extends GetxController {
         // Load delivery radius
         currentRadius.value = profileData.deliveryRadius ?? 50.0;
 
+
+        print("dljfldnfnd${profileData.deliveryRadius}");
+
         // Load business address from addressName
         if (profileData.addressName != null) {
           streetAddressController.text = profileData.addressName.toString();

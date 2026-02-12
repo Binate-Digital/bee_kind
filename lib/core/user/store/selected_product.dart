@@ -590,10 +590,12 @@ class _SelectedProductState extends State<SelectedProduct>
                         onTap: canAddToCart
                             ? () {
 
+
                           final sp = controller.singleProduct.value?.data;
 
                           final qtytocheck = sp?.quantity ?? widget.quantity ?? 0;
-
+                          print("lsskdslkn${sp?.inventoryStatus ??
+                              widget.inventoryStatus}");
 
                           double unitPrice =
                                     (widget.hasDiscount
@@ -618,15 +620,23 @@ class _SelectedProductState extends State<SelectedProduct>
 
                                 if(qtytocheck>=qty){
 
+
+                                  if(sp?.inventoryStatus =="out-of-stock"){
+                                    AppDialogs.showToast(
+                                      " Product is currently out of stock",
+                                    );
+                                    return;
+                                  }
+
                                   controller
                                       .addItems(
                                         OrderItem(
                                           productId: widget.productId,
                                           productName: widget.productName,
-                                          productImage:
-                                              widget.productImages?.first,
+                                          productImage: widget.productImages?.first,
                                           unitPrice: unitPrice,
                                           quantity: qty,
+
                                         ),
                                       )
                                       .then((value) {
@@ -635,6 +645,9 @@ class _SelectedProductState extends State<SelectedProduct>
                                       });
                                   print("less");
                                 }
+
+                                // print("sp?.inventoryStatus${sp?.inventoryStatus}");
+
                                 else{
 
                                   AppDialogs.showToast(

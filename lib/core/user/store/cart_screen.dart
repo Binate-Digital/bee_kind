@@ -17,6 +17,8 @@ class CartScreen extends GetView<StoreController> {
       body: Obx(() {
         final items = controller.orderItems!;
 
+        // print("itemsitems${items[1].productImage}");
+
         return Column(
           children: [
             Expanded(
