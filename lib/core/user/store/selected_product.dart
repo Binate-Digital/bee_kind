@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../services/shared_prefs_services.dart';
 import '../../../utils/app_dialogs.dart' show AppDialogs;
 
 class SelectedProduct extends StatefulWidget {
@@ -590,6 +591,10 @@ class _SelectedProductState extends State<SelectedProduct>
                         onTap: canAddToCart
                             ? () {
 
+
+                          final prefs = SharedPrefs();
+
+                          prefs.setBool("navigateToMyOrder", false);
 
                           final sp = controller.singleProduct.value?.data;
 

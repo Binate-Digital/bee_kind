@@ -508,6 +508,7 @@ class _SelectedOrderState extends State<SelectedOrder> {
                   ),
                   CustomText(
                     text:
+                        // "\$${widget.vendorOrder?.totalPrice?.toStringAsFixed(2) ?? '0.00'}",
                         "\$${widget.vendorOrder?.totalPrice?.toStringAsFixed(2) ?? '0.00'}",
                     fontSize: 18.sp,
                     fontColor: AppColors.blackColor,
@@ -524,6 +525,8 @@ class _SelectedOrderState extends State<SelectedOrder> {
                     weight: FontWeight.bold,
                     fontColor: AppColors.blackColor,
                   ),
+
+                  // CustomText(text: ,)
                   CustomText(
                     text: () {
                       // Calculate delivery charges as: totalAmount - sum(items price * qty)
@@ -534,12 +537,28 @@ class _SelectedOrderState extends State<SelectedOrder> {
                       if (widget.vendorOrder?.items != null) {
                         for (final it in widget.vendorOrder!.items!) {
                           final price = (it.price ?? 0).toDouble();
+
+                          print("priceprice${price}");
                           final qty = (it.quantity ?? 1).toDouble();
+                          print("qtyqty${qty}");
+
+
+                          // print("widget.vendorOrder?.items${widget.vendorOrder!.deliverCharges}");
+
+                          for(var i=0;i<widget.vendorOrder!.items!.length;i++){
+                            var totalPrice=widget.vendorOrder!.items![i].totalPrice;
+                            print("totalPrice${totalPrice}");
+                          }
                           itemsTotal += price * qty;
+
+                          print("itemsTotalitemsTotal${itemsTotal}");
                         }
                       }
 
                       final deliveryCharges = totalAmount - itemsTotal;
+
+
+                      // print("deliveryChargesdeliveryCharges${widget.vendorOrder}");
                       // Show calculated value if positive and finite, otherwise show 0
                       final show =
                           (deliveryCharges.isFinite && deliveryCharges > 0)

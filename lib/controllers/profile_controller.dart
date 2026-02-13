@@ -26,7 +26,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../utils/global.dart';
 import '../widgets/webview_flutter_widget.dart';
 
-class ProfileController extends GetxController {
+  class ProfileController extends GetxController {
   final prefs = SharedPrefs();
 
   final network = Network();
@@ -233,8 +233,12 @@ class ProfileController extends GetxController {
         }
 
         // Load delivery radius
-        currentRadius.value = profileData.deliveryRadius ?? 50.0;
+        currentRadius.value = profileData.deliveryRadius ?? 00.0;
 
+
+        print("profileData.deliveryRadiusprofileData.deliveryRadius${profileData.deliveryRadius}");
+        print("currentRadius.value${currentRadius.value}");
+        update();
 
         print("dljfldnfnd${profileData.deliveryRadius}");
 
@@ -371,7 +375,7 @@ class ProfileController extends GetxController {
 
   /// Launch Veriff verification
   Future<void> launchVeriffVerification(BuildContext context) async {
-    log("INSIDE VERIFF FUNCTION");
+    log("INSIDE VERIFF FUNCTION${Global.access_token ?? ""}");
     if (!isChecked.value) {
       log(" Validation Failed: Age verification consent missing");
       AppDialogs.showToast(
@@ -383,9 +387,10 @@ class ProfileController extends GetxController {
       isVerifyLoading.value = true;
 
       // Call your API to create Veriff session
-      final response = await network.postRequest(
+      final response = await network.postRequestWithoutHeader(
         endPoint: NetworkStrings.verifyVeriff,
         isHeaderRequire: true,
+        token: Global.access_token
       );
 
       isVerifyLoading.value = false;
@@ -862,12 +867,12 @@ class ProfileController extends GetxController {
 
       location = {
         "address": result.formattedAddress,
-        "coordinates": [result.latLng?.latitude, result.latLng?.longitude],
+        "coordinates": [result.latLng?.longitude,result.latLng?.latitude ],
         "type": "Point",
         "floorNumber": floorNumberController.text.trim(),
         "apartmentNumber": apartmentNumberController.text.trim(),
       };
-      log("FULL RESULT: ${jsonEncode(locationToJson(result))}");
+      log("FULL RESULT: ${jsonEncode( locationToJson(result))}");
       locationAddress.value = result.formattedAddress ?? '';
       streetAddressController.text = result.formattedAddress ?? 'Dummy Address';
     } catch (e) {

@@ -315,9 +315,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                             ),
                             onPointTap: (ChartPointDetails details) {
-                              final selectedWeek =
-                                  chartData[details.pointIndex!];
-                              _showDailySales(context, selectedWeek);
+                              // final selectedWeek =
+                              //     chartData[details.pointIndex!];
+                              // _showDailySales(context, selectedWeek);
                             },
                           ),
                         ],

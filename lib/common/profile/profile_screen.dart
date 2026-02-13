@@ -18,6 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../controllers/profile_controller.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -107,6 +109,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             SizedBox(height: 30.h),
             ProfileOption(
               onTap: () {
+                ProfileController contntroller=Get.put(ProfileController());
+                contntroller.    loadProfileDataForEdit();
                 Navigator.push(
                   context,
                   MaterialPageRoute(

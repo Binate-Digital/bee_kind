@@ -45,14 +45,34 @@ import '../models/response_models/notification_model.dart';
     final RxInt currentIndex = 0.obs;
     final RxBool isVendor = false.obs;
 
+      bool showfilteredlist=false;
+
+      bool showWidget=true;
     Rxn<File> profileImage = Rxn(null);
 
     String? address;
 
+
+    String formatTo12Hour(String? time24) {
+      if (time24 == null || time24.trim().isEmpty) return '';
+
+      // Handles "14:30" or "14:30:00"
+      final parts = time24.split(':');
+      if (parts.length < 2) return time24; // fallback if unexpected format
+
+      final hour = int.tryParse(parts[0]) ?? 0;
+      final minute = int.tryParse(parts[1]) ?? 0;
+
+      final dt = DateTime(2000, 1, 1, hour, minute);
+      return DateFormat('h:mm a').format(dt); // e.g. 2:30 PM
+    }
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     final Rxn<GetProfileResponseModel> profile = Rxn<GetProfileResponseModel>();
     final Rxn<GetNotificationsResponseModel> notifications = Rxn<GetNotificationsResponseModel>();
+
+    final Rxn<GetStoresResponseModel> filterResponse = Rxn<GetStoresResponseModel>();
+
 
     Rxn<GetProductsByCategoriesResponseModel> productsByCategory =
         Rxn<GetProductsByCategoriesResponseModel>();
@@ -81,6 +101,15 @@ import '../models/response_models/notification_model.dart';
 
     RxString selectedCategoryId = "".obs;
     RxString selectedCategoryName = "".obs;
+
+
+
+    void clearFilterResponse() {
+      filterResponse.value = null;   // c
+      update();
+      // lears it
+      // or: filterResponse(nil) in some styles, but value=null is simplest
+    }
 
     Widget buildImageContainer({
       required File? image,
@@ -281,6 +310,9 @@ import '../models/response_models/notification_model.dart';
 
 
 
+
+
+
     Future<void> fetchStores() async {
       print("fetchStoresfetchStoresfetchStores");
       showWindow.value = false;
@@ -304,7 +336,7 @@ import '../models/response_models/notification_model.dart';
         queryParams["categoryId"] = selectedCategoryId.value;
       }
       if (currentRadius.value > 0) {
-        queryParams["radius"] = currentRadius.value;
+        queryParams["deliveryRadius"] = currentRadius.value;
       }
       if (minPriceController.text.trim().isNotEmpty) {
         queryParams["minPrice"] = minPriceController.text.trim();
@@ -335,6 +367,117 @@ import '../models/response_models/notification_model.dart';
 
         if (data["status"] == true && data["data"] != null) {
           final model = GetStoresResponseModel.fromJson(data);
+
+          filterResponse.value=GetStoresResponseModel.fromJson(data);
+          print("dsksldnj${filterResponse}");
+
+
+
+
+
+
+
+          storesList.value = model.data ?? [];
+          coordinates.clear();
+
+          for (final store in storesList) {
+            final coords = store.vendorAddress?.coordinates;
+            final pos = parseLatLng(coords);
+            if (pos != null) coordinates.add(pos);
+          }
+
+          await showStoreMarkers();
+
+          // If searching and found results, navigate to first store's location
+          if (searchController.text.isNotEmpty && storesList.isNotEmpty) {
+            final firstStore = storesList.first;
+            final coords = firstStore.vendorAddress?.coordinates;
+            final storeLocation = parseLatLng(coords);
+
+            if (storeLocation != null && mapController != null) {
+              await mapController!.animateCamera(
+                CameraUpdate.newLatLngZoom(storeLocation, 18),
+              );
+            }
+          }
+        } else {
+          Navigator.pop(StaticData.navigatorKey.currentContext!);
+          AppDialogs.showToast(data["message"] ?? "Failed to load stores");
+        }
+      } catch (e) {
+        Navigator.pop(StaticData.navigatorKey.currentContext!);
+        dev.log("fetching stores error: $e");
+        AppDialogs.showToast("Something went wrong while fetching stores.");
+      } finally {
+        Navigator.pop(StaticData.navigatorKey.currentContext!);
+        isLoading.value = false;
+      }
+    }
+
+
+    Future<void> fetchSeacrgStores() async {
+      print("fetchStoresfetchStoresfetchStores");
+      showWindow.value = false;
+      dev.log(
+        "latitude: ${currentLatLng.value?.latitude} longitude: ${currentLatLng.value?.longitude}",
+      );
+
+      // Build query parameters, filtering out empty values
+      final Map<String, dynamic> queryParamsforSearch = {};
+
+      if (searchController.text.trim().isNotEmpty) {
+        queryParamsforSearch["search"] = searchController.text.trim();
+      }
+      // if (currentLatLng.value?.latitude != null) {
+      //   queryParams["lat"] = currentLatLng.value!.latitude;
+      // }
+      // if (currentLatLng.value?.longitude != null) {
+      //   queryParams["lng"] = currentLatLng.value!.longitude;
+      // }
+      // if (selectedCategoryId.value.isNotEmpty) {
+      //   queryParams["categoryId"] = selectedCategoryId.value;
+      // }
+      // if (currentRadius.value > 0) {
+      //   queryParamsforSearch["deliveryRadius"] = 70;
+      // }
+      // if (minPriceController.text.trim().isNotEmpty) {
+      //   queryParams["minPrice"] = minPriceController.text.trim();
+      // }
+      // if (maxPriceController.text.trim().isNotEmpty) {
+      //   queryParams["maxPrice"] = maxPriceController.text.trim();
+      // }
+
+      dev.log("QUERY PARAasasMETERS: $queryParamsforSearch");
+
+      try {
+        showLoadingDialog(StaticData.navigatorKey.currentContext!);
+
+        final response = await network.getRequest(
+          endPoint: NetworkStrings.getStores,
+          queryParameters: queryParamsforSearch,
+          isHeaderRequire: true,
+          isToast: false,
+        );
+
+        if (response == null) {
+          Navigator.pop(StaticData.navigatorKey.currentContext!);
+          AppDialogs.showToast("Unable to load stores.");
+          return;
+        }
+
+        final data = response.data;
+
+        if (data["status"] == true && data["data"] != null) {
+          final model = GetStoresResponseModel.fromJson(data);
+
+          filterResponse.value=GetStoresResponseModel.fromJson(data);
+          print("dsksldnj${filterResponse}");
+
+
+
+
+
+
 
           storesList.value = model.data ?? [];
           coordinates.clear();

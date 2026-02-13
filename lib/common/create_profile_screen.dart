@@ -544,16 +544,20 @@ class CreateProfileScreen extends StatelessWidget {
                         fontSize: 18.sp,
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 30.h),
-                      child: CustomSliderWidget(
-                        min: controller.minRadius,
-                        max: controller.maxRadius,
-                        initialValue: controller.currentRadius.value,
-                        unit: "mi",
-                        onChanged: (value) =>
-                            controller.currentRadius.value = value,
-                      ),
+                    GetBuilder<ProfileController>(
+                      builder: (controller) {
+                        return Padding(
+                          padding: EdgeInsets.only(top: 30.h),
+                          child: CustomSliderWidget(
+                            min: controller.minRadius,
+                            max: controller.maxRadius,
+                            initialValue: controller.currentRadius.value,
+                            unit: "mi",
+                            onChanged: (value) =>
+                                controller.currentRadius.value = value,
+                          ),
+                        );
+                      }
                     ),
 
                     Column(

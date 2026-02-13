@@ -200,7 +200,7 @@ class _ChoosePaymentScreenState extends State<ChoosePaymentScreen> {
                 controller.selectedPaymentMethod.value = value ?? "";
                 log("User selected card: ${controller.selectedPaymentMethod.value}");
 
-                /// SAME BEHAVIOR as PaymentAccountsScreen
+                /// SAME BEHAVIOR as PaymeConfrntAccountsScreen
                 await controller.setDefaultCard(
                   StaticData.navigatorKey.currentContext!,
                   value.toString(),

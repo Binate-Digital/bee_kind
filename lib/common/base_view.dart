@@ -1,3 +1,112 @@
+// import 'package:bee_kind/common/notifications.dart';
+// import 'package:bee_kind/common/profile/profile_screen.dart';
+// import 'package:bee_kind/controllers/base_view_controller.dart';
+// import 'package:bee_kind/core/user/home_screen.dart';
+// import 'package:bee_kind/core/user/store/cart_screen.dart';
+// import 'package:bee_kind/core/user/store/orders_list_screen.dart';
+// import 'package:bee_kind/core/vendor/dashboard_screen.dart';
+// import 'package:bee_kind/core/vendor/my_orders_screen.dart';
+// import 'package:bee_kind/core/vendor/order_requests_screen.dart';
+// import 'package:bee_kind/utils/app_colors.dart';
+// import 'package:bee_kind/utils/assets_path.dart';
+// import 'package:bee_kind/widgets/custom_drawer.dart';
+// import 'package:bee_kind/widgets/custom_text.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
+// import 'package:get/get.dart';
+//
+// class BaseView extends StatelessWidget {
+//   BaseView({super.key});
+//
+//   final controller = Get.put(BaseViewController());
+//
+//   /// Build screen based on current tab + role
+//   Widget _buildCurrentScreen() {
+//     final isVendor = controller.isVendor.value;
+//
+//     final screens = [
+//       isVendor ? DashboardScreen() : UserHomeScreen(),
+//       isVendor ? OrderRequestsScreen() : CartScreen(),
+//       isVendor ? MyOrdersScreen() : OrdersListScreen(),
+//       SettingsScreen(),
+//     ];
+//
+//     return screens[controller.currentIndex.value];
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return PopScope(
+//       canPop: false,
+//       child: Obx(() {
+//         final isVendor = controller.isVendor.value;
+//         final tabs = controller.tabs(isVendor);
+//
+//         return Scaffold(
+//           key: controller.scaffoldKey,
+//           extendBody: true,
+//
+//           drawer: CustomDrawer(
+//             scaffoldKey: controller.scaffoldKey,
+//             isVendor: isVendor,
+//           ),
+//
+//           // ----------------------- APP BAR -----------------------
+//           appBar: AppBar(
+//             leading: Padding(
+//               padding: EdgeInsets.symmetric(horizontal: 20.w),
+//               child: GestureDetector(
+//                 onTap: () => controller.scaffoldKey.currentState?.openDrawer(),
+//                 child: Image.asset(AssetsPath.drawer),
+//               ),
+//             ),
+//             actions: [
+//               Padding(
+//                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+//                 child: GestureDetector(
+//                   onTap: () {
+//                    controller. getNotifications();
+//                     Navigator.push(
+//                       context,
+//                       MaterialPageRoute(builder: (_) => NotificationsScreen()),
+//                     );
+//                   } ,
+//                   child: Image.asset(AssetsPath.notifications),
+//                 ),
+//               ),
+//             ],
+//             backgroundColor: AppColors.whiteColor,
+//             elevation: 0.0,
+//             centerTitle: true,
+//
+//             /// Reactive title
+//             title: CustomText(
+//               text: tabs[controller.currentIndex.value].label,
+//               fontSize: 22.sp,
+//               weight: FontWeight.bold,
+//               fontColor: AppColors.blackColor,
+//             ),
+//           ),
+//
+//           // ----------------------- BODY -----------------------
+//           body: _buildCurrentScreen(),
+//
+//           // ----------------------- BOTTOM NAV -----------------------
+//           bottomNavigationBar: CustomBottomNavigationBar(
+//             tabs: tabs,
+//             controller: controller,
+//           ),
+//         );
+//       }),
+//     );
+//   }
+// }
+//
+
+
+
+
+
 import 'package:bee_kind/common/notifications.dart';
 import 'package:bee_kind/common/profile/profile_screen.dart';
 import 'package:bee_kind/controllers/base_view_controller.dart';
@@ -15,10 +124,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-class BaseView extends StatelessWidget {
-  BaseView({super.key});
+class BaseView extends StatefulWidget {
+  final int initialIndex;
 
-  final controller = Get.put(BaseViewController());
+  const BaseView({
+    super.key,
+    this.initialIndex = 0,
+  });
+
+  @override
+  State<BaseView> createState() => _BaseViewState();
+}
+
+class _BaseViewState extends State<BaseView> {
+  late final BaseViewController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(BaseViewController());
+
+    // Set the starting tab once
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final isVendor = controller.isVendor.value;
+      final tabsLength = controller.tabs(isVendor).length;
+
+      final safeIndex = widget.initialIndex.clamp(0, tabsLength - 1);
+      controller.currentIndex.value = safeIndex;
+    });
+  }
 
   /// Build screen based on current tab + role
   Widget _buildCurrentScreen() {
@@ -45,13 +179,10 @@ class BaseView extends StatelessWidget {
         return Scaffold(
           key: controller.scaffoldKey,
           extendBody: true,
-
           drawer: CustomDrawer(
             scaffoldKey: controller.scaffoldKey,
             isVendor: isVendor,
           ),
-
-          // ----------------------- APP BAR -----------------------
           appBar: AppBar(
             leading: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -65,12 +196,12 @@ class BaseView extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
                 child: GestureDetector(
                   onTap: () {
-                   controller. getNotifications();
+                    controller.getNotifications();
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => NotificationsScreen()),
                     );
-                  } ,
+                  },
                   child: Image.asset(AssetsPath.notifications),
                 ),
               ),
@@ -78,8 +209,6 @@ class BaseView extends StatelessWidget {
             backgroundColor: AppColors.whiteColor,
             elevation: 0.0,
             centerTitle: true,
-
-            /// Reactive title
             title: CustomText(
               text: tabs[controller.currentIndex.value].label,
               fontSize: 22.sp,
@@ -87,11 +216,7 @@ class BaseView extends StatelessWidget {
               fontColor: AppColors.blackColor,
             ),
           ),
-
-          // ----------------------- BODY -----------------------
           body: _buildCurrentScreen(),
-
-          // ----------------------- BOTTOM NAV -----------------------
           bottomNavigationBar: CustomBottomNavigationBar(
             tabs: tabs,
             controller: controller,
@@ -100,6 +225,19 @@ class BaseView extends StatelessWidget {
       }),
     );
   }
+}
+
+class BottomTab {
+  final String label;
+  final String image;
+  final String selectedImage;
+
+  BottomTab({
+    required this.label,
+    required this.image,
+    required this.selectedImage,
+  });
+
 }
 
 class CustomBottomNavigationBar extends StatelessWidget {
@@ -176,16 +314,4 @@ class CustomBottomNavigationBar extends StatelessWidget {
       ),
     );
   }
-}
-
-class BottomTab {
-  final String label;
-  final String image;
-  final String selectedImage;
-
-  BottomTab({
-    required this.label,
-    required this.image,
-    required this.selectedImage,
-  });
 }

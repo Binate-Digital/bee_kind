@@ -77,23 +77,26 @@ class BeeKind extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(430, 932),
-      child: GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Bee Kind',
-        navigatorKey: StaticData.navigatorKey,
-        theme: ThemeData(
-          useMaterial3: false,
-          primaryColor: AppColors.whiteColor,
-          colorScheme: ColorScheme.fromSwatch().copyWith(
-            primary: AppColors.whiteColor,
+      builder: (context, child) {
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Bee Kind',
+          navigatorKey: StaticData.navigatorKey,
+          theme: ThemeData(
+            useMaterial3: false,
+            primaryColor: AppColors.whiteColor,
+            colorScheme: ColorScheme.fromSwatch().copyWith(
+              primary: AppColors.whiteColor,
+            ),
+            fontFamily: "Raleway",
           ),
-          fontFamily: "Raleway",
-        ),
-        home: const SplashScreen(),
-      ),
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }
+
 
 class StaticData {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

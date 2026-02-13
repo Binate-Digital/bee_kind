@@ -31,6 +31,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../common/base_view.dart';
+
 class StoreController extends GetxController {
   RxString searchQuery = "".obs;
 
@@ -516,8 +518,17 @@ class StoreController extends GetxController {
 
         // Navigate success screen
         // successfulOrderDialog(context);
-        Get.back();
-        Get.back();
+
+        // final prefs = SharedPrefs();
+
+        if(prefs.getBool("navigateToMyOrder")==true){
+          Get.to(BaseView(initialIndex: 1,));
+        }
+        else{
+          Get.back();
+          Get.back();
+        }
+
       } else {
         AppDialogs.showToast(response.data["message"] ?? "Order failed");
       }
@@ -632,7 +643,7 @@ class StoreController extends GetxController {
     }
   }
 
-  Future<void> addItems(OrderItem? item) async {
+  Future<void> addItems(OrderItem? item,{bool navigateTOOrder=false}) async {
     if (item == null) return;
 
     // Ensure cart exists

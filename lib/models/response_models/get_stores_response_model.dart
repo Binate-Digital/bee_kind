@@ -33,13 +33,14 @@ class GetStoresResponseModel {
 class StoreInformation {
   VendorAddress? vendorAddress;
   String? sId;
-  String? profilePicture;
+  dynamic? profilePicture;
   String? businessName;
   String? openTime;
   String? closeTime;
   List<String>? offDays;
   dynamic deliveryRadius;
   String? businessDescription;
+  String? phoneNumber;
 
   StoreInformation({
     this.vendorAddress,
@@ -51,6 +52,7 @@ class StoreInformation {
     this.offDays,
     this.deliveryRadius,
     this.businessDescription,
+    this.phoneNumber,
   });
 
   StoreInformation.fromJson(Map<String, dynamic> json) {
@@ -76,6 +78,7 @@ class StoreInformation {
 
     deliveryRadius = json['deliveryRadius'];
     businessDescription = json['businessDescription'];
+    phoneNumber = json['phoneNumber'];
   }
 
   Map<String, dynamic> toJson() {
@@ -93,6 +96,7 @@ class StoreInformation {
     map['offDays'] = offDays;
     map['deliveryRadius'] = deliveryRadius;
     map['businessDescription'] = businessDescription;
+    map['phoneNumber'] = phoneNumber;
 
     return map;
   }

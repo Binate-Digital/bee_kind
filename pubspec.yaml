@@ -46,6 +46,7 @@ dependencies:
   firebase_crashlytics: ^5.0.5
   keyboard_actions: ^4.2.1
   flutter_local_notifications: ^19.5.0
+  flutter_keyboard_size: ^1.0.1
 
 dev_dependencies:
   flutter_test:

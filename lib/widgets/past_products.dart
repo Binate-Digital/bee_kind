@@ -171,7 +171,7 @@ class PastProducts extends StatelessWidget {
               ),
               SizedBox(height: 8.h),
               CustomText(
-                text: "Qty: ${firstItem?.quantity ?? 0}",
+                text: "Qty: ${vendorOrder?.items?.length ?? 0}",
                 fontSize: 14.sp,
                 fontColor: AppColors.blackColor,
               ),

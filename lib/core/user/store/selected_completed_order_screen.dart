@@ -321,7 +321,14 @@ class _SelectedCompletedOrderScreenState
             // Only show Re-Order button for completed orders
             if (_isCompletedOrder)
               CustomButton(
-                onTap: () => _handleReOrder(context),
+                onTap: () {
+                  final prefs = SharedPrefs();
+                  prefs.setBool("navigateToMyOrder", true);
+                  _handleReOrder(context);
+
+
+                },
+        // _handleReOrder(context),
                 text: "Re-Order",
                 gradientColors: [AppColors.whiteColor, AppColors.whiteColor],
               ),

@@ -190,59 +190,7 @@ class Network {
 
 
 
-  Future<Response?> postRequestiWthoutHeader({
-    required String endPoint,
-    dynamic data,
-    dynamic token="",
-    Map<String, dynamic>? queryParameters,
-    VoidCallback? onFailure,
-    bool isToast = true,
-    int connectTimeOut = 50000,
-    bool isErrorToast = true,
-    bool isHeaderRequire = false,
-    Function(int, int)? progress,
-  }) async {
-    Response? response;
 
-    if (await _connectivityManager!.isInternetConnected()) {
-      try {
-        _dio?.options.connectTimeout = Duration(milliseconds: connectTimeOut);
-
-        final temp = await _dio!.patch(
-          NetworkStrings.baseUrl + endPoint,
-          data: data,
-          queryParameters: queryParameters,
-          cancelToken: _cancelRequestToken,
-          onSendProgress: progress,
-          options: Options(
-            headers: await _setHeader1(isHeaderRequire: isHeaderRequire,token: token),
-            sendTimeout: Duration(milliseconds: connectTimeOut),
-            receiveTimeout: Duration(milliseconds: connectTimeOut),
-          ),
-        );
-
-        if (temp.data is Map && temp.data['message'] != null) {
-          final msg = temp.data['message'].toString();
-          temp.data['message'] = msg;
-        }
-
-        response = temp;
-      } on DioException catch (e) {
-        _validateException(
-          response: e.response,
-          message: e.message,
-          onFailure: onFailure,
-          isToast: isToast,
-          isErrorToast: isErrorToast,
-        );
-        debugPrint("$endPoint PATCH Dio: ${e.message}");
-      }
-    } else {
-      _noInternetConnection(onFailure: onFailure, isErrorToast: isErrorToast);
-    }
-
-    return response;
-  }
 
   ////////////////// Post Request /////////////////////////
   Future<Response?> postRequest({
