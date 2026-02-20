@@ -662,6 +662,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
 
 
+
               // BOTTOM CATEGORIES SHEET
               GetBuilder<BaseViewController>(
                   builder: (controller) {

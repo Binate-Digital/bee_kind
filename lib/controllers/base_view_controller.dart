@@ -289,24 +289,31 @@ import '../models/response_models/notification_model.dart';
     ];
 
 
-    LatLng? parseLatLng(List<dynamic>? coords) {
+    LatLng? parseLatLng(List<double>? coords) {
       if (coords == null || coords.length < 2) return null;
 
-      final a = (coords[0] as num).toDouble();
-      final b = (coords[1] as num).toDouble();
+      final a = coords[0];
+      final b = coords[1];
 
-      // If "a" looks like latitude (<= 90) and "b" looks like longitude (<= 180)
-      if (a.abs() <= 90 && b.abs() <= 180) {
-        return LatLng(a, b); // [lat, lng]
+      // If a looks like latitude (within -90..90) and b looks like longitude (within -180..180)
+      // then it's probably [lat, lng]
+      final looksLikeLatLng = (a >= -90 && a <= 90) && (b >= -180 && b <= 180);
+
+      // If a looks like longitude and b looks like latitude, it's probably [lng, lat] (GeoJSON)
+      final looksLikeLngLat = (a >= -180 && a <= 180) && (b >= -90 && b <= 90);
+
+      if (looksLikeLngLat) {
+        return LatLng(b, a); // b=lat, a=lng
       }
 
-      // Otherwise assume [lng, lat]
-      if (b.abs() <= 90 && a.abs() <= 180) {
-        return LatLng(b, a);
+      if (looksLikeLatLng) {
+        return LatLng(a, b); // a=lat, b=lng
       }
 
-      return null; // invalid numbers
+      // fallback: assume GeoJSON
+      return LatLng(b, a);
     }
+
 
 
 
@@ -540,6 +547,8 @@ import '../models/response_models/notification_model.dart';
         dev.log("Store ${i + 1}: ${store.businessName}, ID: ${store.sId}");
 
         final coords = store.vendorAddress?.coordinates;
+
+        print("coords${coords}");
         final position = parseLatLng(coords);
 
         if (position == null) {
@@ -564,7 +573,7 @@ import '../models/response_models/notification_model.dart';
       markers.refresh();
 
       update();
-      dev.log("Total markers on map: ${markers.length}");
+      dev.log("Total markers on map: ${markers}");
     }
 
     String formatTime(String? time) {
@@ -780,9 +789,10 @@ import '../models/response_models/notification_model.dart';
 
       if (position != null) {
         currentLatLng.value = LatLng(position.latitude, position.longitude);
+
         address = await getAddressFromLatLng(
-          position.latitude,
           position.longitude,
+          position.latitude,
         );
 
         prefs.setString("address", address.toString());

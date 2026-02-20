@@ -159,7 +159,11 @@ class PinScreen extends StatelessWidget {
                             fontSize: 18.sp,
                           ),
                           GestureDetector(
-                            onTap: () => controller.showOTPSnackBar(context),
+                            onTap: () {
+                              controller.showOTPSnackBar(context);
+                              controller.startTimer();
+
+                            },
                             child: CustomText(
                               text: "Resend",
                               underlined: true,

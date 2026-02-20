@@ -56,6 +56,8 @@ class _LiveTrackingState extends State<LiveTracking> {
 
   @override
   void initState() {
+
+    print("dlsakndlnsaklns");
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _fetchOrderDetails();
@@ -67,6 +69,8 @@ class _LiveTrackingState extends State<LiveTracking> {
   bool isCalculatingEta = false;
 
   Future<void> _calculateETA() async {
+
+    print("sldnsndksnd");
     if (pickupLatLng == null || dropoffLatLng == null) return;
 
     try {
@@ -176,6 +180,7 @@ class _LiveTrackingState extends State<LiveTracking> {
   /// coordinates are [lat, lng]
   /// ---------------------------------------------------
   void _setupLocationsFromOrder(Order order) {
+
     // Default fallback if coordinates are missing
     const fallbackPickup = LatLng(24.861714457432807, 67.07000228675905);
     const fallbackDropoff = LatLng(24.873714457432807, 67.08200228675905);
@@ -183,9 +188,13 @@ class _LiveTrackingState extends State<LiveTracking> {
     // Store (pickup)
     final storeCoords = order.storeAddress?.coordinates;
     if (storeCoords != null && storeCoords.length >= 2) {
+
+      print("ldnfslndslfkldnfl");
       final lat = storeCoords[0];
       final lng = storeCoords[1];
-      pickupLatLng = LatLng(lat, lng);
+      pickupLatLng = LatLng(lng, lat);
+
+      print("pickupLatLngpickupLatLng${pickupLatLng}");
     } else {
       pickupLatLng = fallbackPickup;
     }
@@ -195,7 +204,8 @@ class _LiveTrackingState extends State<LiveTracking> {
     if (userCoords != null && userCoords.length >= 2) {
       final lat = userCoords[0];
       final lng = userCoords[1];
-      dropoffLatLng = LatLng(lat, lng);
+      dropoffLatLng = LatLng(lng, lat);
+      print("dropoffLatLngdropoffLatLng${dropoffLatLng}");
     } else {
       dropoffLatLng = fallbackDropoff;
     }
@@ -211,6 +221,9 @@ class _LiveTrackingState extends State<LiveTracking> {
       const ImageConfiguration(size: Size(30, 35)),
       AssetsPath.marker,
     );
+
+
+    print("dropoffLatLngdropoffLatLng${dropoffLatLng}");
 
     setState(() {
       _markers = {
@@ -329,6 +342,8 @@ class _LiveTrackingState extends State<LiveTracking> {
 
   @override
   Widget build(BuildContext context) {
+
+    print("sadbksjbdjsad");
     if (isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator(color: Colors.amber)),
@@ -358,6 +373,9 @@ class _LiveTrackingState extends State<LiveTracking> {
         : null;
 
     final currentStep = _stepFromStatus(order.status);
+
+
+    print("d;skladsand${pickupLatLng}");
 
     return AppBarBaseView(
       title: estimatedTimeText ?? "Calculating ETA...",
