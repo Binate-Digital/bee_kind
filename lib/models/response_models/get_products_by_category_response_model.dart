@@ -45,6 +45,7 @@ class ProductByCategoryData {
   String? businessName;
   String? businessId;
   num? deliveryRadius;
+  dynamic? distanceInKm;
   String? updatedAt;
   bool? isAvailable;
   String? inventoryStatus;
@@ -68,6 +69,7 @@ class ProductByCategoryData {
     this.businessName,
     this.businessId,
     this.deliveryRadius,
+    this.distanceInKm,
     this.updatedAt,
     this.isAvailable,
     this.inventoryStatus,
@@ -110,6 +112,7 @@ class ProductByCategoryData {
     final dr = json["deliveryRadius"];
     deliveryRadius = (dr is num) ? dr : null;
     updatedAt = json['updatedAt'];
+    distanceInKm = json['distanceInKm'];
     isAvailable = json['isAvailable'];
     inventoryStatus = json['inventoryStatus'];
     createdAt = json['createdAt'];
@@ -134,6 +137,7 @@ class ProductByCategoryData {
     data["businessName"] = businessName;
     data["businessId"] = businessId;
     data["deliveryRadius"] = deliveryRadius;
+    data["distanceInKm"] = distanceInKm;
     data['updatedAt'] = updatedAt;
     data['isAvailable'] = isAvailable;
     data['inventoryStatus'] = inventoryStatus;

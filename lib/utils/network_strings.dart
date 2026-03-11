@@ -3,9 +3,9 @@
 class NetworkStrings {
   ///BASE URL
   static const String baseUrl =
-      "https://beekind-backend.deployment-uat.com/api/v1/";
+      // "https://beekind-backend.deployment-uat.com/api/v1/";
       // "https://gls7l78c-5100.euw .devtunnels.ms/api/v1/";
-      // "https://3dsr3m62-5100.uks1.devtunnels.ms/api/v1/";
+      "https://c368pk0v-5005.euw.devtunnels.ms/api/v1/";
 
 //
 

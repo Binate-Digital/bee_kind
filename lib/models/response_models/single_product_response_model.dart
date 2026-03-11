@@ -1,207 +1,230 @@
 class SingleProductResponseModel {
   bool? status;
   String? message;
-  ProductDetail? data;
+  ProductData? data;
 
-  SingleProductResponseModel({this.status, this.message, this.data});
+  SingleProductResponseModel({
+    this.status,
+    this.message,
+    this.data,
+  });
 
-  SingleProductResponseModel.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
-    message = json['message'];
-    data = json['data'] != null ? ProductDetail.fromJson(json['data']) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = status;
-    data['message'] = message;
-    if (this.data != null) {
-      data['data'] = this.data!.toJson();
-    }
-    return data;
+  factory SingleProductResponseModel.fromJson(Map<String, dynamic> json) {
+    return SingleProductResponseModel(
+      status: json["status"],
+      message: json["message"],
+      data: json["data"] != null ? ProductData.fromJson(json["data"]) : null,
+    );
   }
 }
 
-class ProductDetail {
-  bool? isDiscountAvailable;
+class ProductData {
   String? sId;
-  List<String>? productImages;
   String? productName;
   String? categoryId;
   int? quantity;
-  int? price;
-  int? afterDiscountPrice;
+  double? price;
+  dynamic? afterDiscountPrice;
+  bool? isDiscountAvailable;
   String? effects;
   String? ingredients;
-  String? dosage;
   String? description;
-  String? user;
-  int? iV;
+  String? dosage;
   bool? isDeleted;
-  String? updatedAt;
   bool? isAvailable;
   String? inventoryStatus;
-  ProductReviews? reviews;
+  List<String>? productImages;
+  RatingDetail? ratingDetail;
+  List<Review>? reviews;
 
-  ProductDetail({
-    this.isDiscountAvailable,
+  ProductData({
     this.sId,
-    this.productImages,
     this.productName,
     this.categoryId,
     this.quantity,
     this.price,
     this.afterDiscountPrice,
+    this.isDiscountAvailable,
     this.effects,
     this.ingredients,
     this.description,
-    this.user,
-    this.iV,
+    this.dosage,
     this.isDeleted,
-    this.updatedAt,
     this.isAvailable,
     this.inventoryStatus,
+    this.productImages,
+    this.ratingDetail,
     this.reviews,
   });
 
-  ProductDetail.fromJson(Map<String, dynamic> json) {
-    isDiscountAvailable = json['isDiscountAvailable'];
-    sId = json['_id'];
-    productImages = json['productImages'] != null
-        ? List<String>.from(json['productImages'])
-        : [];
-    productName = json['productName'];
-    categoryId = json['categoryId'];
-    quantity = json['quantity'] != null
-        ? (json['quantity'] is int
-              ? json['quantity']
-              : (json['quantity'] as num).toInt())
-        : null;
-    price = json['price'] != null
-        ? (json['price'] is int
-              ? json['price']
-              : (json['price'] as num).toInt())
-        : null;
-    afterDiscountPrice = json['afterDiscountPrice'] != null
-        ? (json['afterDiscountPrice'] is int
-              ? json['afterDiscountPrice']
-              : (json['afterDiscountPrice'] as num).toInt())
-        : null;
-    effects = json['effects'];
-    ingredients = json['ingredients'];
-    dosage = json['dosage'];
-    description = json['description'];
-    user = json['user'];
-    iV = json['__v'] != null
-        ? (json['__v'] is int ? json['__v'] : (json['__v'] as num).toInt())
-        : null;
-    isDeleted = json['isDeleted'];
-    updatedAt = json['updatedAt'];
-    isAvailable = json['isAvailable'];
-    inventoryStatus = json['inventoryStatus'];
-    reviews = json['reviews'] != null
-        ? ProductReviews.fromJson(json['reviews'])
-        : null;
-  }
+  factory ProductData.fromJson(Map<String, dynamic> json) {
+    // Check if the 'reviews' field is an object with averageRating, totalReviews, and an array of reviews
+    var reviewsData = json["reviews"];
+    List<Review> reviews = [];
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['isDiscountAvailable'] = isDiscountAvailable;
-    data['_id'] = sId;
-    data['productImages'] = productImages;
-    data['productName'] = productName;
-    data['categoryId'] = categoryId;
-    data['quantity'] = quantity;
-    data['price'] = price;
-    data['afterDiscountPrice'] = afterDiscountPrice;
-    data['effects'] = effects;
-    data['ingredients'] = ingredients;
-    data['dosage'] = dosage;
-    data['description'] = description;
-    data['user'] = user;
-    data['__v'] = iV;
-    data['isDeleted'] = isDeleted;
-    data['updatedAt'] = updatedAt;
-    data['isAvailable'] = isAvailable;
-    data['inventoryStatus'] = inventoryStatus;
-    if (reviews != null) {
-      data['reviews'] = reviews!.toJson();
+    // If 'reviews' is an object, parse the nested reviews field and RatingDetail
+    if (reviewsData is Map<String, dynamic>) {
+      // Parse the RatingDetail
+      RatingDetail? ratingDetail;
+      if (reviewsData["averageRating"] != null || reviewsData["totalReviews"] != null) {
+        ratingDetail = RatingDetail.fromJson(reviewsData);
+      }
+      // If 'reviews' array exists, parse it into a list of Review objects
+      if (reviewsData["reviews"] != null) {
+        reviews = List<Review>.from(reviewsData["reviews"].map((x) => Review.fromJson(x)));
+      }
+
+      // Create ProductData with parsed reviews
+      return ProductData(
+        sId: json["_id"],
+        productName: json["productName"],
+        categoryId: json["categoryId"],
+        quantity: json["quantity"],
+        price: json["price"]?.toDouble(),
+        afterDiscountPrice: json["afterDiscountPrice"]?.toDouble(),
+        isDiscountAvailable: json["isDiscountAvailable"],
+        effects: json["effects"],
+        ingredients: json["ingredients"],
+        description: json["description"],
+        dosage: json["dosage"],
+        isDeleted: json["isDeleted"],
+        isAvailable: json["isAvailable"],
+        inventoryStatus: json["inventoryStatus"],
+        productImages: List<String>.from(json["productImages"] ?? []),
+        ratingDetail: ratingDetail,
+        reviews: reviews,
+      );
+    } else if (reviewsData is List) {
+      // If 'reviews' is a direct list, map it to Review objects
+      return ProductData(
+        sId: json["_id"],
+        productName: json["productName"],
+        categoryId: json["categoryId"],
+        quantity: json["quantity"],
+        price: json["price"]?.toDouble(),
+        afterDiscountPrice: json["afterDiscountPrice"]?.toDouble(),
+        isDiscountAvailable: json["isDiscountAvailable"],
+        effects: json["effects"],
+        ingredients: json["ingredients"],
+        description: json["description"],
+        dosage: json["dosage"],
+        isDeleted: json["isDeleted"],
+        isAvailable: json["isAvailable"],
+        inventoryStatus: json["inventoryStatus"],
+        productImages: List<String>.from(json["productImages"] ?? []),
+        ratingDetail: json["ratingDetail"] != null
+            ? RatingDetail.fromJson(json["ratingDetail"])
+            : null,
+        reviews: List<Review>.from(reviewsData.map((x) => Review.fromJson(x))),
+      );
+    } else {
+      // Default case where reviews field is missing or not matching expected structure
+      return ProductData(
+        sId: json["_id"],
+        productName: json["productName"],
+        categoryId: json["categoryId"],
+        quantity: json["quantity"],
+        price: json["price"]?.toDouble(),
+        afterDiscountPrice: json["afterDiscountPrice"]?.toDouble(),
+        isDiscountAvailable: json["isDiscountAvailable"],
+        effects: json["effects"],
+        ingredients: json["ingredients"],
+        description: json["description"],
+        dosage: json["dosage"],
+        isDeleted: json["isDeleted"],
+        isAvailable: json["isAvailable"],
+        inventoryStatus: json["inventoryStatus"],
+        productImages: List<String>.from(json["productImages"] ?? []),
+        ratingDetail: json["ratingDetail"] != null
+            ? RatingDetail.fromJson(json["ratingDetail"])
+            : null,
+        reviews: [],
+      );
     }
-    return data;
   }
 }
 
-class ProductReviews {
+class RatingDetail {
   double? averageRating;
   int? totalReviews;
-  List<ProductReviews>? reviews;
 
-  ProductReviews({this.averageRating, this.totalReviews, this.reviews});
+  RatingDetail({this.averageRating, this.totalReviews});
 
-  ProductReviews.fromJson(Map<String, dynamic> json) {
-    averageRating = json['averageRating']?.toDouble();
-    totalReviews = json['totalReviews'];
-    if (json['reviews'] != null) {
-      reviews = <ProductReviews>[];
-      json['reviews'].forEach((v) {
-        reviews!.add(ProductReviews.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['averageRating'] = averageRating;
-    data['totalReviews'] = totalReviews;
-    if (reviews != null) {
-      data['reviews'] = reviews!.map((v) => v.toJson()).toList();
-    }
-    return data;
+  factory RatingDetail.fromJson(Map<String, dynamic> json) {
+    return RatingDetail(
+      averageRating: json["averageRating"]?.toDouble(),
+      totalReviews: json["totalReviews"],
+    );
   }
 }
 
-class Reviews {
-  String? sId;
+class Review {
+  String? id;
   String? orderId;
-  String? userId;
+  String? productId;
+  User? user;
   int? rating;
   String? review;
   String? reply;
   String? repliedBy;
-  String? createdAt;
+  bool? isDeleted;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
-  Reviews({
-    this.sId,
+  Review({
+    this.id,
     this.orderId,
-    this.userId,
+    this.productId,
+    this.user,
     this.rating,
     this.review,
     this.reply,
     this.repliedBy,
+    this.isDeleted,
     this.createdAt,
+    this.updatedAt,
   });
 
-  Reviews.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
-    orderId = json['orderId'];
-    userId = json['userId'];
-    rating = json['rating'];
-    review = json['review'];
-    reply = json['reply'];
-    repliedBy = json['repliedBy'];
-    createdAt = json['createdAt'];
+  factory Review.fromJson(Map<String, dynamic> json) {
+    return Review(
+      id: json["_id"],
+      orderId: json["orderId"],
+      productId: json["productId"],
+      user: json["user"] != null ? User.fromJson(json["user"]) : null,
+      rating: json["rating"],
+      review: json["review"],
+      reply: json["reply"],
+      repliedBy: json["repliedBy"],
+      isDeleted: json["isDeleted"],
+      createdAt: json["createdAt"] != null
+          ? DateTime.parse(json["createdAt"])
+          : null,
+      updatedAt: json["updatedAt"] != null
+          ? DateTime.parse(json["updatedAt"])
+          : null,
+    );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['_id'] = sId;
-    data['orderId'] = orderId;
-    data['userId'] = userId;
-    data['rating'] = rating;
-    data['review'] = review;
-    data['reply'] = reply;
-    data['repliedBy'] = repliedBy;
-    data['createdAt'] = createdAt;
-    return data;
+class User {
+  String? id;
+  String? profilePicture;
+  String? firstName;
+  String? lastName;
+
+  User({
+    this.id,
+    this.profilePicture,
+    this.firstName,
+    this.lastName,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json["_id"],
+      profilePicture: json["profilePicture"],
+      firstName: json["firstName"],
+      lastName: json["lastName"],
+    );
   }
 }

@@ -321,6 +321,8 @@ import '../models/response_models/notification_model.dart';
 
 
     Future<void> fetchStores() async {
+
+      print("skldsnd");
       print("fetchStoresfetchStoresfetchStores");
       showWindow.value = false;
       dev.log(
@@ -342,9 +344,9 @@ import '../models/response_models/notification_model.dart';
       if (selectedCategoryId.value.isNotEmpty) {
         queryParams["categoryId"] = selectedCategoryId.value;
       }
-      if (currentRadius.value > 0) {
-        queryParams["deliveryRadius"] = currentRadius.value;
-      }
+      // if (currentRadius.value > 0) {
+      //   queryParams["deliveryRadius"] = currentRadius.value;
+      // }
       if (minPriceController.text.trim().isNotEmpty) {
         queryParams["minPrice"] = minPriceController.text.trim();
       }
@@ -365,7 +367,7 @@ import '../models/response_models/notification_model.dart';
         );
 
         if (response == null) {
-          Navigator.pop(StaticData.navigatorKey.currentContext!);
+          // Navigator.pop(StaticData.navigatorKey.currentContext!);
           AppDialogs.showToast("Unable to load stores.");
           return;
         }
@@ -544,11 +546,11 @@ import '../models/response_models/notification_model.dart';
       int addedMarkers = 0;
       for (int i = 0; i < storesList.length; i++) {
         final store = storesList[i];
-        dev.log("Store ${i + 1}: ${store.businessName}, ID: ${store.sId}");
+        dev.log("Store===> ${i + 1}: ${store.businessName}, ID: ${store.sId}");
 
         final coords = store.vendorAddress?.coordinates;
 
-        print("coords${coords}");
+        print("coords====${coords}");
         final position = parseLatLng(coords);
 
         if (position == null) {

@@ -104,6 +104,7 @@ class _SelectedProductState extends State<SelectedProduct>
           context,
           navigate: false,
         );
+        await controller.fetchProductReviews(widget.productId, context);
         // Fetch vendor-specific reviews
         log("Fetching vendor reviews for product ID: ${widget.productId}");
         await controller.fetchVendorProductReviews(widget.productId, context);
@@ -331,8 +332,17 @@ class _SelectedProductState extends State<SelectedProduct>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Obx(() {
-                        final avgRating = controller.averageRating.value;
-                        final totalReviews = controller.totalReviews.value;
+                        final avgRating;
+                        final totalReviews;
+                        if(widget.isVendor){
+                          avgRating = controller.vendorRating.value;
+                          totalReviews = controller.VendorReviews.value;
+                        }
+                        else{
+                          avgRating = controller.averageRating  .value;
+                          totalReviews = controller.totalReviews.value;
+                        }
+
                         return Row(
                           children: [
                             Image.asset(AssetsPath.star, width: 18.w),
@@ -676,6 +686,7 @@ class _SelectedProductState extends State<SelectedProduct>
 
               SizedBox(height: 30.h),
 
+
               /// ---------------- REVIEWS ----------------
               Obx(() {
                 if (controller.isLoading.value) {
@@ -688,6 +699,7 @@ class _SelectedProductState extends State<SelectedProduct>
                     ),
                   );
                 }
+
 
                 // No reviews
                 if (controller.reviewsList != null &&

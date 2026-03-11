@@ -116,7 +116,7 @@ class CategoryWiseProduct extends StatelessWidget {
 
               fromHome
                   ? CustomText(
-                      text: "${product?.deliveryRadius?.toStringAsFixed(1) ?? 0.toStringAsFixed(1)} Miles Away",
+                      text: "${product?.distanceInKm?.toStringAsFixed(1) ?? 0.toStringAsFixed(1)} Miles Away",
                       fontSize: 16.sp,
                       fontColor: AppColors.yellow2,
                       weight: FontWeight.bold,

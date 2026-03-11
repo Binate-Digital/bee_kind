@@ -250,7 +250,8 @@ class AuthController extends GetxController {
             loginResponse.message ?? "Login failed. Check credentials.",
           );
         }
-      } catch (e) {
+      }
+      catch (e) {
         log("Login exception: $e");
         isLoading.value = false;
       }

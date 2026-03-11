@@ -86,7 +86,9 @@ class StoreController extends GetxController {
 
   // SUMMARY DATA
   RxDouble averageRating = 0.0.obs;
+  RxDouble vendorRating = 0.0.obs;
   RxInt totalReviews = 0.obs;
+  RxInt VendorReviews = 0.obs;
 
   RxInt quantityCount = 0.obs;
 
@@ -753,8 +755,11 @@ class StoreController extends GetxController {
   double calculateTotalCartPrice() {
     if (orderItems == null) return 0.0;
 
+
     return orderItems!.fold(0.0, (sum, item) {
       double price = item.unitPrice ?? 0.0;
+      print("sddfdf===$price");
+      print("sum===$sum");
       return sum + price;
     });
   }
@@ -794,10 +799,13 @@ class StoreController extends GetxController {
     String? productId,
     BuildContext context,
   ) async {
+
+    print("fetchProductReviewsfetchProductReviews===");
     try {
       isLoading.value = true;
 
       final response = await network.getRequest(
+
         endPoint: "${NetworkStrings.getProductReviews}/$productId",
         isHeaderRequire: true,
         isToast: false,
@@ -819,9 +827,15 @@ class StoreController extends GetxController {
         // Extract data
         final details = productReviews.value?.data;
 
+
+        print("+asjbdjsdkbskajdb");
+        // print("lfnnfdf${details?.reviews?[1].review}");
+
         averageRating.value = (details?.averageRating ?? 0).toDouble();
         totalReviews.value = details?.totalReviews ?? 0;
         reviewsList?.value = details?.reviews ?? [];
+        print("sakndsndlsknlsnd");
+        print(reviewsList?.value);
       } else {
         isLoading.value = false;
         log(data["message"]);
@@ -840,6 +854,7 @@ class StoreController extends GetxController {
     BuildContext context,
   ) async {
     try {
+
       isLoading.value = true;
 
       final response = await network.getRequest(
@@ -871,14 +886,16 @@ class StoreController extends GetxController {
           );
           averageRating.value = 0;
           totalReviews.value = 0;
-          reviewsList?.value = [];
+          // reviewsList?.value = [];
         } else if (payload is Map) {
           // Normal object shape
           productReviews.value = ProductReviewsResponseModel.fromJson(data);
           final details = productReviews.value?.data;
           averageRating.value = details?.averageRating ?? 0;
           totalReviews.value = details?.totalReviews ?? 0;
-          reviewsList?.value = details?.reviews ?? [];
+          // reviewsList?.value = details?.reviews ?? [];
+          print("fetchVendorProductReviewsfetchVendorProductReview====${reviewsList?.value}");
+
         } else {
           // Fallback
           productReviews.value = ProductReviewsResponseModel(
@@ -1056,7 +1073,11 @@ class StoreController extends GetxController {
 
   Future<void> fetchStoreDetail(String? storeId, BuildContext context) async {
     debugPrint("fetch store detail");
+
+
     try {
+      allPopularProducts.clear();
+      allProducts.clear();
       showLoadingDialog(context);
 
       final response = await network.getRequest(
@@ -1268,6 +1289,9 @@ class StoreController extends GetxController {
           );
         }
 
+
+        print("dnasdlsd======${singleProduct.value?.data?.ratingDetail?.averageRating}");
+
         if (navigate) {
           Navigator.push(
             context,
@@ -1308,6 +1332,8 @@ class StoreController extends GetxController {
     bool navigate = true,
   }) async {
     try {
+
+      print("saldnssnldnlsa");
       showLoadingDialog(context);
 
       final response = await network.getRequest(
@@ -1326,7 +1352,7 @@ class StoreController extends GetxController {
       final data = response.data;
 
       if (data["status"] == true && data["data"] != null) {
-        singleProduct.value = SingleProductResponseModel.fromJson(data);
+          singleProduct.value = SingleProductResponseModel.fromJson(data);
 
         // Initialize isAvailable from API response
         isAvailable.value = singleProduct.value?.data?.isAvailable ?? false;
@@ -1336,7 +1362,16 @@ class StoreController extends GetxController {
           selectedStockStatus.value = convertApiStatusToDisplay(
             singleProduct.value!.data!.inventoryStatus!,
           );
+
         }
+          final details = singleProduct.value?.data;
+
+          vendorRating.value = (details?.ratingDetail?.averageRating ?? 0).toDouble();
+          VendorReviews.value = (details?.ratingDetail?.totalReviews ?? 0);
+        print("+++++++++++++++++");
+          // averageRating.value=singleProduct.value?.data?.ratingDetail!.averageRating;
+print(singleProduct.value?.data?.ratingDetail?.averageRating,);
+
 
         if (navigate) {
           Navigator.push(
@@ -1364,7 +1399,9 @@ class StoreController extends GetxController {
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to load product");
       }
-    } catch (e) {
+    }
+
+    catch (e) {
       Navigator.pop(context);
       log("fetchVendorProduct Exception: $e");
       AppDialogs.showToast("Something went wrong while getting product.");

@@ -701,11 +701,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                 padding: EdgeInsets.all(20.w),
                                 child: Row(
                                   children: [
-                                    CustomText(
-                                      text: "Categories",
-                                      fontSize: 20.sp,
-                                      weight: FontWeight.bold,
-                                      fontColor: AppColors.blackColor,
+                                    GestureDetector(
+
+                                      onTap:(){
+
+                                        print("sdlknsnd");
+                                        controller.fetchStores();
+                                        // controller.showStoreMarkers();
+                                      },
+                                      child: CustomText(
+                                        text: "Categories",
+                                        fontSize: 20.sp,
+                                        weight: FontWeight.bold,
+                                        fontColor: AppColors.blackColor,
+                                      ),
                                     ),
                                   ],
                                 ),

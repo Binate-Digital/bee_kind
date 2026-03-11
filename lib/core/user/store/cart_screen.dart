@@ -92,8 +92,10 @@ class CartScreen extends GetView<StoreController> {
                               Obx(() {
                                 return CustomText(
                                   text:
-                                      "\$${controller.calculateTotalCartPrice().toStringAsFixed(2)}",
-                                  fontSize: 18.sp,
+                                      // "\$${controller.calculateTotalCartPrice().toStringAsFixed(2)}",
+                                  "\$${(controller.calculateTotalCartPrice() + 20).toStringAsFixed(2)}",
+
+                                fontSize: 18.sp,
                                   fontColor: AppColors.yellow2,
                                   weight: FontWeight.bold,
                                 );
