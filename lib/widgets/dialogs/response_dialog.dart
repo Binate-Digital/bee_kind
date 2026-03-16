@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-Future<void> showRespondDialog(BuildContext ctx, String? reviewId) async {
+Future<String?> showRespondDialog(BuildContext ctx, String? reviewId) async {
   TextEditingController responseController = TextEditingController();
   final storeController = Get.find<StoreController>();
   bool isLoading = false;
 
-  showDialog(
+  return showDialog<String>(
     context: ctx,
     barrierDismissible: false,
     builder: (context) {
@@ -88,15 +88,15 @@ Future<void> showRespondDialog(BuildContext ctx, String? reviewId) async {
 
                               setState(() => isLoading = true);
 
-                              await storeController.addReplyToReview(
+                              final isSuccess = await storeController.addReplyToReview(
                                 reviewId,
-                                responseController.text,
+                                responseController.text.trim(),
                                 context,
                               );
 
                               setState(() => isLoading = false);
-                              if (context.mounted) {
-                                Navigator.pop(context);
+                              if (isSuccess && context.mounted) {
+                                Navigator.pop(context, responseController.text.trim());
                               }
                             },
                       text: isLoading ? "Sending..." : "Send",

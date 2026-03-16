@@ -48,7 +48,7 @@ class SelectedProduct extends StatefulWidget {
   final String? description;
   final String? inventoryStatus;
   final dynamic price;
-  final int? afterDiscountPrice;
+  final dynamic? afterDiscountPrice;
   final int? quantity;
   final List<String>? productImages;
   final String? productId;
@@ -687,6 +687,8 @@ class _SelectedProductState extends State<SelectedProduct>
               SizedBox(height: 30.h),
 
 
+
+
               /// ---------------- REVIEWS ----------------
               Obx(() {
                 if (controller.isLoading.value) {
@@ -717,21 +719,35 @@ class _SelectedProductState extends State<SelectedProduct>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        CustomText(
-                          text: "Rating & Reviews",
-                          fontSize: 18.sp,
-                          weight: FontWeight.bold,
+                        GestureDetector(
+
+                          onTap:(){
+                            controller.fetchProductReviews(widget.productId, context);
+                          },
+
+                          child: CustomText(
+                            text: "Rating & Reviews",
+                            fontSize: 18.sp,
+                            weight: FontWeight.bold,
+                          ),
                         ),
                         GestureDetector(
-                          onTap: () {
+                          onTap: () async {
+                            if (widget.isVendor) {
+                              await controller.fetchProductReviews(widget.productId, context);
+                            } else {
+                              await controller.fetchProductReviews(widget.productId, context);
+                            }
+
                             final data = controller.productReviews.value?.data;
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => RatingScreen(
                                   isVendor: widget.isVendor,
-                                  avgRating: data?.averageRating ?? 0.0,
-                                  totalReviews: data?.totalReviews ?? 0.0,
+                                  avgRating: (data?.averageRating ?? 0).toDouble(),
+                                  totalReviews: (data?.totalReviews ?? 0).toDouble(),
                                   reviews: data?.reviews ?? [],
                                 ),
                               ),
@@ -755,15 +771,28 @@ class _SelectedProductState extends State<SelectedProduct>
                       itemBuilder: (_, index) {
                         final data = controller.reviewsList?[index];
                         log("RATING: ${data?.rating}");
-                        return ReviewCard(
-                          isVendor: widget.isVendor,
-                          review: data?.review ?? "",
-                          userImage: data?.user?.profileImage,
-                          userName: data?.user?.fullName,
-                          vendorResponse: data?.reply ?? "",
-                          ratingCount: data?.rating ?? 0,
-                          reviewId: data?.sId,
-                        );
+                        return
+
+                          ReviewCard(
+                            isVendor: widget.isVendor,
+                            reviewId: data?.sId,
+                            review: data?.review,
+                            ratingCount: data?.rating,
+                            userName: data?.user?.fullName,
+                            userImage: data?.user?.profileImage,
+                            vendorResponses: data?.reply,
+                            repliedBy: data?.repliedBy,
+                          );
+                        //   ReviewCard(
+                        //   isVendor: widget.isVendor,
+                        //   review: data?.review ?? "",
+                        //   userImage: data?.user?.profileImage,
+                        //   userName: data?.user?.fullName,
+                        //   vendorResponse: data?.reply ?? "",
+                        //   ratingCount: data?.rating ?? 0,
+                        //   reviewId: data?.sId,
+                        //
+                        // );
                       },
                     ),
                   ],

@@ -3,7 +3,11 @@ class ProductReviewsResponseModel {
   String? message;
   ProductReviews? data;
 
-  ProductReviewsResponseModel({this.status, this.message, this.data});
+  ProductReviewsResponseModel({
+    this.status,
+    this.message,
+    this.data,
+  });
 
   ProductReviewsResponseModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
@@ -24,8 +28,8 @@ class ProductReviewsResponseModel {
 
 class ProductReviews {
   String? sId;
-  dynamic averageRating;
-  dynamic totalReviews;
+  double? averageRating;
+  int? totalReviews;
   List<Reviews>? reviews;
 
   ProductReviews({
@@ -36,14 +40,18 @@ class ProductReviews {
   });
 
   ProductReviews.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
-    averageRating = json['averageRating'];
-    totalReviews = json['totalReviews'];
-    if (json['reviews'] != null) {
-      reviews = <Reviews>[];
-      json['reviews'].forEach((v) {
-        reviews!.add(Reviews.fromJson(v));
-      });
+    sId = json['_id']?.toString();
+    averageRating = (json['averageRating'] as num?)?.toDouble();
+    totalReviews = json['totalReviews'] is int
+        ? json['totalReviews']
+        : int.tryParse(json['totalReviews']?.toString() ?? '');
+
+    if (json['reviews'] != null && json['reviews'] is List) {
+      reviews = (json['reviews'] as List)
+          .map((v) => Reviews.fromJson(v))
+          .toList();
+    } else {
+      reviews = [];
     }
   }
 
@@ -65,10 +73,9 @@ class Reviews {
   String? userId;
   int? rating;
   String? review;
-  String? reply;
-  String? repliedBy;
+  List<String>? reply;
+  List<String>? repliedBy;
   String? createdAt;
-
   UserModel? user;
 
   Reviews({
@@ -84,17 +91,35 @@ class Reviews {
   });
 
   Reviews.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
-    orderId = json['orderId'];
-    userId = json['userId'];
-    rating = json['rating'];
-    review = json['review'];
-    reply = json['reply'];
-    repliedBy = json['repliedBy'];
-    createdAt = json['createdAt'];
-
-    /// ⭐ Parse user object
+    sId = json['_id']?.toString();
+    orderId = json['orderId']?.toString();
+    userId = json['userId']?.toString();
+    rating = json['rating'] is int
+        ? json['rating']
+        : int.tryParse(json['rating']?.toString() ?? '');
+    review = json['review']?.toString();
+    reply = _parseStringList(json['reply']);
+    repliedBy = _parseStringList(json['repliedBy']);
+    createdAt = json['createdAt']?.toString();
     user = json['user'] != null ? UserModel.fromJson(json['user']) : null;
+  }
+
+  static List<String> _parseStringList(dynamic value) {
+    if (value == null) return [];
+
+    if (value is String) {
+      return value.trim().isEmpty ? [] : [value];
+    }
+
+    if (value is List) {
+      return value
+          .where((e) => e != null)
+          .map((e) => e.toString())
+          .where((e) => e.trim().isNotEmpty)
+          .toList();
+    }
+
+    return [];
   }
 
   Map<String, dynamic> toJson() {
@@ -104,11 +129,10 @@ class Reviews {
     data['userId'] = userId;
     data['rating'] = rating;
     data['review'] = review;
-    data['reply'] = reply;
-    data['repliedBy'] = repliedBy;
+    data['reply'] = reply ?? [];
+    data['repliedBy'] = repliedBy ?? [];
     data['createdAt'] = createdAt;
 
-    /// ⭐ Add user to JSON
     if (user != null) {
       data['user'] = user!.toJson();
     }
@@ -121,33 +145,38 @@ class UserModel {
   String? fullName;
   String? profileImage;
 
-  UserModel({this.fullName, this.profileImage});
+  UserModel({
+    this.fullName,
+    this.profileImage,
+  });
 
   UserModel.fromJson(Map<String, dynamic> json) {
-    // Handle different possible field names for user name
-    fullName = json['name'] ?? 
-               json['fullName'] ?? 
-               json['userName'] ?? 
-               json['username'] ??
-               _buildFullName(json['firstName'], json['lastName']);
+    fullName = json['name']?.toString() ??
+        json['fullName']?.toString() ??
+        json['userName']?.toString() ??
+        json['username']?.toString() ??
+        _buildFullName(json['firstName'], json['lastName']);
 
-    // Handle different possible field names for profile image
-    profileImage = json['profilePicture'] ?? 
-                   json['profileImage'] ?? 
-                   json['avatar'] ??
-                   json['image'];
+    profileImage = json['profilePicture']?.toString() ??
+        json['profileImage']?.toString() ??
+        json['avatar']?.toString() ??
+        json['image']?.toString();
   }
 
-  // Helper to combine firstName and lastName
-  String? _buildFullName(dynamic firstName, dynamic lastName) {
+  static String? _buildFullName(dynamic firstName, dynamic lastName) {
     if (firstName == null && lastName == null) return null;
+
     final first = firstName?.toString() ?? '';
     final last = lastName?.toString() ?? '';
     final combined = '$first $last'.trim();
+
     return combined.isEmpty ? null : combined;
   }
 
   Map<String, dynamic> toJson() {
-    return {"name": fullName, "profilePicture": profileImage};
+    return {
+      "name": fullName,
+      "profilePicture": profileImage,
+    };
   }
 }

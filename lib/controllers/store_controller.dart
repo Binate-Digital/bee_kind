@@ -801,8 +801,8 @@ class StoreController extends GetxController {
   ) async {
 
     print("fetchProductReviewsfetchProductReviews===");
-    try {
-      isLoading.value = true;
+    // try {
+      // isLoading.value = true;
 
       final response = await network.getRequest(
 
@@ -841,11 +841,13 @@ class StoreController extends GetxController {
         log(data["message"]);
         AppDialogs.showToast("Reviews not found.");
       }
-    } catch (e) {
-      isLoading.value = false;
-      log("fetchProductReviews Exception: $e");
-      AppDialogs.showToast("Error loading reviews");
-    }
+    // }
+
+    // catch (e) {
+    //   isLoading.value = false;
+    //   log("fetchProductReviews Exception: $e");
+    //   AppDialogs.showToast("Error loading reviews");
+    // }
   }
 
   /// Fetch product reviews as a vendor (vendor/get-reviews/:productId)
@@ -960,7 +962,7 @@ class StoreController extends GetxController {
     }
   }
 
-  Future<void> addReplyToReview(
+  Future<bool> addReplyToReview(
     String? reviewId,
     String reply,
     BuildContext context,
@@ -968,7 +970,7 @@ class StoreController extends GetxController {
     try {
       if (reviewId == null || reviewId.isEmpty) {
         AppDialogs.showToast("Invalid review ID");
-        return;
+        return false;
       }
 
       final response = await network.postRequest(
@@ -980,30 +982,38 @@ class StoreController extends GetxController {
 
       if (response == null) {
         AppDialogs.showToast("Failed to send reply");
-        return;
+        return false;
       }
 
       final data = response.data;
 
       if (data["status"] == true) {
         AppDialogs.showToast("Reply sent successfully");
-        // Refresh reviews to show the new reply
-        await fetchProductReviews(singleProduct.value?.data?.sId, context);
+        final reviewIndex = reviewsList?.indexWhere((e) => e.sId == reviewId) ?? -1;
+        if (reviewIndex != -1) {
+          final currentReplies = List<String>.from(reviewsList![reviewIndex].reply ?? const []);
+          currentReplies.add(reply);
+          reviewsList![reviewIndex].reply = currentReplies;
+          reviewsList?.refresh();
+        }
+        return true;
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to send reply");
         log("Add reply failed: ${data['message']}");
+        return false;
       }
     } catch (e) {
       log("addReplyToReview Exception: $e");
       AppDialogs.showToast("Error sending reply: $e");
+      return false;
     }
   }
 
-  Future<void> deleteReview(String? reviewId, BuildContext context) async {
+  Future<bool> deleteReview(String? reviewId, BuildContext context) async {
     try {
       if (reviewId == null || reviewId.isEmpty) {
         AppDialogs.showToast("Invalid review ID");
-        return;
+        return false;
       }
 
       final response = await network.deleteRequest(
@@ -1014,26 +1024,32 @@ class StoreController extends GetxController {
 
       if (response == null) {
         AppDialogs.showToast("Failed to delete review");
-        return;
+        return false;
       }
 
       final data = response.data;
 
       if (data["status"] == true) {
         AppDialogs.showToast("Review deleted successfully");
-        // Refresh reviews to remove the deleted one
-        await fetchProductReviews(singleProduct.value?.data?.sId, context);
+        reviewsList?.removeWhere((e) => e.sId == reviewId);
+        reviewsList?.refresh();
+        if (totalReviews.value > 0) {
+          totalReviews.value = totalReviews.value - 1;
+        }
+        return true;
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to delete review");
         log("Delete review failed: ${data['message']}");
+        return false;
       }
     } catch (e) {
       log("deleteReview Exception: $e");
       AppDialogs.showToast("Error deleting review: $e");
+      return false;
     }
   }
 
-  Future<void> updateReview(
+  Future<bool> updateReview(
     String? reviewId,
     String updatedText,
     BuildContext context,
@@ -1041,7 +1057,7 @@ class StoreController extends GetxController {
     try {
       if (reviewId == null || reviewId.isEmpty) {
         AppDialogs.showToast("Invalid review ID");
-        return;
+        return false;
       }
 
       final response = await network.patchRequest(
@@ -1053,21 +1069,28 @@ class StoreController extends GetxController {
 
       if (response == null) {
         AppDialogs.showToast("Failed to update review");
-        return;
+        return false;
       }
 
       final data = response.data;
 
       if (data["status"] == true) {
         AppDialogs.showToast("Review updated successfully");
-        await fetchProductReviews(singleProduct.value?.data?.sId, context);
+        final reviewIndex = reviewsList?.indexWhere((e) => e.sId == reviewId) ?? -1;
+        if (reviewIndex != -1) {
+          reviewsList![reviewIndex].review = updatedText;
+          reviewsList?.refresh();
+        }
+        return true;
       } else {
         AppDialogs.showToast(data["message"] ?? "Failed to update review");
         log("Update review failed: ${data['message']}");
+        return false;
       }
     } catch (e) {
       log("updateReview Exception: $e");
       AppDialogs.showToast("Error updating review: $e");
+      return false;
     }
   }
 
@@ -1400,7 +1423,7 @@ print(singleProduct.value?.data?.ratingDetail?.averageRating,);
         AppDialogs.showToast(data["message"] ?? "Failed to load product");
       }
     }
-
+    //
     catch (e) {
       Navigator.pop(context);
       log("fetchVendorProduct Exception: $e");

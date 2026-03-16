@@ -29,6 +29,10 @@ class NotificationsScreen extends StatelessWidget {
                   physics: NeverScrollableScrollPhysics(),
                   itemCount:  controller.notifications.value?.data?.length??0,
                   itemBuilder: (context, index){
+                    String getDateOnly(String? dateTime) {
+                      if (dateTime == null || dateTime.isEmpty) return "";
+                      return dateTime.split('T').first;
+                    }
                   return
                   //   Container(
                   //   padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 12.h),
@@ -95,6 +99,7 @@ class NotificationsScreen extends StatelessWidget {
 
                     NotificationsWidget(message:controller.notifications.value?.data?[index].message ,
                     title:controller.notifications.value?.data?[index].type ,
+                      time: getDateOnly(controller.notifications.value?.data?[index].createdAt)
 
                     );
                 }

@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NotificationsWidget extends StatelessWidget {
-  const NotificationsWidget({super.key, this.title, this.message, this.time});
+  const NotificationsWidget({super.key, this.title, this.message, this.time,this.type});
 
   final String? title;
   final String? message;
   final String? time;
+  final String? type;
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +50,25 @@ class NotificationsWidget extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CustomText(
-                            text: title ?? "Notification",
-                            fontSize: 18.sp,
-                            fontFamily: "Raleway",
-                            weight: FontWeight.bold,
-                            fontColor: AppColors.blackColor,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              CustomText(
+                                text: title ?? "Notification",
+                                fontSize: 18.sp,
+                                fontFamily: "Raleway",
+                                weight: FontWeight.bold,
+                                fontColor: AppColors.blackColor,
+                              ),
+                              CustomText(
+                                text: time ?? "Notification",
+                                fontSize: 18.sp,
+                                fontFamily: "Raleway",
+                                weight: FontWeight.normal,
+                                fontColor: AppColors.blackColor,
+                              ),
+                            ],
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),

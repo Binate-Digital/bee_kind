@@ -37,6 +37,7 @@ class CategoryWiseProductsList extends StatelessWidget {
                     products?[index].businessId,
                     context,
                   )
+
                 : controller.fetchSingleProduct(products?[index].sId, context),
             child: CategoryWiseProduct(
               fromHome: fromHome,

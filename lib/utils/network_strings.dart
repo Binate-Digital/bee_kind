@@ -6,6 +6,9 @@ class NetworkStrings {
       // "https://beekind-backend.deployment-uat.com/api/v1/";
       // "https://gls7l78c-5100.euw .devtunnels.ms/api/v1/";
       "https://c368pk0v-5005.euw.devtunnels.ms/api/v1/";
+      // "https://c368pk0v-5005.euw.devtunnels.ms/api/v1/";
+
+
 
 //
 

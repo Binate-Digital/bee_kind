@@ -88,7 +88,7 @@ class Product extends StatelessWidget {
         ),
         SizedBox(height: 6.h),
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.35,
+          width: MediaQuery.of(context).size.width * 0.37,
           child: Column(
             children: [
               Row(
