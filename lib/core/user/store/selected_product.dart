@@ -612,14 +612,20 @@ class _SelectedProductState extends State<SelectedProduct>
                           print("lsskdslkn${sp?.inventoryStatus ??
                               widget.inventoryStatus}");
 
+
+                          final afterPrice =
+                              sp?.afterDiscountPrice ?? widget.afterDiscountPrice;
+                          final price = sp?.price ?? widget.price ?? 0;
+                          final hasDiscount =
+                              sp?.isDiscountAvailable ?? widget.hasDiscount;
                           double unitPrice =
-                                    (widget.hasDiscount
+                                    (hasDiscount
                                         ? double.tryParse(
-                                            widget.afterDiscountPrice
+                                      afterPrice
                                                 .toString(),
                                           )
                                         : double.tryParse(
-                                            widget.price.toString(),
+                                      price.toString(),
                                           )) ??
                                     0;
                                 print("dljfdsfbdlfn${unitPrice}");
@@ -643,12 +649,34 @@ class _SelectedProductState extends State<SelectedProduct>
                                     return;
                                   }
 
-                                  controller
-                                      .addItems(
+
+
+
+                                  final sp1 = controller.singleProduct.value?.data;
+                                  final name =
+                                      sp1?.productName ?? widget.productName ?? "Lorem Ipsum";
+                                  final image =
+                                      sp1?.productImages?.first ?? widget.productImages?.first;
+                                  final afterPrice =
+                                      sp1?.afterDiscountPrice ?? widget.afterDiscountPrice;
+                                  final hasDiscount =
+                                      sp?.isDiscountAvailable ?? widget.hasDiscount;
+                                  final price = sp1?.price ?? widget.price ?? 0;
+
+
+
+
+                                  print("widget.productId===${widget.productId}");
+                                  print("productName===${name}");
+                                  print("image===${image}");
+                                  print("unitPrice===${unitPrice}");
+                                  print("qty===${qty}");
+
+                                  controller.addItems(
                                         OrderItem(
                                           productId: widget.productId,
-                                          productName: widget.productName,
-                                          productImage: widget.productImages?.first,
+                                          productName:name,
+                                          productImage: image,
                                           unitPrice: unitPrice,
                                           quantity: qty,
 

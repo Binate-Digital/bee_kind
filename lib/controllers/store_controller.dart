@@ -391,6 +391,8 @@ class StoreController extends GetxController {
       });
 
       completedOrdersList.assignAll(deduped);
+
+      print("completedOrdersList===${completedOrdersList.length}");
       log("Fetched ${mergedList.length} completed/cancelled orders");
     } catch (e) {
       isFetchingOrders.value = false;

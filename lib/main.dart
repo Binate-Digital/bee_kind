@@ -19,56 +19,139 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  print('Handling a background message ${message.data}');
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  print("background message received");
+  print("message.data = ${message.data}");
+  print("message.notification?.title = ${message.notification?.title}");
+  print("message.notification?.body = ${message.notification?.body}");
 }
 
 Future<void> onDidReceiveNotificationResponseHandler(
     NotificationResponse notificationResponse) async {
-  // appPrint("onDidReceiveNotificationResponseHandler $notificationResponse || ${notificationResponse.payload}");
-  var data = jsonDecode(notificationResponse.payload!);
-  print("onDidReceiveNotificationResponseHandler decoded $data");
+  print("notification tapped in foreground/background");
+  print("raw payload = ${notificationResponse.payload}");
+
+  if (notificationResponse.payload != null &&
+      notificationResponse.payload!.isNotEmpty) {
+    final data = jsonDecode(notificationResponse.payload!);
+    printNotificationData(data, source: "local_notification_tap");
+  }
 }
+@pragma('vm:entry-point')
 @pragma('vm:entry-point')
 void onDidReceiveBackgroundNotificationResponseHandler(
     NotificationResponse notificationResponse) {
-  var data = jsonDecode(notificationResponse.payload!);
-  print('onDidReceiveBackgroundNotificationResponseHandler $data');
+  print("notification tapped from background isolate");
+  print("raw payload = ${notificationResponse.payload}");
+
+  if (notificationResponse.payload != null &&
+      notificationResponse.payload!.isNotEmpty) {
+    final data = jsonDecode(notificationResponse.payload!);
+    printNotificationData(data, source: "background_notification_tap");
+  }
+}
+
+void printNotificationData(Map<String, dynamic> data, {String? source}) {
+  print("========== notification payload (${source ?? 'unknown'}) ==========");
+  print(data);
+  print("type: ${data['type']}");
+  print("screen: ${data['screen']}");
+  print("id: ${data['id']}");
+  print("=======================================================");
 }
 
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
-  // WidgetsFlutterBinding.ensureInitialized();
-  //test2
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   Stripe.publishableKey = NetworkStrings.STRIPE_KEY;
 
   SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  // if (Firebase.apps.isEmpty) {
-  //   await Firebase.initializeApp(
-  //     options: DefaultFirebaseOptions.currentPlatform,
-  //   );
-  // }
 
   await Future.delayed(const Duration(seconds: 2));
   await FirebaseNotificationService().firebaseMessaging();
-
-
   await Validation.getFCMToken();
-  // FirebaseMessaging.onBackgroundMessage(
-  //   PushNotificationService.firebaseBackgroundHandler,
-  // );
-
-  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await SharedPrefs.init();
+
   Get.lazyPut(() => StoreController(), fenix: true);
+
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // app in foreground
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print("foreground message received");
+    print("message.data = ${message.data}");
+    print("title = ${message.notification?.title}");
+    print("body = ${message.notification?.body}");
+  });
+
+  // app opened from background by tapping notification
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print("notification tapped -> app opened from background");
+    print("message.data = ${message.data}");
+    printNotificationData(message.data, source: "onMessageOpenedApp");
+
+    // later use this for navigation
+    // handleNotificationNavigation(message.data);
+  });
+
+  // app opened from terminated state by tapping notification
+  RemoteMessage? initialMessage =
+  await FirebaseMessaging.instance.getInitialMessage();
+
+  if (initialMessage != null) {
+    print("app opened from terminated state via notification");
+    print("message.data = ${initialMessage.data}");
+    printNotificationData(initialMessage.data, source: "getInitialMessage");
+
+    // later use this for navigation
+    // handleNotificationNavigation(initialMessage.data);
+  }
+
   runApp(const BeeKind());
 }
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
+//   // WidgetsFlutterBinding.ensureInitialized();
+//   //test2
+//   Stripe.publishableKey = NetworkStrings.STRIPE_KEY;
+//
+//   SystemChrome.setSystemUIOverlayStyle(
+//     SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+//   );
+//   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+//   // if (Firebase.apps.isEmpty) {
+//   //   await Firebase.initializeApp(
+//   //     options: DefaultFirebaseOptions.currentPlatform,
+//   //   );
+//   // }
+//
+//   await Future.delayed(const Duration(seconds: 2));
+//   await FirebaseNotificationService().firebaseMessaging();
+//
+//
+//   await Validation.getFCMToken();
+//   // FirebaseMessaging.onBackgroundMessage(
+//   //   PushNotificationService.firebaseBackgroundHandler,
+//   // );
+//
+//   // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+//   await SharedPrefs.init();
+//   Get.lazyPut(() => StoreController(), fenix: true);
+//   runApp(const BeeKind());
+// }
 
 class BeeKind extends StatelessWidget {
   const BeeKind({super.key});
