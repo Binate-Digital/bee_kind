@@ -1,6 +1,7 @@
 import 'package:bee_kind/core/user/store/live_tracking.dart';
 import 'package:bee_kind/core/user/store/selected_product.dart';
 import 'package:bee_kind/models/response_models/notification_model.dart';
+import 'package:bee_kind/services/notification_navigation_service.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/widgets/custom_app_bar.dart';
 import 'package:bee_kind/widgets/notifications_widget.dart';
@@ -18,63 +19,30 @@ class NotificationsScreen extends StatelessWidget {
     NotificationItem notification,
     BaseViewController controller,
   ) {
-    final type = notification.type?.trim().toLowerCase();
+    final routeData =
+        NotificationNavigationService.fromNotificationItem(notification);
 
-    switch (type) {
-      case 'review-reply-added':
-        final productId = notification.metadata?.productId;
-        if (productId != null && productId.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SelectedProduct(productId: productId),
-            ),
-          );
-        }
+    print("routeDatarouteData====${NotificationTarget.product}");
+
+    switch (routeData.target) {
+      case NotificationTarget.product:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SelectedProduct(productId: routeData.productId),
+          ),
+        );
         break;
-      case 'new-product':
-        final productId = notification.metadata?.productId;
-        if (productId != null && productId.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SelectedProduct(productId: productId),
-            ),
-          );
-        }
-        break;
-      case 'discount-added':
-        final productId = notification.metadata?.productId;
-        if (productId != null && productId.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SelectedProduct(productId: productId),
-            ),
-          );
-        }
-        break;
-      case 'order-status-updated':
-        final orderId = notification.metadata?.orderId;
-        if (orderId != null && orderId.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => LiveTracking(orderId: orderId)),
-          );
-        }
+      case NotificationTarget.orderTracking:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => LiveTracking(orderId: routeData.orderId!),
+          ),
+        );
         break;
 
-      case 'new-order-accepted':
-        final orderId = notification.metadata?.orderId;
-        if (orderId != null && orderId.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => LiveTracking(orderId: orderId)),
-          );
-        }
-        break;
-
-      case 'new-order':
+      case NotificationTarget.orderRequestsTab:
         controller.changeTab(1);
         if (Navigator.canPop(context)) {
           Navigator.pop(context);
@@ -85,8 +53,7 @@ class NotificationsScreen extends StatelessWidget {
           );
         }
         break;
-
-      default:
+      case NotificationTarget.none:
         break;
     }
   }

@@ -80,18 +80,6 @@ class FirebaseNotificationService{
       print("FirebaseMessaging.onMessage.listen ${message.data}");
       showFlutterNotification(message);
     });
-
-    FirebaseMessaging.instance.getInitialMessage().then((message) {
-      RemoteNotification? notification = message?.notification;
-      AndroidNotification? android = message?.notification?.android;
-      print("FirebaseMessaging.instance.getInitialMessage ${message?.data}");
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-      print("FirebaseMessaging.onMessageOpenedApp.listen ${message.data}");
-    });
   }
 
 

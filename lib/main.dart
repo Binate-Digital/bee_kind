@@ -1,9 +1,13 @@
 import 'dart:convert';
 
+import 'package:bee_kind/common/base_view.dart';
+import 'package:bee_kind/controllers/base_view_controller.dart';
 import 'package:bee_kind/controllers/store_controller.dart';
+import 'package:bee_kind/core/user/store/live_tracking.dart';
+import 'package:bee_kind/core/user/store/selected_product.dart';
 import 'package:bee_kind/firebase_options.dart';
+import 'package:bee_kind/services/notification_navigation_service.dart';
 import 'package:bee_kind/services/notification_services.dart';
-import 'package:bee_kind/services/push_notification_service.dart';
 import 'package:bee_kind/services/shared_prefs_services.dart';
 import 'package:bee_kind/splash/splash_screen.dart';
 import 'package:bee_kind/utils/app_colors.dart';
@@ -36,8 +40,11 @@ Future<void> onDidReceiveNotificationResponseHandler(
 
   if (notificationResponse.payload != null &&
       notificationResponse.payload!.isNotEmpty) {
-    final data = jsonDecode(notificationResponse.payload!);
+    final data = Map<String, dynamic>.from(
+      jsonDecode(notificationResponse.payload!) as Map,
+    );
     printNotificationData(data, source: "local_notification_tap");
+    handleNotificationNavigation(data);
   }
 }
 @pragma('vm:entry-point')
@@ -49,8 +56,59 @@ void onDidReceiveBackgroundNotificationResponseHandler(
 
   if (notificationResponse.payload != null &&
       notificationResponse.payload!.isNotEmpty) {
-    final data = jsonDecode(notificationResponse.payload!);
+    final data = Map<String, dynamic>.from(
+      jsonDecode(notificationResponse.payload!) as Map,
+    );
     printNotificationData(data, source: "background_notification_tap");
+    handleNotificationNavigation(data);
+  }
+}
+
+void handleNotificationNavigation(
+  Map<String, dynamic> data, {
+  bool deferUntilBaseView = false,
+}) {
+  final routeData = NotificationNavigationService.fromPayload(data);
+
+  if (!routeData.hasTarget) {
+    return;
+  }
+
+  final navigatorState = StaticData.navigatorKey.currentState;
+
+  if (deferUntilBaseView ||
+      navigatorState == null ||
+      !Get.isRegistered<BaseViewController>()) {
+    NotificationNavigationService.setPendingPayload(data);
+    return;
+  }
+
+
+  print("adlbsdbjs${routeData.target}");
+  switch (routeData.target) {
+    case NotificationTarget.product:
+      navigatorState.push(
+        MaterialPageRoute(
+          builder: (_) => SelectedProduct(productId: routeData.productId),
+        ),
+      );
+      break;
+    case NotificationTarget.orderTracking:
+      navigatorState.push(
+        MaterialPageRoute(
+          builder: (_) => LiveTracking(orderId: routeData.orderId!),
+        ),
+      );
+      break;
+    case NotificationTarget.orderRequestsTab:
+      Get.find<BaseViewController>().changeTab(1);
+      navigatorState.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const BaseView(initialIndex: 1)),
+        (route) => false,
+      );
+      break;
+    case NotificationTarget.none:
+      break;
   }
 }
 
@@ -101,9 +159,7 @@ void main() async {
     print("notification tapped -> app opened from background");
     print("message.data = ${message.data}");
     printNotificationData(message.data, source: "onMessageOpenedApp");
-
-    // later use this for navigation
-    // handleNotificationNavigation(message.data);
+    handleNotificationNavigation(message.data);
   });
 
   // app opened from terminated state by tapping notification
@@ -114,9 +170,10 @@ void main() async {
     print("app opened from terminated state via notification");
     print("message.data = ${initialMessage.data}");
     printNotificationData(initialMessage.data, source: "getInitialMessage");
-
-    // later use this for navigation
-    // handleNotificationNavigation(initialMessage.data);
+    handleNotificationNavigation(
+      initialMessage.data,
+      deferUntilBaseView: true,
+    );
   }
 
   runApp(const BeeKind());

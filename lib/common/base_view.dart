@@ -112,10 +112,13 @@ import 'package:bee_kind/common/profile/profile_screen.dart';
 import 'package:bee_kind/controllers/base_view_controller.dart';
 import 'package:bee_kind/core/user/home_screen.dart';
 import 'package:bee_kind/core/user/store/cart_screen.dart';
+import 'package:bee_kind/core/user/store/live_tracking.dart';
 import 'package:bee_kind/core/user/store/orders_list_screen.dart';
+import 'package:bee_kind/core/user/store/selected_product.dart';
 import 'package:bee_kind/core/vendor/dashboard_screen.dart';
 import 'package:bee_kind/core/vendor/my_orders_screen.dart';
 import 'package:bee_kind/core/vendor/order_requests_screen.dart';
+import 'package:bee_kind/services/notification_navigation_service.dart';
 import 'package:bee_kind/utils/app_colors.dart';
 import 'package:bee_kind/utils/assets_path.dart';
 import 'package:bee_kind/widgets/custom_drawer.dart';
@@ -139,6 +142,37 @@ class BaseView extends StatefulWidget {
 class _BaseViewState extends State<BaseView> {
   late final BaseViewController controller;
 
+  void _handlePendingNotificationNavigation() {
+    final pendingPayload = NotificationNavigationService.takePendingPayload();
+    if (pendingPayload == null) return;
+
+    final routeData = NotificationNavigationService.fromPayload(pendingPayload);
+
+    switch (routeData.target) {
+      case NotificationTarget.product:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SelectedProduct(productId: routeData.productId),
+          ),
+        );
+        break;
+      case NotificationTarget.orderTracking:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => LiveTracking(orderId: routeData.orderId!),
+          ),
+        );
+        break;
+      case NotificationTarget.orderRequestsTab:
+        controller.changeTab(1);
+        break;
+      case NotificationTarget.none:
+        break;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -151,6 +185,7 @@ class _BaseViewState extends State<BaseView> {
 
       final safeIndex = widget.initialIndex.clamp(0, tabsLength - 1);
       controller.currentIndex.value = safeIndex;
+      _handlePendingNotificationNavigation();
     });
   }
 
