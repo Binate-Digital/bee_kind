@@ -146,14 +146,31 @@ class _BaseViewState extends State<BaseView> {
     final pendingPayload = NotificationNavigationService.takePendingPayload();
     if (pendingPayload == null) return;
 
-    final routeData = NotificationNavigationService.fromPayload(pendingPayload);
+    final routeData = NotificationNavigationService.fromPayload(
+      pendingPayload,
+      isVendor: controller.isVendor.value,
+    );
 
     switch (routeData.target) {
       case NotificationTarget.product:
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => SelectedProduct(productId: routeData.productId),
+            builder: (_) => SelectedProduct(
+              productId: routeData.productId,
+              isVendor: controller.isVendor.value,
+            ),
+          ),
+        );
+        break;
+      case NotificationTarget.vendorMyProducts:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SelectedProduct(
+              productId: routeData.productId,
+              isVendor: true,
+            ),
           ),
         );
         break;

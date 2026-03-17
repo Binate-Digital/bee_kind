@@ -68,7 +68,11 @@ void handleNotificationNavigation(
   Map<String, dynamic> data, {
   bool deferUntilBaseView = false,
 }) {
-  final routeData = NotificationNavigationService.fromPayload(data);
+  final isVendor = _isVendorLoggedIn();
+  final routeData = NotificationNavigationService.fromPayload(
+    data,
+    isVendor: isVendor,
+  );
 
   if (!routeData.hasTarget) {
     return;
@@ -83,13 +87,24 @@ void handleNotificationNavigation(
     return;
   }
 
-
-  print("adlbsdbjs${routeData.target}");
   switch (routeData.target) {
     case NotificationTarget.product:
       navigatorState.push(
         MaterialPageRoute(
-          builder: (_) => SelectedProduct(productId: routeData.productId),
+          builder: (_) => SelectedProduct(
+            productId: routeData.productId,
+            isVendor: isVendor,
+          ),
+        ),
+      );
+      break;
+    case NotificationTarget.vendorMyProducts:
+      navigatorState.push(
+        MaterialPageRoute(
+          builder: (_) => SelectedProduct(
+            productId: routeData.productId,
+            isVendor: true,
+          ),
         ),
       );
       break;
@@ -109,6 +124,14 @@ void handleNotificationNavigation(
       break;
     case NotificationTarget.none:
       break;
+  }
+}
+
+bool _isVendorLoggedIn() {
+  try {
+    return SharedPrefs().getString('role') == 'vendor';
+  } catch (_) {
+    return false;
   }
 }
 

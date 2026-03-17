@@ -23,6 +23,7 @@ class NotificationRouteData {
 enum NotificationTarget {
   none,
   product,
+  vendorMyProducts,
   orderTracking,
   orderRequestsTab,
 }
@@ -34,15 +35,20 @@ class NotificationNavigationService {
 
   static NotificationRouteData fromNotificationItem(
     NotificationItem notification,
+    {bool isVendor = false}
   ) {
     return _resolveRoute(
       type: _clean(notification.type),
       productId: _clean(notification.metadata?.productId),
       orderId: _clean(notification.metadata?.orderId),
+      isVendor: isVendor,
     );
   }
 
-  static NotificationRouteData fromPayload(Map<String, dynamic> payload) {
+  static NotificationRouteData fromPayload(
+    Map<String, dynamic> payload, {
+    bool isVendor = false,
+  }) {
     final metadata = _extractMetadata(payload['metadata']);
     final type = _clean(payload['type']);
     final fallbackId = _clean(payload['id']);
@@ -63,6 +69,7 @@ class NotificationNavigationService {
       type: type,
       productId: productId,
       orderId: orderId,
+      isVendor: isVendor,
     );
   }
 
@@ -80,21 +87,27 @@ class NotificationNavigationService {
     String? type,
     String? productId,
     String? orderId,
+    bool isVendor = false,
   }) {
-
-    print("sadknkdfbbdsf");
     switch (type) {
       case 'review-reply-added':
 
-        print("productId====${productId}");
-
-        // if (productId != null) {
+        print("productIdproductId======${productId}");
+        if (isVendor && productId != null) {
+          return NotificationRouteData(
+            target: NotificationTarget.vendorMyProducts,
+            type: type,
+            productId: productId,
+          );
+        }
+        if (productId != null) {
           return NotificationRouteData(
             target: NotificationTarget.product,
             type: type,
             productId: productId,
           );
-        // }
+        }
+        break;
       case 'new-product':
       case 'discount-added':
         if (productId != null) {

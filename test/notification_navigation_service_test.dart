@@ -14,6 +14,19 @@ void main() {
       expect(routeData.productId, 'product-123');
     });
 
+    test('maps review-reply-added payload to vendor products for vendor role', () {
+      final routeData = NotificationNavigationService.fromPayload(
+        {
+          'type': 'review-reply-added',
+          'metadata': {'productId': 'product-123'},
+        },
+        isVendor: true,
+      );
+
+      expect(routeData.target, NotificationTarget.vendorMyProducts);
+      expect(routeData.productId, 'product-123');
+    });
+
     test('maps order-status-updated payload to order tracking route', () {
       final routeData = NotificationNavigationService.fromPayload({
         'type': 'order-status-updated',
@@ -55,6 +68,19 @@ void main() {
       );
 
       expect(routeData.target, NotificationTarget.product);
+      expect(routeData.productId, 'product-abc');
+    });
+
+    test('maps vendor review reply notification item to vendor products route', () {
+      final routeData = NotificationNavigationService.fromNotificationItem(
+        NotificationItem(
+          type: 'review-reply-added',
+          metadata: NotificationMetadata(productId: 'product-abc'),
+        ),
+        isVendor: true,
+      );
+
+      expect(routeData.target, NotificationTarget.vendorMyProducts);
       expect(routeData.productId, 'product-abc');
     });
   });

@@ -19,17 +19,33 @@ class NotificationsScreen extends StatelessWidget {
     NotificationItem notification,
     BaseViewController controller,
   ) {
-    final routeData =
-        NotificationNavigationService.fromNotificationItem(notification);
+    final routeData = NotificationNavigationService.fromNotificationItem(
+      notification,
+      isVendor: controller.isVendor.value,
+    );
 
-    print("routeDatarouteData====${NotificationTarget.product}");
+    print("Notifications====${routeData.target}");
 
     switch (routeData.target) {
       case NotificationTarget.product:
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => SelectedProduct(productId: routeData.productId),
+            builder: (_) => SelectedProduct(
+              productId: routeData.productId,
+              isVendor: controller.isVendor.value,
+            ),
+          ),
+        );
+        break;
+      case NotificationTarget.vendorMyProducts:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SelectedProduct(
+              productId: routeData.productId,
+              isVendor: true,
+            ),
           ),
         );
         break;
