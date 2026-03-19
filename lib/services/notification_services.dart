@@ -8,6 +8,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../main.dart';
 
 class FirebaseNotificationService{
+  static const String _androidNotificationIcon = 'mipmap/ic_launcher';
+  static const String _androidNotificationLargeIcon =
+      'mipmap/ic_launcher';
+
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
   firebaseMessaging() async {
@@ -55,7 +59,7 @@ class FirebaseNotificationService{
         ?.createNotificationChannel(channel);
 
     var initializationSettingsAndroid =
-    const AndroidInitializationSettings('@mipmap/ic_launcher');
+    const AndroidInitializationSettings(_androidNotificationIcon);
     var initializationSettingsiOS = const DarwinInitializationSettings(
       requestSoundPermission: true,
       requestBadgePermission: true,
@@ -111,7 +115,15 @@ class FirebaseNotificationService{
                 color: Colors.blue,
                 importance: Importance.max,
                 priority: Priority.max,
-                icon: "@mipmap/ic_launcher",
+                icon: _androidNotificationIcon,
+                largeIcon: const DrawableResourceAndroidBitmap(
+                  _androidNotificationLargeIcon,
+                ),
+                styleInformation: BigTextStyleInformation(
+                  notification.body ?? '',
+                  contentTitle: notification.title,
+                  summaryText: notification.body,
+                ),
               ),
               iOS: const DarwinNotificationDetails(
                 presentSound: true,
